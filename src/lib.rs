@@ -739,7 +739,7 @@ fn plugin_init(version: fmx_int16) -> u64 {
                 def.ptr,
                 desc.ptr,
                 4,
-                20,
+                -1,
                 flags,
                 Some(rust_execute_sql),
                 &mut _x,
