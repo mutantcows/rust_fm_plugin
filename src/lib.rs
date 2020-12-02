@@ -684,41 +684,30 @@ fn plugin_idle(idle_level: FMX_IdleLevel, _session_id: fmx_ptrtype) {
     }
 }
 
-macro_rules! ok_or_return {
-    ( $e:expr ) => {
-        match $e {
-            Ok(x) => x,
-            Err(_) => return,
-        }
-    };
-}
-
-macro_rules! some_or_return {
-    ( $e:expr ) => {
-        match $e {
-            Some(x) => x,
-            None => return,
-        }
-    };
-}
-
-fn write_to_file(content: &str) {
+fn write_to_file(content: &str) -> Result<(), String> {
     use directories::UserDirs;
     use std::fs::OpenOptions;
     use std::io::prelude::*;
     use std::path::Path;
 
-    let user_dirs = some_or_return!(UserDirs::new());
-    let dir = some_or_return!(user_dirs.desktop_dir());
+    let user_dirs = UserDirs::new().ok_or("No user dirs")?;
+    let dir = user_dirs.desktop_dir().ok_or("No desktop path")?;
     let path = Path::join(&dir, "plugin.log");
 
-    let mut file = ok_or_return!(OpenOptions::new()
+    let mut file = OpenOptions::new()
         .create(true)
         .write(true)
         .append(true)
-        .open(&path));
+        .open(&path)
+        .map_err(|err| err.to_string())?;
 
-    ok_or_return!(file.write_all(content.as_bytes()));
+    file.write_all(content.as_bytes())
+        .map_err(|err| err.to_string())?;
+    Ok(())
+}
+
+fn log(content: &str) {
+    write_to_file(content).unwrap_or(());
 }
 
 fn write_to_u16_buff(buffer: *mut c_ushort, buffer_size: c_uint, s: &str) {
@@ -735,4 +724,14 @@ fn write_to_i8_buff(buffer: *mut c_char, buffer_size: c_uint, s: &str) {
     let bytes = unsafe { &*(bytes as *const [u8] as *const [i8]) };
     let string_bytes = unsafe { std::slice::from_raw_parts_mut(buffer, buffer_size as usize) };
     string_bytes[..bytes.len()].copy_from_slice(bytes);
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    #[test]
+    fn logging() {
+        let result = write_to_file("test");
+        assert_eq!(result, Ok(()));
+    }
 }
