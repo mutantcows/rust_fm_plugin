@@ -1,9 +1,7 @@
 extern crate bindgen;
 
-use std::env::var;
-
 fn main() {
-    let manifest = var("CARGO_MANIFEST_DIR").unwrap();
+    let manifest = env!("CARGO_MANIFEST_DIR");
     println!("cargo:rerun-if-changed={}/headers/FMWrapper.h", manifest);
     println!(r"cargo:rustc-link-search={}/libraries/Win/x64", manifest);
 
