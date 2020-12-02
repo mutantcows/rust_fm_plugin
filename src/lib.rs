@@ -7,6 +7,23 @@ use std::os::raw::{c_char, c_int, c_longlong, c_short, c_uchar, c_uint, c_ulongl
 use std::ptr::null_mut;
 use widestring::WideCString;
 
+const PLUGIN_ID: &[u8; 4] = b"RUST";
+const PLUGIN_NAME: &str = "RustPlugIn";
+const PLUGIN_DESCRIPTION: &str = "Small example plug-in compiled with Rust.";
+const PLUGIN_URL: &str = "http://httpbin.org/get?id=";
+
+/*
+first 4 chars are the plugin id
+char 5 always 1
+char 6 "Y" or "n" to enable configure button in prefs
+char 7 alwast "n"
+char 8 "Y" or "n" to enable init and shutdown callbacks
+char 9 "Y" or "n" for idle callback
+char 10 "Y" or "n" for session/file shutdwon callbacks
+char 11 always "n"
+*/
+const PLUGIN_OPTIONS: &str = "RUST1nnYnnn";
+
 pub type fmx_uint16 = c_ushort;
 pub type fmx_int16 = c_short;
 pub type fmx_uchar = c_uchar;
@@ -385,23 +402,6 @@ impl fmx_DataVect {
         Data::from_ptr(data_ptr)
     }
 }
-
-const PLUGIN_ID: &[u8; 4] = b"RUST";
-const PLUGIN_NAME: &str = "RustPlugIn";
-const PLUGIN_DESCRIPTION: &str = "Small example plug-in compiled with Rust.";
-const PLUGIN_URL: &str = "http://httpbin.org/get?id=";
-
-/*
-first 4 chars are the plugin id
-char 5 always 1
-char 6 "Y" or "n" to enable configure button in prefs
-char 7 alwast "n"
-char 8 "Y" or "n" to enable init and shutdown callbacks
-char 9 "Y" or "n" for idle callback
-char 10 "Y" or "n" for session/file shutdwon callbacks
-char 11 always "n"
-*/
-const PLUGIN_OPTIONS: &str = "RUST1nnYnnn";
 
 fn prepend_character(txt: &mut Text, insert_buffer: &mut Text, ch: char) {
     let mut tmp = [0; 1];
