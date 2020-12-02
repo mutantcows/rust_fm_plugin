@@ -5,7 +5,7 @@
 use std::ffi::CString;
 use std::os::raw::{c_char, c_int, c_longlong, c_short, c_uchar, c_uint, c_ulonglong, c_ushort};
 use std::ptr::null_mut;
-use widestring::WideCString;
+use widestring::{U16CString, WideCString};
 
 const PLUGIN_ID: &[u8; 4] = b"RUST";
 const PLUGIN_NAME: &str = "RustPlugIn";
@@ -192,7 +192,26 @@ extern "C" {
         _x: *mut fmx__fmxcpt,
     ) -> *const fmx_Data;
 
+    pub fn FM_DataVect_AtAsText(
+        _self: *const fmx_DataVect,
+        position: fmx_uint32,
+        _x: *mut fmx__fmxcpt,
+    ) -> *const fmx_Text;
+
+    pub fn FM_DataVect_AtAsNumber(
+        _self: *const fmx_DataVect,
+        position: fmx_uint32,
+        _x: *mut fmx__fmxcpt,
+    ) -> *const fmx_FixPt;
+
+    pub fn FM_DataVect_PushBack(
+        _self: *mut fmx_DataVect,
+        data: *const fmx_Data,
+        _x: *mut fmx__fmxcpt,
+    );
+
     pub fn FM_Data_GetAsNumber(_self: *const fmx_Data, _x: *mut fmx__fmxcpt) -> *const fmx_FixPt;
+    pub fn FM_Data_GetAsText(_self: *const fmx_Data, _x: *mut fmx__fmxcpt) -> *const fmx_Text;
 
     pub fn FM_FixPt_AsLong(_self: *const fmx_FixPt, _x: *mut fmx__fmxcpt) -> fmx_int32;
 
@@ -264,6 +283,47 @@ extern "C" {
         _x: *mut fmx__fmxcpt,
     ) -> *mut fmx_QuadChar;
 
+    pub fn FM_ExprEnv_Constructor1(_x: *mut fmx__fmxcpt) -> *mut fmx_ExprEnv;
+
+    pub fn FM_ExprEnv_ExecuteFileSQLTextResult(
+        _self: *const fmx_ExprEnv,
+        expression: *const fmx_Text,
+        filename: *const fmx_Text,
+        parameters: *const fmx_DataVect,
+        result: *mut fmx_Data,
+        colSep: fmx_uint16,
+        rowSep: fmx_uint16,
+        _x: *mut fmx__fmxcpt,
+    ) -> fmx_errcode;
+
+}
+
+impl fmx_ExprEnv {
+    fn execute_file_sql_text_result(
+        &self,
+        expression: Text,
+        file_name: Text,
+        parameters: DataVect,
+        result: &mut Data,
+        col_sep: fmx_uint16,
+        row_sep: fmx_uint16,
+    ) -> fmx_errcode {
+        let mut _x = fmx__fmxcpt::new();
+        let error = unsafe {
+            FM_ExprEnv_ExecuteFileSQLTextResult(
+                self,
+                expression.ptr,
+                file_name.ptr,
+                parameters.ptr,
+                result.ptr,
+                col_sep,
+                row_sep,
+                &mut _x,
+            )
+        };
+        _x.check();
+        error
+    }
 }
 
 struct QuadChar {
@@ -292,6 +352,19 @@ impl Text {
         Self { ptr }
     }
 
+    fn from_ptr(ptr: *const fmx_Text) -> Self {
+        Self {
+            ptr: ptr as *mut fmx_Text,
+        }
+    }
+
+    fn size(&self) -> fmx_uint32 {
+        let mut _x = fmx__fmxcpt::new();
+        let size = unsafe { FM_Text_GetSize(self.ptr, &mut _x) };
+        _x.check();
+        size
+    }
+
     fn assign(&mut self, s: &str) {
         let c_string: CString = CString::new(s).unwrap();
         let mut _x = fmx__fmxcpt::new();
@@ -317,6 +390,24 @@ impl Text {
         let mut _x = fmx__fmxcpt::new();
         unsafe { FM_Text_InsertText(self.ptr, s.ptr, pos, &mut _x) };
         _x.check();
+    }
+
+    fn get_unicode(&self, position: fmx_uint32, size: fmx_uint32) -> U16CString {
+        let mut _x = fmx__fmxcpt::new();
+        let out_vec: Vec<u16> = vec![1; size as usize];
+        let out_buffer = U16CString::new(out_vec).unwrap();
+
+        unsafe {
+            FM_Text_GetUnicode(
+                self.ptr,
+                out_buffer.as_ptr() as *mut u16,
+                position,
+                size,
+                &mut _x,
+            )
+        };
+        _x.check();
+        out_buffer
     }
 }
 
@@ -364,11 +455,18 @@ impl Data {
         }
     }
 
-    fn get_as_number(&mut self) -> FixPt {
+    fn get_as_number(&self) -> FixPt {
         let mut _x = fmx__fmxcpt::new();
         let ptr = unsafe { FM_Data_GetAsNumber(self.ptr, &mut _x) };
         _x.check();
         FixPt::from_ptr(ptr)
+    }
+
+    fn get_as_text(&self) -> Text {
+        let mut _x = fmx__fmxcpt::new();
+        let ptr = unsafe { FM_Data_GetAsText(self.ptr, &mut _x) };
+        _x.check();
+        Text::from_ptr(ptr)
     }
 }
 
@@ -387,6 +485,25 @@ impl fmx_Data {
     }
 }
 
+struct DataVect {
+    ptr: *mut fmx_DataVect,
+}
+
+impl DataVect {
+    fn new() -> Self {
+        let mut _x = fmx__fmxcpt::new();
+        let ptr = unsafe { FM_DataVect_Constructor1(&mut _x) };
+        _x.check();
+        Self { ptr }
+    }
+
+    fn push(&mut self, data: Data) {
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_DataVect_PushBack(self.ptr, data.ptr, &mut _x) };
+        _x.check();
+    }
+}
+
 impl fmx_DataVect {
     fn size(&self) -> fmx_uint32 {
         let mut _x = fmx__fmxcpt::new();
@@ -400,6 +517,20 @@ impl fmx_DataVect {
         let data_ptr = unsafe { FM_DataVect_At(self, position, &mut _x) };
         _x.check();
         Data::from_ptr(data_ptr)
+    }
+
+    fn at_as_text(&self, position: fmx_uint32) -> Text {
+        let mut _x = fmx__fmxcpt::new();
+        let ptr = unsafe { FM_DataVect_AtAsText(self, position, &mut _x) };
+        _x.check();
+        Text::from_ptr(ptr)
+    }
+
+    fn at_as_number(&self, position: fmx_uint32) -> FixPt {
+        let mut _x = fmx__fmxcpt::new();
+        let ptr = unsafe { FM_DataVect_AtAsNumber(self, position, &mut _x) };
+        _x.check();
+        FixPt::from_ptr(ptr)
     }
 }
 
@@ -417,7 +548,7 @@ unsafe extern "C" fn rust_convert_to_base(
     data_vect: *const fmx_DataVect,
     results: *mut fmx_Data,
 ) -> fmx_errcode {
-    let mut error_result: fmx_errcode = 1552;
+    let mut error_result: fmx_errcode = 960;
     let mut out_text = Text::new();
 
     let mut out_locale = (*results).get_locale();
@@ -426,12 +557,12 @@ unsafe extern "C" fn rust_convert_to_base(
     let data_size = (*data_vect).size();
 
     if data_size >= 2 {
-        let mut data: Data = (*data_vect).at(0);
-        let number: FixPt = data.get_as_number();
+        let data = (*data_vect).at(0);
+        let number = data.get_as_number();
         let mut number: fmx_int32 = number.get_as_long();
 
-        let mut base: Data = (*data_vect).at(1);
-        let base: FixPt = base.get_as_number();
+        let base = (*data_vect).at(1);
+        let base = base.get_as_number();
         let base: fmx_int32 = base.get_as_long();
 
         if base == 2 || base == 3 || base == 8 || base == 12 || base == 16 {
@@ -459,6 +590,59 @@ unsafe extern "C" fn rust_convert_to_base(
     }
 
     (*results).set_as_text(out_text, out_locale);
+
+    error_result
+}
+
+#[no_mangle]
+unsafe extern "C" fn rust_execute_sql(
+    _func_id: c_short,
+    environment: *const fmx_ExprEnv,
+    data_vect: *const fmx_DataVect,
+    results: *mut fmx_Data,
+) -> fmx_errcode {
+    let error_result: fmx_errcode = 0;
+
+    let file_name = (*data_vect).at_as_text(0);
+    let expression = (*data_vect).at_as_text(1);
+
+    let col_sep = (*data_vect).at_as_text(2);
+    let col_sep = match col_sep.size() {
+        0 => ',' as u16,
+        _ => *col_sep.get_unicode(0, 1).as_ptr(),
+    };
+
+    let row_sep = (*data_vect).at_as_text(3);
+    let row_sep = match row_sep.size() {
+        0 => '\n' as u16,
+        _ => *row_sep.get_unicode(0, 1).as_ptr(),
+    };
+
+    let mut parameters = DataVect::new();
+    let param_count = (*data_vect).size();
+
+    if param_count > 4 {
+        for i in 4..param_count {
+            let param = (*data_vect).at(i);
+            parameters.push(param);
+        }
+    }
+
+    let mut result = Data::new();
+
+    (*environment).execute_file_sql_text_result(
+        expression,
+        file_name,
+        parameters,
+        &mut result,
+        col_sep,
+        row_sep,
+    );
+
+    let r = result.get_as_text();
+
+    let out_locale = (*result.ptr).get_locale();
+    (*results).set_as_text(r, out_locale);
 
     error_result
 }
@@ -531,11 +715,42 @@ fn plugin_init(version: fmx_int16) -> u64 {
                 Some(rust_convert_to_base),
                 &mut _x,
             )
-        } == 0
+        } != 0
         {
-            _x.check();
-            sdk_version = SDKVersion::V190 as u64;
+            return sdk_version;
         }
+
+        _x.check();
+
+        let mut name: Text = Text::new();
+        name.assign("RUST_ExecuteSQL");
+
+        let mut desc = Text::new();
+        desc.assign("Performs SQL Query");
+
+        let mut def = Text::new();
+        def.assign("RUST_ExecuteSQL( fileName ; sqlQuery ; fieldSeparator ; rowSeparator { ; arguments... } )");
+
+        if unsafe {
+            FM_ExprEnv_RegisterExternalFunctionEx(
+                plugin_id.ptr,
+                200,
+                name.ptr,
+                def.ptr,
+                desc.ptr,
+                4,
+                20,
+                flags,
+                Some(rust_execute_sql),
+                &mut _x,
+            )
+        } != 0
+        {
+            return sdk_version;
+        }
+
+        _x.check();
+        sdk_version = SDKVersion::V190 as u64;
     }
 
     sdk_version
@@ -547,6 +762,8 @@ fn plugin_shutdown(version: fmx_int16) {
     if version >= 57 {
         let mut _x = fmx__fmxcpt::new();
         unsafe { FM_ExprEnv_UnRegisterExternalFunction(plugin_id, 100, &mut _x) };
+        _x.check();
+        unsafe { FM_ExprEnv_UnRegisterExternalFunction(plugin_id, 200, &mut _x) };
         _x.check();
     }
 }
