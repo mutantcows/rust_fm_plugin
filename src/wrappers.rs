@@ -225,3 +225,104 @@ impl fmx_DataVect {
         FixPt::from_ptr(ptr)
     }
 }
+
+pub(crate) enum PluginFlag {
+    DisplayInAllDialogs = 0b1111111100000000,
+    MacCompatible = 0b0000000000000010,
+    WinCompatible = 0b0000000000000100,
+    ServerCompatible = 0b0000000000001000,
+    IOSCompatible = 0b0000000000010000,
+    CustomWebCompatible = 0b0000000000100000,
+    WebDirectCompatible = 0b0000000001000000,
+    AllDeviceCompatible = 0b0000000001111110,
+    FutureCompatible = 0b111111110000000000000000,
+}
+
+pub(crate) enum SDKVersion {
+    BadExtn = -1,
+    DoNotEnable = -2,
+    V40 = 11,
+    V41 = 12,
+    V50 = 14,
+    V60 = 17,
+    V70 = 50, // Jumping to 50
+    V80 = 51,
+    V110 = 52,
+    V120 = 53, // Support for 64-bit plugins
+    V130 = 54,
+    V140 = 55,
+    V150 = 56,
+    V160 = 57,
+    V170 = 59,
+    V180 = 60,
+    V190 = 62,
+    Min = 4,
+    Max = 255,
+}
+
+pub(crate) enum GetStringType {
+    Name,
+    AppConfig,
+    Options,
+    HelpUrl,
+    Blank,
+}
+
+impl From<u32> for GetStringType {
+    fn from(num: u32) -> Self {
+        match num {
+            128 => Self::Name,
+            129 => Self::AppConfig,
+            131 => Self::Options,
+            132 => Self::HelpUrl,
+            _ => Self::Blank,
+        }
+    }
+}
+
+impl From<u8> for FMExternCallType {
+    fn from(num: u8) -> Self {
+        match num {
+            0 => Self::Init,
+            1 => Self::Idle,
+            4 => Self::Shutdown,
+            5 => Self::AppPrefs,
+            7 => Self::GetString,
+            8 => Self::SessionShutdown,
+            9 => Self::FileShutdown,
+            _ => unreachable!(),
+        }
+    }
+}
+
+#[derive(Debug)]
+pub(crate) enum FMExternCallType {
+    Init,
+    Idle,
+    Shutdown,
+    AppPrefs,
+    GetString,
+    SessionShutdown,
+    FileShutdown,
+}
+
+pub(crate) enum IdleType {
+    Idle,
+    NotIdle,
+    ScriptPaused,
+    ScriptRunning,
+    Unsafe,
+}
+
+impl From<u8> for IdleType {
+    fn from(num: u8) -> Self {
+        match num {
+            0 => Self::Idle,
+            1 => Self::NotIdle,
+            2 => Self::ScriptPaused,
+            3 => Self::ScriptRunning,
+            4 => Self::Unsafe,
+            _ => unreachable!(),
+        }
+    }
+}

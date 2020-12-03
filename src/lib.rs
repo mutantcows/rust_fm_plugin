@@ -2,14 +2,14 @@
 #![allow(non_snake_case)]
 #![allow(dead_code)]
 
-use std::ffi::CString;
-use std::os::raw::{c_char, c_short, c_uint, c_ushort};
+use std::os::raw::c_short;
 use std::ptr::null_mut;
-use widestring::WideCString;
 
 mod ffi;
+mod helpers;
 mod wrappers;
 use ffi::*;
+use helpers::*;
 use wrappers::*;
 
 const PLUGIN_ID: &[u8; 4] = b"RUST";
@@ -142,40 +142,6 @@ unsafe extern "C" fn rust_execute_sql(
     error_result
 }
 
-enum PluginFlag {
-    DisplayInAllDialogs = 0b1111111100000000,
-    MacCompatible = 0b0000000000000010,
-    WinCompatible = 0b0000000000000100,
-    ServerCompatible = 0b0000000000001000,
-    IOSCompatible = 0b0000000000010000,
-    CustomWebCompatible = 0b0000000000100000,
-    WebDirectCompatible = 0b0000000001000000,
-    AllDeviceCompatible = 0b0000000001111110,
-    FutureCompatible = 0b111111110000000000000000,
-}
-
-enum SDKVersion {
-    BadExtn = -1,
-    DoNotEnable = -2,
-    V40 = 11,
-    V41 = 12,
-    V50 = 14,
-    V60 = 17,
-    V70 = 50, // Jumping to 50
-    V80 = 51,
-    V110 = 52,
-    V120 = 53, // Support for 64-bit plugins
-    V130 = 54,
-    V140 = 55,
-    V150 = 56,
-    V160 = 57,
-    V170 = 59,
-    V180 = 60,
-    V190 = 62,
-    Min = 4,
-    Max = 255,
-}
-
 // Do_PluginInit ===========================================================================
 
 fn plugin_init(version: fmx_int16) -> u64 {
@@ -263,26 +229,6 @@ fn plugin_shutdown(version: fmx_int16) {
     }
 }
 
-enum GetStringType {
-    Name,
-    AppConfig,
-    Options,
-    HelpUrl,
-    Blank,
-}
-
-impl From<u32> for GetStringType {
-    fn from(num: u32) -> Self {
-        match num {
-            128 => Self::Name,
-            129 => Self::AppConfig,
-            131 => Self::Options,
-            132 => Self::HelpUrl,
-            _ => Self::Blank,
-        }
-    }
-}
-
 // Do_GetString ============================================================================
 fn plugin_get_string(
     which_string: fmx_uint32,
@@ -299,32 +245,6 @@ fn plugin_get_string(
         Blank => "",
     };
     write_to_u16_buff(out_buffer, out_buffer_size, string);
-}
-
-impl From<u8> for FMExternCallType {
-    fn from(num: u8) -> Self {
-        match num {
-            0 => Self::Init,
-            1 => Self::Idle,
-            4 => Self::Shutdown,
-            5 => Self::AppPrefs,
-            7 => Self::GetString,
-            8 => Self::SessionShutdown,
-            9 => Self::FileShutdown,
-            _ => unreachable!(),
-        }
-    }
-}
-
-#[derive(Debug)]
-enum FMExternCallType {
-    Init,
-    Idle,
-    Shutdown,
-    AppPrefs,
-    GetString,
-    SessionShutdown,
-    FileShutdown,
 }
 
 // FMExternCallProc ========================================================================
@@ -364,26 +284,6 @@ fn session_notifications(_session_id: fmx_ptrtype) {}
 fn file_notifications(_session_id: fmx_ptrtype, _file_id: fmx_ptrtype) {}
 
 // Do_PluginIdle ===========================================================================
-enum IdleType {
-    Idle,
-    NotIdle,
-    ScriptPaused,
-    ScriptRunning,
-    Unsafe,
-}
-
-impl From<u8> for IdleType {
-    fn from(num: u8) -> Self {
-        match num {
-            0 => Self::Idle,
-            1 => Self::NotIdle,
-            2 => Self::ScriptPaused,
-            3 => Self::ScriptRunning,
-            4 => Self::Unsafe,
-            _ => unreachable!(),
-        }
-    }
-}
 
 fn plugin_idle(idle_level: FMX_IdleLevel, _session_id: fmx_ptrtype) {
     use IdleType::*;
@@ -393,57 +293,5 @@ fn plugin_idle(idle_level: FMX_IdleLevel, _session_id: fmx_ptrtype) {
         ScriptPaused => {}
         ScriptRunning => {}
         Unsafe => {}
-    }
-}
-
-fn write_to_file(content: &str) -> Result<(), String> {
-    use directories::UserDirs;
-    use std::fs::OpenOptions;
-    use std::io::prelude::*;
-    use std::path::Path;
-
-    let user_dirs = UserDirs::new().ok_or("No user dirs")?;
-    let dir = user_dirs.desktop_dir().ok_or("No desktop path")?;
-    let path = Path::join(&dir, "plugin.log");
-
-    let mut file = OpenOptions::new()
-        .create(true)
-        .write(true)
-        .append(true)
-        .open(&path)
-        .map_err(|err| err.to_string())?;
-
-    file.write_all(content.as_bytes())
-        .map_err(|err| err.to_string())?;
-    Ok(())
-}
-
-fn log(content: &str) {
-    write_to_file(content).unwrap_or(());
-}
-
-fn write_to_u16_buff(buffer: *mut c_ushort, buffer_size: c_uint, s: &str) {
-    let c_string = WideCString::from_str(s).unwrap();
-    let bytes = c_string.as_slice();
-
-    let string_bytes = unsafe { std::slice::from_raw_parts_mut(buffer, buffer_size as usize) };
-    string_bytes[..bytes.len()].copy_from_slice(bytes);
-}
-
-fn write_to_i8_buff(buffer: *mut c_char, buffer_size: c_uint, s: &str) {
-    let c_string = CString::new(s).unwrap();
-    let bytes = c_string.as_bytes_with_nul();
-    let bytes = unsafe { &*(bytes as *const [u8] as *const [i8]) };
-    let string_bytes = unsafe { std::slice::from_raw_parts_mut(buffer, buffer_size as usize) };
-    string_bytes[..bytes.len()].copy_from_slice(bytes);
-}
-
-#[cfg(test)]
-mod test {
-    use super::*;
-    #[test]
-    fn logging() {
-        let result = write_to_file("test");
-        assert_eq!(result, Ok(()));
     }
 }
