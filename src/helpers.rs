@@ -2,6 +2,8 @@ use std::ffi::CString;
 use std::os::raw::{c_char, c_uint, c_ushort};
 use widestring::WideCString;
 
+use crate::wrappers::*;
+
 pub(crate) fn write_to_file(content: &str) -> Result<(), String> {
     use directories::UserDirs;
     use std::fs::OpenOptions;
@@ -42,6 +44,13 @@ pub(crate) fn write_to_i8_buff(buffer: *mut c_char, buffer_size: c_uint, s: &str
     let bytes = unsafe { &*(bytes as *const [u8] as *const [i8]) };
     let string_bytes = unsafe { std::slice::from_raw_parts_mut(buffer, buffer_size as usize) };
     string_bytes[..bytes.len()].copy_from_slice(bytes);
+}
+
+pub(crate) fn prepend_character(txt: &mut Text, insert_buffer: &mut Text, ch: char) {
+    let mut tmp = [0; 1];
+    let s = ch.encode_utf8(&mut tmp);
+    insert_buffer.assign_unicode_with_length(s, 1);
+    txt.insert_text(insert_buffer, 0);
 }
 
 #[cfg(test)]

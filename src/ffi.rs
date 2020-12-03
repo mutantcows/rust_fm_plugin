@@ -2,7 +2,6 @@
 #![allow(non_snake_case)]
 #![allow(dead_code)]
 
-use crate::wrappers::*;
 use std::os::raw::{c_char, c_int, c_longlong, c_short, c_uchar, c_uint, c_ulonglong, c_ushort};
 
 pub type fmx_uint16 = c_ushort;
@@ -262,32 +261,4 @@ extern "C" {
         _x: *mut fmx__fmxcpt,
     ) -> fmx_errcode;
 
-}
-
-impl fmx_ExprEnv {
-    pub(crate) fn execute_file_sql_text_result(
-        &self,
-        expression: Text,
-        file_name: Text,
-        parameters: DataVect,
-        result: &mut Data,
-        col_sep: fmx_uint16,
-        row_sep: fmx_uint16,
-    ) -> fmx_errcode {
-        let mut _x = fmx__fmxcpt::new();
-        let error = unsafe {
-            FM_ExprEnv_ExecuteFileSQLTextResult(
-                self,
-                expression.ptr,
-                file_name.ptr,
-                parameters.ptr,
-                result.ptr,
-                col_sep,
-                row_sep,
-                &mut _x,
-            )
-        };
-        _x.check();
-        error
-    }
 }

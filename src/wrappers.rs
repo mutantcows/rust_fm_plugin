@@ -326,3 +326,31 @@ impl From<u8> for IdleType {
         }
     }
 }
+
+impl fmx_ExprEnv {
+    pub(crate) fn execute_file_sql_text_result(
+        &self,
+        expression: Text,
+        file_name: Text,
+        parameters: DataVect,
+        result: &mut Data,
+        col_sep: fmx_uint16,
+        row_sep: fmx_uint16,
+    ) -> fmx_errcode {
+        let mut _x = fmx__fmxcpt::new();
+        let error = unsafe {
+            FM_ExprEnv_ExecuteFileSQLTextResult(
+                self,
+                expression.ptr,
+                file_name.ptr,
+                parameters.ptr,
+                result.ptr,
+                col_sep,
+                row_sep,
+                &mut _x,
+            )
+        };
+        _x.check();
+        error
+    }
+}
