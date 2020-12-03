@@ -259,6 +259,16 @@ extern "C" {
 
     pub fn FM_ExprEnv_Constructor1(_x: *mut fmx__fmxcpt) -> *mut fmx_ExprEnv;
     pub fn FM_RowVect_Constructor1(_x: *mut fmx__fmxcpt) -> *mut fmx_RowVect;
+    pub fn FM_DataVect_Delete(_self: *mut fmx_DataVect, _x: *mut fmx__fmxcpt);
+    pub fn FM_RowVect_Delete(_self: *mut fmx_RowVect, _x: *mut fmx__fmxcpt);
+    pub fn FM_QuadChar_Delete(_self: *mut fmx_QuadChar, _x: *mut fmx__fmxcpt);
+    pub fn FM_Locale_Delete(_self: *mut fmx_Locale, _x: *mut fmx__fmxcpt);
+    pub fn FM_Locale_Constructor1(inputType: fmx_int32, _x: *mut fmx__fmxcpt) -> *mut fmx_Locale;
+    pub fn FM_FixPt_Constructor1(
+        val: fmx_int32,
+        precision: fmx_int32,
+        _x: *mut fmx__fmxcpt,
+    ) -> *mut fmx_FixPt;
 
     pub fn FM_ExprEnv_ExecuteFileSQLTextResult(
         _self: *const fmx_ExprEnv,

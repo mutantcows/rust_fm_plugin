@@ -20,6 +20,7 @@ impl fmx__fmxcpt {
 
 pub(crate) struct QuadChar {
     pub(crate) ptr: *mut fmx_QuadChar,
+    drop: bool,
 }
 
 impl QuadChar {
@@ -28,7 +29,17 @@ impl QuadChar {
         let b: &[i8; 4] = unsafe { &*(bytes as *const [u8; 4] as *const [i8; 4]) };
         let ptr = unsafe { FM_QuadChar_Constructor2(b[0], b[1], b[2], b[3], &mut _x) };
         _x.check();
-        Self { ptr }
+        Self { ptr, drop: true }
+    }
+}
+
+impl Drop for QuadChar {
+    fn drop(&mut self) {
+        if self.drop {
+            let mut _x = fmx__fmxcpt::new();
+            unsafe { FM_QuadChar_Delete(self.ptr, &mut _x) };
+            _x.check();
+        }
     }
 }
 
@@ -116,13 +127,22 @@ impl Drop for Text {
 }
 
 pub(crate) struct FixPt {
-    pub(crate) ptr: *const fmx_FixPt,
+    pub(crate) ptr: *mut fmx_FixPt,
     drop: bool,
 }
 
 impl FixPt {
+    pub(crate) fn new(val: fmx_int32, precision: fmx_int32) -> FixPt {
+        let mut _x = fmx__fmxcpt::new();
+        let ptr = unsafe { FM_FixPt_Constructor1(val, precision, &mut _x) };
+        _x.check();
+        Self { ptr, drop: true }
+    }
     pub(crate) fn from_ptr(ptr: *const fmx_FixPt) -> FixPt {
-        Self { ptr, drop: false }
+        Self {
+            ptr: ptr as *mut fmx_FixPt,
+            drop: false,
+        }
     }
 
     pub(crate) fn get_as_long(&self) -> fmx_int32 {
@@ -144,14 +164,36 @@ impl Drop for FixPt {
 }
 
 pub(crate) struct Locale {
-    pub(crate) ptr: *const fmx_Locale,
+    pub(crate) ptr: *mut fmx_Locale,
+    drop: bool,
 }
 
 impl Locale {
+    pub(crate) fn new(input_type: fmx_int32) -> Self {
+        let mut _x = fmx__fmxcpt::new();
+        let ptr = unsafe { FM_Locale_Constructor1(input_type, &mut _x) };
+        _x.check();
+        Self { ptr, drop: true }
+    }
+
     pub(crate) fn from_ptr(ptr: *const fmx_Locale) -> Self {
-        Self { ptr }
+        Self {
+            ptr: ptr as *mut fmx_Locale,
+            drop: false,
+        }
     }
 }
+
+impl Drop for Locale {
+    fn drop(&mut self) {
+        if self.drop {
+            let mut _x = fmx__fmxcpt::new();
+            unsafe { FM_Locale_Delete(self.ptr, &mut _x) };
+            _x.check();
+        }
+    }
+}
+
 pub(crate) struct Data {
     pub(crate) ptr: *mut fmx_Data,
     drop: bool,
@@ -214,6 +256,7 @@ impl Drop for Data {
 
 pub(crate) struct DataVect {
     pub(crate) ptr: *mut fmx_DataVect,
+    drop: bool,
 }
 
 impl DataVect {
@@ -221,12 +264,13 @@ impl DataVect {
         let mut _x = fmx__fmxcpt::new();
         let ptr = unsafe { FM_DataVect_Constructor1(&mut _x) };
         _x.check();
-        Self { ptr }
+        Self { ptr, drop: true }
     }
 
     pub(crate) fn from_ptr(ptr: *const fmx_DataVect) -> Self {
         Self {
             ptr: ptr as *mut fmx_DataVect,
+            drop: false,
         }
     }
 
@@ -267,8 +311,19 @@ impl fmx_DataVect {
     }
 }
 
+impl Drop for DataVect {
+    fn drop(&mut self) {
+        if self.drop {
+            let mut _x = fmx__fmxcpt::new();
+            unsafe { FM_DataVect_Delete(self.ptr, &mut _x) };
+            _x.check();
+        }
+    }
+}
+
 pub(crate) struct RowVect {
     pub(crate) ptr: *mut fmx_RowVect,
+    drop: bool,
 }
 
 impl RowVect {
@@ -276,7 +331,7 @@ impl RowVect {
         let mut _x = fmx__fmxcpt::new();
         let ptr = unsafe { FM_RowVect_Constructor1(&mut _x) };
         _x.check();
-        Self { ptr }
+        Self { ptr, drop: true }
     }
 
     pub(crate) fn size(&self) -> fmx_uint32 {
@@ -298,6 +353,16 @@ impl RowVect {
         let empty = unsafe { FM_RowVect_IsEmpty(self.ptr, &mut _x) };
         _x.check();
         empty
+    }
+}
+
+impl Drop for RowVect {
+    fn drop(&mut self) {
+        if self.drop {
+            let mut _x = fmx__fmxcpt::new();
+            unsafe { FM_RowVect_Delete(self.ptr, &mut _x) };
+            _x.check();
+        }
     }
 }
 
