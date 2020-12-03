@@ -88,6 +88,12 @@ pub struct fmx_QuadChar {
     pub _address: u8,
 }
 
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct fmx_RowVect {
+    pub _address: u8,
+}
+
 pub type fmx_ExtPluginType = Option<
     unsafe extern "C" fn(
         functionId: c_short,
@@ -249,6 +255,7 @@ extern "C" {
     ) -> *mut fmx_QuadChar;
 
     pub fn FM_ExprEnv_Constructor1(_x: *mut fmx__fmxcpt) -> *mut fmx_ExprEnv;
+    pub fn FM_RowVect_Constructor1(_x: *mut fmx__fmxcpt) -> *mut fmx_RowVect;
 
     pub fn FM_ExprEnv_ExecuteFileSQLTextResult(
         _self: *const fmx_ExprEnv,
@@ -260,5 +267,22 @@ extern "C" {
         rowSep: fmx_uint16,
         _x: *mut fmx__fmxcpt,
     ) -> fmx_errcode;
+
+    pub fn FM_ExprEnv_ExecuteFileSQL(
+        _self: *const fmx_ExprEnv,
+        expression: *const fmx_Text,
+        filename: *const fmx_Text,
+        parameters: *const fmx_DataVect,
+        result: *mut fmx_RowVect,
+        _x: *mut fmx__fmxcpt,
+    ) -> fmx_errcode;
+
+    pub fn FM_RowVect_Size(_self: *const fmx_RowVect, _x: *mut fmx__fmxcpt) -> fmx_uint32;
+    pub fn FM_RowVect_IsEmpty(_self: *const fmx_RowVect, _x: *mut fmx__fmxcpt) -> bool;
+    pub fn FM_RowVect_At(
+        _self: *const fmx_RowVect,
+        position: fmx_uint32,
+        _x: *mut fmx__fmxcpt,
+    ) -> *const fmx_DataVect;
 
 }

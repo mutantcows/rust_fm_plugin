@@ -3,7 +3,7 @@ use crate::wrappers::*;
 use std::os::raw::c_short;
 
 #[no_mangle]
-pub(crate) unsafe extern "C" fn rust_execute_sql(
+pub(crate) unsafe extern "C" fn rust_execute_sql_text_result(
     _func_id: c_short,
     environment: *const fmx_ExprEnv,
     data_vect: *const fmx_DataVect,

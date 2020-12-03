@@ -189,6 +189,12 @@ impl DataVect {
         Self { ptr }
     }
 
+    pub(crate) fn from_ptr(ptr: *const fmx_DataVect) -> Self {
+        Self {
+            ptr: ptr as *mut fmx_DataVect,
+        }
+    }
+
     pub(crate) fn push(&mut self, data: Data) {
         let mut _x = fmx__fmxcpt::new();
         unsafe { FM_DataVect_PushBack(self.ptr, data.ptr, &mut _x) };
@@ -223,6 +229,40 @@ impl fmx_DataVect {
         let ptr = unsafe { FM_DataVect_AtAsNumber(self, position, &mut _x) };
         _x.check();
         FixPt::from_ptr(ptr)
+    }
+}
+
+pub(crate) struct RowVect {
+    pub(crate) ptr: *mut fmx_RowVect,
+}
+
+impl RowVect {
+    pub(crate) fn new() -> Self {
+        let mut _x = fmx__fmxcpt::new();
+        let ptr = unsafe { FM_RowVect_Constructor1(&mut _x) };
+        _x.check();
+        Self { ptr }
+    }
+
+    pub(crate) fn size(&self) -> fmx_uint32 {
+        let mut _x = fmx__fmxcpt::new();
+        let size = unsafe { FM_RowVect_Size(self.ptr, &mut _x) };
+        _x.check();
+        size
+    }
+
+    pub(crate) fn at(&self, position: fmx_uint32) -> DataVect {
+        let mut _x = fmx__fmxcpt::new();
+        let ptr = unsafe { FM_RowVect_At(self.ptr, position, &mut _x) };
+        _x.check();
+        DataVect::from_ptr(ptr)
+    }
+
+    pub(crate) fn is_empty(&self) -> bool {
+        let mut _x = fmx__fmxcpt::new();
+        let empty = unsafe { FM_RowVect_IsEmpty(self.ptr, &mut _x) };
+        _x.check();
+        empty
     }
 }
 
@@ -347,6 +387,28 @@ impl fmx_ExprEnv {
                 result.ptr,
                 col_sep,
                 row_sep,
+                &mut _x,
+            )
+        };
+        _x.check();
+        error
+    }
+
+    pub(crate) fn execute_file_sql(
+        &self,
+        expression: Text,
+        file_name: Text,
+        parameters: DataVect,
+        result: &mut RowVect,
+    ) -> fmx_errcode {
+        let mut _x = fmx__fmxcpt::new();
+        let error = unsafe {
+            FM_ExprEnv_ExecuteFileSQL(
+                self,
+                expression.ptr,
+                file_name.ptr,
+                parameters.ptr,
+                result.ptr,
                 &mut _x,
             )
         };

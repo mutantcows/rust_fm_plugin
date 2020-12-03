@@ -83,15 +83,30 @@ fn plugin_init(version: fmx_int16) -> u64 {
         let execute_sql_func = ExternalFunction::new(
             200,
             "RUST_ExecuteSQL",
-            "RUST_ExecuteSQL( fileName ; sqlQuery ; fieldSeparator ; rowSeparator { ; arguments... } )",
+            "RUST_ExecuteSQL( fileName ; sqlQuery { ; arguments... } )",
             "Performs SQL Query",
-            4,
+            2,
             -1,
             flags,
             Some(rust_execute_sql),
         );
 
         if execute_sql_func.register(&plugin_id) != 0 {
+            return sdk_version;
+        }
+
+        let execute_sql_text_result_func = ExternalFunction::new(
+            300,
+            "RUST_ExecuteSQLTextResult",
+            "RUST_ExecuteSQLTextResult( fileName ; sqlQuery ; fieldSeparator ; rowSeparator { ; arguments... } )",
+            "Performs SQL Query",
+            4,
+            -1,
+            flags,
+            Some(rust_execute_sql_text_result),
+        );
+
+        if execute_sql_text_result_func.register(&plugin_id) != 0 {
             return sdk_version;
         }
 
