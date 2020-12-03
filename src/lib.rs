@@ -64,66 +64,37 @@ fn plugin_init(version: fmx_int16) -> u64 {
     let flags: fmx_uint32 =
         PluginFlag::DisplayInAllDialogs as u32 | PluginFlag::FutureCompatible as u32;
 
-    let mut _x = fmx__fmxcpt::new();
-
     if version >= SDKVersion::V160 as i16 {
-        let mut name: Text = Text::new();
-        name.assign("RUST_ConvertToBase");
+        let convert_to_base_func = ExternalFunction::new(
+            100,
+            "RUST_ConvertToBase",
+            "RUST_ConvertToBase( number ; base )",
+            "Converts the number into a string using the specified base",
+            2,
+            2,
+            flags,
+            Some(rust_convert_to_base),
+        );
 
-        let mut desc = Text::new();
-        desc.assign("Converts the number into a string using the specified base");
-
-        let mut def = Text::new();
-        def.assign("RUST_ConvertToBase( number ; base )");
-
-        if unsafe {
-            FM_ExprEnv_RegisterExternalFunctionEx(
-                plugin_id.ptr,
-                100,
-                name.ptr,
-                def.ptr,
-                desc.ptr,
-                2,
-                2,
-                flags,
-                Some(rust_convert_to_base),
-                &mut _x,
-            )
-        } != 0
-        {
+        if convert_to_base_func.register(&plugin_id) != 0 {
             return sdk_version;
         }
 
-        _x.check();
+        let execute_sql_func = ExternalFunction::new(
+            200,
+            "RUST_ExecuteSQL",
+            "RUST_ExecuteSQL( fileName ; sqlQuery ; fieldSeparator ; rowSeparator { ; arguments... } )",
+            "Performs SQL Query",
+            4,
+            -1,
+            flags,
+            Some(rust_execute_sql),
+        );
 
-        let mut name: Text = Text::new();
-        name.assign("RUST_ExecuteSQL");
-
-        let mut desc = Text::new();
-        desc.assign("Performs SQL Query");
-
-        let mut def = Text::new();
-        def.assign("RUST_ExecuteSQL( fileName ; sqlQuery ; fieldSeparator ; rowSeparator { ; arguments... } )");
-
-        if unsafe {
-            FM_ExprEnv_RegisterExternalFunctionEx(
-                plugin_id.ptr,
-                200,
-                name.ptr,
-                def.ptr,
-                desc.ptr,
-                4,
-                -1,
-                flags,
-                Some(rust_execute_sql),
-                &mut _x,
-            )
-        } != 0
-        {
+        if execute_sql_func.register(&plugin_id) != 0 {
             return sdk_version;
         }
 
-        _x.check();
         sdk_version = SDKVersion::V190 as u64;
     }
 
