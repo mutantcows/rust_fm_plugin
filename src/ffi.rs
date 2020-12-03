@@ -185,6 +185,8 @@ extern "C" {
     pub fn FM_Data_GetAsText(_self: *const fmx_Data, _x: *mut fmx__fmxcpt) -> *const fmx_Text;
 
     pub fn FM_FixPt_AsLong(_self: *const fmx_FixPt, _x: *mut fmx__fmxcpt) -> fmx_int32;
+    pub fn FM_FixPt_Delete(_self: *mut fmx_FixPt, _x: *mut fmx__fmxcpt);
+    pub fn FM_Data_Delete(_self: *mut fmx_Data, _x: *mut fmx__fmxcpt);
 
     pub fn FM_Text_AssignWide(_self: *mut fmx_Text, s: *const u16, _x: *mut fmx__fmxcpt);
 
@@ -245,6 +247,7 @@ extern "C" {
         size: fmx_uint32,
         _x: *mut fmx__fmxcpt,
     );
+    pub fn FM_Text_Delete(_self: *mut fmx_Text, _x: *mut fmx__fmxcpt);
 
     pub fn FM_QuadChar_Constructor2(
         c0: c_char,

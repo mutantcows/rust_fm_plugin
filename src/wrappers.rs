@@ -34,6 +34,7 @@ impl QuadChar {
 
 pub(crate) struct Text {
     pub(crate) ptr: *mut fmx_Text,
+    drop: bool,
 }
 
 impl Text {
@@ -41,12 +42,13 @@ impl Text {
         let mut _x = fmx__fmxcpt::new();
         let ptr = unsafe { FM_Text_Constructor1(&mut _x) };
         _x.check();
-        Self { ptr }
+        Self { ptr, drop: true }
     }
 
     pub(crate) fn from_ptr(ptr: *const fmx_Text) -> Self {
         Self {
             ptr: ptr as *mut fmx_Text,
+            drop: false,
         }
     }
 
@@ -103,13 +105,24 @@ impl Text {
     }
 }
 
+impl Drop for Text {
+    fn drop(&mut self) {
+        if self.drop {
+            let mut _x = fmx__fmxcpt::new();
+            unsafe { FM_Text_Delete(self.ptr, &mut _x) };
+            _x.check();
+        }
+    }
+}
+
 pub(crate) struct FixPt {
     pub(crate) ptr: *const fmx_FixPt,
+    drop: bool,
 }
 
 impl FixPt {
-    pub(crate) fn from_ptr(ptr: *const fmx_FixPt) -> Self {
-        Self { ptr }
+    pub(crate) fn from_ptr(ptr: *const fmx_FixPt) -> FixPt {
+        Self { ptr, drop: false }
     }
 
     pub(crate) fn get_as_long(&self) -> fmx_int32 {
@@ -117,6 +130,16 @@ impl FixPt {
         let num = unsafe { FM_FixPt_AsLong(self.ptr, &mut _x) };
         _x.check();
         num
+    }
+}
+
+impl Drop for FixPt {
+    fn drop(&mut self) {
+        if self.drop {
+            let mut _x = fmx__fmxcpt::new();
+            unsafe { FM_FixPt_Delete(self.ptr as *mut fmx_FixPt, &mut _x) };
+            _x.check();
+        }
     }
 }
 
@@ -131,6 +154,7 @@ impl Locale {
 }
 pub(crate) struct Data {
     pub(crate) ptr: *mut fmx_Data,
+    drop: bool,
 }
 
 impl Data {
@@ -138,12 +162,13 @@ impl Data {
         let mut _x = fmx__fmxcpt::new();
         let ptr = unsafe { FM_Data_Constructor1(&mut _x) };
         _x.check();
-        Self { ptr }
+        Self { ptr, drop: true }
     }
 
     pub(crate) fn from_ptr(ptr: *const fmx_Data) -> Self {
         Self {
             ptr: ptr as *mut fmx_Data,
+            drop: false,
         }
     }
 
@@ -174,6 +199,16 @@ impl fmx_Data {
         let mut _x = fmx__fmxcpt::new();
         unsafe { FM_Data_SetAsText(self, text.ptr, locale.ptr, 1, &mut _x) };
         _x.check();
+    }
+}
+
+impl Drop for Data {
+    fn drop(&mut self) {
+        if self.drop {
+            let mut _x = fmx__fmxcpt::new();
+            unsafe { FM_Data_Delete(self.ptr as *mut fmx_Data, &mut _x) };
+            _x.check();
+        }
     }
 }
 
