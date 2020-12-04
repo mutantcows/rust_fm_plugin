@@ -296,4 +296,18 @@ extern "C" {
         _x: *mut fmx__fmxcpt,
     ) -> *const fmx_DataVect;
 
+    pub fn FM_ExprEnv_Evaluate(
+        _self: *const fmx_ExprEnv,
+        expression: *const fmx_Text,
+        result: *mut fmx_Data,
+        _x: *mut fmx__fmxcpt,
+    ) -> fmx_errcode;
+
+    pub fn FM_ExprEnv_EvaluateGetFunction(
+        _self: *const fmx_ExprEnv,
+        functionValue: c_short,
+        result: *mut fmx_Data,
+        _x: *mut fmx__fmxcpt,
+    ) -> fmx_errcode;
+
 }
