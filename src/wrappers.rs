@@ -126,6 +126,13 @@ impl Drop for Text {
     }
 }
 
+impl ToString for Text {
+    fn to_string(&self) -> String {
+        let str = self.get_unicode(0, self.size());
+        str.to_string().unwrap()
+    }
+}
+
 pub(crate) struct FixPt {
     pub(crate) ptr: *mut fmx_FixPt,
     drop: bool,

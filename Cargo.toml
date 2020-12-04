@@ -13,7 +13,8 @@ crate-type = ["cdylib"]
 [dependencies]
 widestring = "*"
 directories = "*"
-
+pdf_forms = "*"
+serde_json = "*"
 
 [build-dependencies]
 bindgen = "*"

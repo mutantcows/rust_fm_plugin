@@ -16,6 +16,27 @@ pub type fmx_boolean = c_char;
 pub type FMX_ExternCallSwitch = fmx_uchar;
 pub type FMX_ScriptControl = fmx_uchar;
 pub type FMX_IdleLevel = fmx_uchar;
+pub type FMX_ExternCallPtr = *mut FMX_ExternCallStruct;
+pub type FMX_ExternCallProc = Option<unsafe extern "C" fn(arg1: FMX_ExternCallPtr)>;
+pub type FMX_CurrentEnvCall = Option<unsafe extern "C" fn(env: *mut fmx_ExprEnv) -> fmx_errcode>;
+
+pub type fmx_ExtPluginType = Option<
+    unsafe extern "C" fn(
+        functionId: c_short,
+        env: *const fmx_ExprEnv,
+        parms: *const fmx_DataVect,
+        result: *mut fmx_Data,
+    ) -> fmx_errcode,
+>;
+
+pub type FMX_StartScriptCall = ::std::option::Option<
+    unsafe extern "C" fn(
+        fileName: *const fmx_Text,
+        scriptName: *const fmx_Text,
+        control: FMX_ScriptControl,
+        parameter: *const fmx_Data,
+    ) -> fmx_errcode,
+>;
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -89,28 +110,6 @@ pub struct fmx_QuadChar {
 pub struct fmx_RowVect {
     pub _address: u8,
 }
-
-pub type fmx_ExtPluginType = Option<
-    unsafe extern "C" fn(
-        functionId: c_short,
-        env: *const fmx_ExprEnv,
-        parms: *const fmx_DataVect,
-        result: *mut fmx_Data,
-    ) -> fmx_errcode,
->;
-
-pub type FMX_StartScriptCall = ::std::option::Option<
-    unsafe extern "C" fn(
-        fileName: *const fmx_Text,
-        scriptName: *const fmx_Text,
-        control: FMX_ScriptControl,
-        parameter: *const fmx_Data,
-    ) -> fmx_errcode,
->;
-
-pub type FMX_ExternCallPtr = *mut FMX_ExternCallStruct;
-pub type FMX_ExternCallProc = Option<unsafe extern "C" fn(arg1: FMX_ExternCallPtr)>;
-pub type FMX_CurrentEnvCall = Option<unsafe extern "C" fn(env: *mut fmx_ExprEnv) -> fmx_errcode>;
 
 #[repr(C, packed)]
 #[derive(Debug, Copy, Clone)]

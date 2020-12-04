@@ -110,6 +110,21 @@ fn plugin_init(version: fmx_int16) -> u64 {
             return sdk_version;
         }
 
+        let pdf_to_json_func = ExternalFunction::new(
+            400,
+            "RUST_PDFToJSON",
+            "RUST_PDFToJSON( path )",
+            "Converts fields in pdf to JSON object.",
+            1,
+            1,
+            flags,
+            Some(rust_pdf_to_json),
+        );
+
+        if pdf_to_json_func.register(&plugin_id) != 0 {
+            return sdk_version;
+        }
+
         sdk_version = SDKVersion::V190 as u64;
     }
 
