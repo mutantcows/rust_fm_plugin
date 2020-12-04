@@ -227,19 +227,17 @@ impl Data {
         _x.check();
         Text::from_ptr(ptr)
     }
-}
 
-impl fmx_Data {
     pub(crate) fn get_locale(&self) -> Locale {
         let mut _x = fmx__fmxcpt::new();
-        let ptr = unsafe { FM_Data_GetLocale(self, &mut _x) };
+        let ptr = unsafe { FM_Data_GetLocale(self.ptr, &mut _x) };
         _x.check();
         Locale::from_ptr(ptr)
     }
 
     pub(crate) fn set_as_text(&mut self, text: Text, locale: Locale) {
         let mut _x = fmx__fmxcpt::new();
-        unsafe { FM_Data_SetAsText(self, text.ptr, locale.ptr, 1, &mut _x) };
+        unsafe { FM_Data_SetAsText(self.ptr, text.ptr, locale.ptr, 1, &mut _x) };
         _x.check();
     }
 }
@@ -274,40 +272,38 @@ impl DataVect {
         }
     }
 
-    pub(crate) fn push(&mut self, data: Data) {
-        let mut _x = fmx__fmxcpt::new();
-        unsafe { FM_DataVect_PushBack(self.ptr, data.ptr, &mut _x) };
-        _x.check();
-    }
-}
-
-impl fmx_DataVect {
     pub(crate) fn size(&self) -> fmx_uint32 {
         let mut _x = fmx__fmxcpt::new();
-        let size = unsafe { FM_DataVect_Size(self, &mut _x) };
+        let size = unsafe { FM_DataVect_Size(self.ptr, &mut _x) };
         _x.check();
         size
     }
 
     pub(crate) fn at(&self, position: fmx_uint32) -> Data {
         let mut _x = fmx__fmxcpt::new();
-        let data_ptr = unsafe { FM_DataVect_At(self, position, &mut _x) };
+        let data_ptr = unsafe { FM_DataVect_At(self.ptr, position, &mut _x) };
         _x.check();
         Data::from_ptr(data_ptr)
     }
 
     pub(crate) fn at_as_text(&self, position: fmx_uint32) -> Text {
         let mut _x = fmx__fmxcpt::new();
-        let ptr = unsafe { FM_DataVect_AtAsText(self, position, &mut _x) };
+        let ptr = unsafe { FM_DataVect_AtAsText(self.ptr, position, &mut _x) };
         _x.check();
         Text::from_ptr(ptr)
     }
 
     pub(crate) fn at_as_number(&self, position: fmx_uint32) -> FixPt {
         let mut _x = fmx__fmxcpt::new();
-        let ptr = unsafe { FM_DataVect_AtAsNumber(self, position, &mut _x) };
+        let ptr = unsafe { FM_DataVect_AtAsNumber(self.ptr, position, &mut _x) };
         _x.check();
         FixPt::from_ptr(ptr)
+    }
+
+    pub(crate) fn push(&mut self, data: Data) {
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_DataVect_PushBack(self.ptr, data.ptr, &mut _x) };
+        _x.check();
     }
 }
 
@@ -467,7 +463,19 @@ impl From<u8> for IdleType {
     }
 }
 
-impl fmx_ExprEnv {
+pub(crate) struct ExprEnv {
+    pub(crate) ptr: *mut fmx_ExprEnv,
+    drop: bool,
+}
+
+impl ExprEnv {
+    pub(crate) fn from_ptr(ptr: *const fmx_ExprEnv) -> Self {
+        Self {
+            ptr: ptr as *mut fmx_ExprEnv,
+            drop: false,
+        }
+    }
+
     pub(crate) fn execute_file_sql_text_result(
         &self,
         expression: Text,
@@ -480,7 +488,7 @@ impl fmx_ExprEnv {
         let mut _x = fmx__fmxcpt::new();
         let error = unsafe {
             FM_ExprEnv_ExecuteFileSQLTextResult(
-                self,
+                self.ptr,
                 expression.ptr,
                 file_name.ptr,
                 parameters.ptr,
@@ -504,7 +512,7 @@ impl fmx_ExprEnv {
         let mut _x = fmx__fmxcpt::new();
         let error = unsafe {
             FM_ExprEnv_ExecuteFileSQL(
-                self,
+                self.ptr,
                 expression.ptr,
                 file_name.ptr,
                 parameters.ptr,
@@ -514,6 +522,16 @@ impl fmx_ExprEnv {
         };
         _x.check();
         error
+    }
+}
+
+impl Drop for ExprEnv {
+    fn drop(&mut self) {
+        if self.drop {
+            let mut _x = fmx__fmxcpt::new();
+            unsafe { FM_ExprEnv_Delete(self.ptr, &mut _x) };
+            _x.check();
+        }
     }
 }
 

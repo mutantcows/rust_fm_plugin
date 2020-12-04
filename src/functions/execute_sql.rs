@@ -5,28 +5,31 @@ use std::os::raw::c_short;
 #[no_mangle]
 pub(crate) unsafe extern "C" fn rust_execute_sql(
     _func_id: c_short,
-    environment: *const fmx_ExprEnv,
-    data_vect: *const fmx_DataVect,
-    results: *mut fmx_Data,
+    env_ptr: *const fmx_ExprEnv,
+    data_vect_ptr: *const fmx_DataVect,
+    results_ptr: *mut fmx_Data,
 ) -> fmx_errcode {
     let error_result: fmx_errcode = 0;
+    let env = ExprEnv::from_ptr(env_ptr);
+    let data_vect = DataVect::from_ptr(data_vect_ptr);
+    let mut results = Data::from_ptr(results_ptr);
 
-    let file_name = (*data_vect).at_as_text(0);
-    let expression = (*data_vect).at_as_text(1);
+    let file_name = data_vect.at_as_text(0);
+    let expression = data_vect.at_as_text(1);
 
     let mut parameters = DataVect::new();
-    let param_count = (*data_vect).size();
+    let param_count = data_vect.size();
 
     if param_count > 2 {
         for i in 2..param_count {
-            let param = (*data_vect).at(i);
+            let param = data_vect.at(i);
             parameters.push(param);
         }
     }
 
     let mut result = RowVect::new();
 
-    (*environment).execute_file_sql(expression, file_name, parameters, &mut result);
+    env.execute_file_sql(expression, file_name, parameters, &mut result);
 
     if result.is_empty() {
         return 0;
@@ -40,13 +43,13 @@ pub(crate) unsafe extern "C" fn rust_execute_sql(
 
     let record_count = result.size();
     let first_row = result.at(0);
-    let field_count = (*first_row.ptr).size();
-    let out_locale = (*(*first_row.ptr).at(0).ptr).get_locale();
+    let field_count = first_row.size();
+    let out_locale = first_row.at(0).get_locale();
 
     for i in 0..record_count {
         let record = result.at(i);
         for j in 0..field_count {
-            let field = (*record.ptr).at(j);
+            let field = record.at(j);
             let text = field.get_as_text();
             out_text.insert_text(&text, out_text.size());
             out_text.insert_text(&col_sep, out_text.size());
@@ -54,7 +57,7 @@ pub(crate) unsafe extern "C" fn rust_execute_sql(
         out_text.insert_text(&row_sep, out_text.size());
     }
 
-    (*results).set_as_text(out_text, out_locale);
+    results.set_as_text(out_text, out_locale);
 
     error_result
 }

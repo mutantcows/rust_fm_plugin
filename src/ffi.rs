@@ -286,6 +286,8 @@ extern "C" {
         _x: *mut fmx__fmxcpt,
     ) -> fmx_errcode;
 
+    pub fn FM_ExprEnv_Delete(_self: *mut fmx_ExprEnv, _x: *mut fmx__fmxcpt);
+
     pub fn FM_RowVect_Size(_self: *const fmx_RowVect, _x: *mut fmx__fmxcpt) -> fmx_uint32;
     pub fn FM_RowVect_IsEmpty(_self: *const fmx_RowVect, _x: *mut fmx__fmxcpt) -> bool;
     pub fn FM_RowVect_At(
