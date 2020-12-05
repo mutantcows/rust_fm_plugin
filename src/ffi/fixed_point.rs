@@ -1,6 +1,6 @@
 use super::*;
 use std::cmp::{Eq, Ord, Ordering, PartialEq, PartialOrd};
-use std::ops::{Add, Div, Mul, Sub};
+use std::ops::{Add, AddAssign, Div, Mul, Neg, Sub, SubAssign};
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -84,10 +84,7 @@ extern "C" {
 
     pub fn FM_FixPt_Negate(_self: *mut fmx_FixPt, _x: *mut fmx__fmxcpt);
 
-    pub fn FM_FixPt_GetPrecision(
-        _self: *const fmx_FixPt,
-        _x: *mut fmx__fmxcpt,
-    ) -> ::std::os::raw::c_int;
+    pub fn FM_FixPt_GetPrecision(_self: *const fmx_FixPt, _x: *mut fmx__fmxcpt) -> fmx_int32;
 
     pub fn FM_FixPt_SetPrecision(_self: *mut fmx_FixPt, precision: fmx_int32, _x: *mut fmx__fmxcpt);
 
@@ -145,6 +142,50 @@ impl FixPt {
             drop: false,
         }
     }
+
+    pub(crate) fn clone_precision(&self, val: i32) -> FixPt {
+        let mut _x = fmx__fmxcpt::new();
+        let ptr = unsafe { FM_FixPt_Constructor2(val, self.ptr, &mut _x) };
+        _x.check();
+        Self { ptr, drop: true }
+    }
+
+    pub(crate) fn assign(&mut self, fixed_point: FixPt) {
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_FixPt_AssignFixPt(self.ptr, fixed_point.ptr, &mut _x) };
+        _x.check();
+    }
+
+    pub(crate) fn assign_i32(&mut self, num: i32) {
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_FixPt_AssignInt(self.ptr, num, &mut _x) };
+        _x.check();
+    }
+
+    pub(crate) fn assign_i64(&mut self, num: i64) {
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_FixPt_AssignInt64(self.ptr, num, &mut _x) };
+        _x.check();
+    }
+
+    pub(crate) fn assign_float(&mut self, num: f64) {
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_FixPt_AssignDouble(self.ptr, num, &mut _x) };
+        _x.check();
+    }
+
+    pub(crate) fn get_precision(&self) -> i32 {
+        let mut _x = fmx__fmxcpt::new();
+        let precision = unsafe { FM_FixPt_GetPrecision(self.ptr, &mut _x) };
+        _x.check();
+        precision
+    }
+
+    pub(crate) fn set_precision(&mut self, precision: i32) {
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_FixPt_SetPrecision(self.ptr, precision, &mut _x) };
+        _x.check();
+    }
 }
 
 impl Default for FixPt {
@@ -165,6 +206,15 @@ impl Drop for FixPt {
 
 impl From<FixPt> for i32 {
     fn from(fix_pt: FixPt) -> i32 {
+        let mut _x = fmx__fmxcpt::new();
+        let num = unsafe { FM_FixPt_AsLong(fix_pt.ptr, &mut _x) };
+        _x.check();
+        num
+    }
+}
+
+impl From<&FixPt> for i32 {
+    fn from(fix_pt: &FixPt) -> i32 {
         let mut _x = fmx__fmxcpt::new();
         let num = unsafe { FM_FixPt_AsLong(fix_pt.ptr, &mut _x) };
         _x.check();
@@ -199,6 +249,36 @@ impl From<FixPt> for f64 {
     }
 }
 
+impl From<f64> for FixPt {
+    fn from(num: f64) -> FixPt {
+        let fixed_pt = FixPt::default();
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_FixPt_AssignDouble(fixed_pt.ptr, num, &mut _x) };
+        _x.check();
+        fixed_pt
+    }
+}
+
+impl From<i32> for FixPt {
+    fn from(num: i32) -> FixPt {
+        let fixed_pt = FixPt::default();
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_FixPt_AssignInt(fixed_pt.ptr, num, &mut _x) };
+        _x.check();
+        fixed_pt
+    }
+}
+
+impl From<i64> for FixPt {
+    fn from(num: i64) -> FixPt {
+        let fixed_pt = FixPt::default();
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_FixPt_AssignInt64(fixed_pt.ptr, num, &mut _x) };
+        _x.check();
+        fixed_pt
+    }
+}
+
 impl Add for FixPt {
     type Output = Self;
 
@@ -208,6 +288,78 @@ impl Add for FixPt {
         unsafe { FM_FixPt_Add(self.ptr, other.ptr, result.ptr, &mut _x) };
         _x.check();
         result
+    }
+}
+
+impl Add<i32> for FixPt {
+    type Output = Self;
+
+    fn add(self, other: i32) -> Self {
+        let mut _x = fmx__fmxcpt::new();
+        let result = FixPt::default();
+        unsafe { FM_FixPt_Increment(self.ptr, other, &mut _x) };
+        _x.check();
+        result
+    }
+}
+
+impl Add<i64> for FixPt {
+    type Output = Self;
+
+    fn add(self, other: i64) -> Self {
+        let mut _x = fmx__fmxcpt::new();
+        let result = FixPt::default();
+        unsafe { FM_FixPt_Increment64(self.ptr, other, &mut _x) };
+        _x.check();
+        result
+    }
+}
+
+impl AddAssign for FixPt {
+    fn add_assign(&mut self, other: Self) {
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_FixPt_Increment(self.ptr, other.into(), &mut _x) };
+        _x.check();
+    }
+}
+
+impl AddAssign<i32> for FixPt {
+    fn add_assign(&mut self, other: i32) {
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_FixPt_Increment(self.ptr, other, &mut _x) };
+        _x.check();
+    }
+}
+
+impl AddAssign<i64> for FixPt {
+    fn add_assign(&mut self, other: i64) {
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_FixPt_Increment64(self.ptr, other, &mut _x) };
+        _x.check();
+    }
+}
+
+impl SubAssign for FixPt {
+    fn sub_assign(&mut self, other: Self) {
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_FixPt_Decrement(self.ptr, other.into(), &mut _x) };
+        _x.check();
+    }
+}
+
+impl SubAssign<i32> for FixPt {
+    fn sub_assign(&mut self, other: i32) {
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_FixPt_Decrement(self.ptr, other, &mut _x) };
+        _x.check();
+    }
+}
+
+impl SubAssign<i64> for FixPt {
+    fn sub_assign(&mut self, other: i64) {
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_FixPt_Decrement64(self.ptr, other, &mut _x) };
+        _x.check();
     }
 }
 
@@ -247,6 +399,17 @@ impl Div for FixPt {
     }
 }
 
+impl Neg for FixPt {
+    type Output = Self;
+
+    fn neg(self) -> Self {
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_FixPt_Negate(self.ptr, &mut _x) };
+        _x.check();
+        self
+    }
+}
+
 impl PartialEq for FixPt {
     fn eq(&self, other: &FixPt) -> bool {
         let mut _x = fmx__fmxcpt::new();
@@ -275,5 +438,14 @@ impl Ord for FixPt {
             true => Ordering::Greater,
             false => Ordering::Less,
         }
+    }
+}
+
+impl Clone for FixPt {
+    fn clone(&self) -> Self {
+        let mut _x = fmx__fmxcpt::new();
+        let ptr = unsafe { FM_FixPt_Constructor2(self.into(), self.ptr, &mut _x) };
+        _x.check();
+        Self { ptr, drop: true }
     }
 }
