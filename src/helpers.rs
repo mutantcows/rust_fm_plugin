@@ -1,8 +1,7 @@
+use crate::ffi::*;
 use std::ffi::CString;
 use std::os::raw::{c_char, c_uint, c_ushort};
 use widestring::WideCString;
-
-use crate::wrappers::*;
 
 pub(crate) fn write_to_file(content: &str) -> Result<(), String> {
     use directories::UserDirs;

@@ -1,5 +1,4 @@
 use crate::ffi::*;
-use crate::wrappers::*;
 use pdf_forms::{FieldState, Form};
 use serde_json::{to_string_pretty, Map, Value};
 use std::os::raw::c_short;

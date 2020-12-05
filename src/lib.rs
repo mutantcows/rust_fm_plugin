@@ -8,11 +8,9 @@ mod ffi;
 mod functions;
 mod helpers;
 mod script_steps;
-mod wrappers;
 use ffi::*;
 use functions::*;
 use helpers::*;
-use wrappers::*;
 
 const PLUGIN_ID: &[u8; 4] = b"RUST";
 const PLUGIN_NAME: &str = "RustPlugIn";
@@ -32,12 +30,12 @@ char 11 always "n"
 const PLUGIN_OPTIONS: &str = "RUST1nnYnnn";
 
 #[no_mangle]
-pub static mut gFMX_ExternCallPtr: FMX_ExternCallPtr = null_mut();
+pub static mut gfmx_ExternCallPtr: *mut fmx_ExternCallStruct = null_mut();
 
 #[no_mangle]
-unsafe extern "C" fn FMExternCallProc(pb: FMX_ExternCallPtr) {
-    // Setup global defined in FMXExtern.h (this will be obsoleted in a later header file)
-    gFMX_ExternCallPtr = pb;
+unsafe extern "C" fn FMExternCallProc(pb: *mut fmx_ExternCallStruct) {
+    // Setup global defined in fmxExtern.h (this will be obsoleted in a later header file)
+    gfmx_ExternCallPtr = pb;
     use FMExternCallType::*;
 
     // Message dispatcher
@@ -58,13 +56,13 @@ unsafe extern "C" fn FMExternCallProc(pb: FMX_ExternCallPtr) {
 }
 
 fn plugin_init(version: fmx_int16) -> u64 {
-    let mut sdk_version: u64 = SDKVersion::DoNotEnable as u64;
+    let mut extern_version: u64 = ExternVersion::DoNotEnable as u64;
     let plugin_id = QuadChar::new(PLUGIN_ID);
 
     let flags: fmx_uint32 =
         PluginFlag::DisplayInAllDialogs as u32 | PluginFlag::FutureCompatible as u32;
 
-    if version >= SDKVersion::V160 as i16 {
+    if version >= ExternVersion::V160 as i16 {
         let convert_to_base_func = ExternalFunction::new(
             100,
             "RUST_ConvertToBase",
@@ -77,7 +75,7 @@ fn plugin_init(version: fmx_int16) -> u64 {
         );
 
         if convert_to_base_func.register(&plugin_id) != 0 {
-            return sdk_version;
+            return extern_version;
         }
 
         let execute_sql_func = ExternalFunction::new(
@@ -92,7 +90,7 @@ fn plugin_init(version: fmx_int16) -> u64 {
         );
 
         if execute_sql_func.register(&plugin_id) != 0 {
-            return sdk_version;
+            return extern_version;
         }
 
         let execute_sql_text_result_func = ExternalFunction::new(
@@ -107,7 +105,7 @@ fn plugin_init(version: fmx_int16) -> u64 {
         );
 
         if execute_sql_text_result_func.register(&plugin_id) != 0 {
-            return sdk_version;
+            return extern_version;
         }
 
         let pdf_to_json_func = ExternalFunction::new(
@@ -122,16 +120,16 @@ fn plugin_init(version: fmx_int16) -> u64 {
         );
 
         if pdf_to_json_func.register(&plugin_id) != 0 {
-            return sdk_version;
+            return extern_version;
         }
 
-        sdk_version = SDKVersion::V190 as u64;
+        extern_version = ExternVersion::V190 as u64;
     }
 
-    sdk_version
+    extern_version
 }
 
-fn plugin_idle(idle_level: FMX_IdleLevel, _session_id: fmx_ptrtype) {
+fn plugin_idle(idle_level: fmx_IdleLevel, _session_id: fmx_ptrtype) {
     use IdleType::*;
     match IdleType::from(idle_level) {
         Idle => {}
@@ -161,8 +159,8 @@ fn plugin_get_string(
     out_buffer_size: fmx_uint32,
     out_buffer: *mut fmx_unichar16,
 ) {
-    use GetStringType::*;
-    let string = match GetStringType::from(which_string) {
+    use ExternStringType::*;
+    let string = match ExternStringType::from(which_string) {
         Name => PLUGIN_NAME,
         AppConfig => PLUGIN_DESCRIPTION,
         Options => PLUGIN_OPTIONS,
