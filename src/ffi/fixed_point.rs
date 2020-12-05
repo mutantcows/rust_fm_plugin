@@ -1,4 +1,6 @@
 use super::*;
+use std::cmp::{Eq, Ord, Ordering, PartialEq, PartialOrd};
+use std::ops::{Add, Div, Mul, Sub};
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -124,6 +126,7 @@ extern "C" {
     pub fn FM_FixPt_AsFloat(_self: *const fmx_FixPt, _x: *mut fmx__fmxcpt) -> f64;
 }
 
+#[derive(Eq)]
 pub(crate) struct FixPt {
     pub(crate) ptr: *mut fmx_FixPt,
     drop: bool,
@@ -142,12 +145,11 @@ impl FixPt {
             drop: false,
         }
     }
+}
 
-    pub(crate) fn get_as_long(&self) -> fmx_int32 {
-        let mut _x = fmx__fmxcpt::new();
-        let num = unsafe { FM_FixPt_AsLong(self.ptr, &mut _x) };
-        _x.check();
-        num
+impl Default for FixPt {
+    fn default() -> Self {
+        FixPt::new(0, 16)
     }
 }
 
@@ -163,6 +165,115 @@ impl Drop for FixPt {
 
 impl From<FixPt> for i32 {
     fn from(fix_pt: FixPt) -> i32 {
-        fix_pt.get_as_long()
+        let mut _x = fmx__fmxcpt::new();
+        let num = unsafe { FM_FixPt_AsLong(fix_pt.ptr, &mut _x) };
+        _x.check();
+        num
+    }
+}
+
+impl From<FixPt> for i64 {
+    fn from(fix_pt: FixPt) -> i64 {
+        let mut _x = fmx__fmxcpt::new();
+        let num = unsafe { FM_FixPt_AsLong64(fix_pt.ptr, &mut _x) };
+        _x.check();
+        num
+    }
+}
+
+impl From<FixPt> for bool {
+    fn from(fix_pt: FixPt) -> bool {
+        let mut _x = fmx__fmxcpt::new();
+        let b = unsafe { FM_FixPt_AsBool(fix_pt.ptr, &mut _x) };
+        _x.check();
+        b
+    }
+}
+
+impl From<FixPt> for f64 {
+    fn from(fix_pt: FixPt) -> f64 {
+        let mut _x = fmx__fmxcpt::new();
+        let num = unsafe { FM_FixPt_AsFloat(fix_pt.ptr, &mut _x) };
+        _x.check();
+        num
+    }
+}
+
+impl Add for FixPt {
+    type Output = Self;
+
+    fn add(self, other: Self) -> Self {
+        let mut _x = fmx__fmxcpt::new();
+        let result = FixPt::default();
+        unsafe { FM_FixPt_Add(self.ptr, other.ptr, result.ptr, &mut _x) };
+        _x.check();
+        result
+    }
+}
+
+impl Sub for FixPt {
+    type Output = Self;
+
+    fn sub(self, other: Self) -> Self {
+        let mut _x = fmx__fmxcpt::new();
+        let result = FixPt::default();
+        unsafe { FM_FixPt_Subtract(self.ptr, other.ptr, result.ptr, &mut _x) };
+        _x.check();
+        result
+    }
+}
+
+impl Mul for FixPt {
+    type Output = Self;
+
+    fn mul(self, other: Self) -> Self {
+        let mut _x = fmx__fmxcpt::new();
+        let result = FixPt::default();
+        unsafe { FM_FixPt_Multiply(self.ptr, other.ptr, result.ptr, &mut _x) };
+        _x.check();
+        result
+    }
+}
+
+impl Div for FixPt {
+    type Output = Self;
+
+    fn div(self, other: Self) -> Self {
+        let mut _x = fmx__fmxcpt::new();
+        let result = FixPt::default();
+        unsafe { FM_FixPt_Divide(self.ptr, other.ptr, result.ptr, &mut _x) };
+        _x.check();
+        result
+    }
+}
+
+impl PartialEq for FixPt {
+    fn eq(&self, other: &FixPt) -> bool {
+        let mut _x = fmx__fmxcpt::new();
+        let result = unsafe { FM_FixPt_operatorEQ(self.ptr, other.ptr, &mut _x) };
+        _x.check();
+        result
+    }
+}
+
+impl PartialOrd for FixPt {
+    fn partial_cmp(&self, other: &FixPt) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for FixPt {
+    fn cmp(&self, other: &FixPt) -> Ordering {
+        if self == other {
+            return Ordering::Equal;
+        }
+
+        let mut _x = fmx__fmxcpt::new();
+        let gt = unsafe { FM_FixPt_operatorGT(self.ptr, other.ptr, &mut _x) };
+        _x.check();
+        match gt {
+            true => Ordering::Greater,
+            false => Ordering::Less,
+        }
     }
 }
