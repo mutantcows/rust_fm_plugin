@@ -10,52 +10,42 @@ pub(crate) unsafe extern "C" fn rust_convert_to_base(
     data_vect_ptr: *const fmx_DataVect,
     results_ptr: *mut fmx_Data,
 ) -> fmx_errcode {
-    let mut error_result: fmx_errcode = 960;
     let data_vect = DataVect::from_ptr(data_vect_ptr);
     let mut results = Data::from_ptr(results_ptr);
 
     let mut out_text = Text::new();
-
-    let mut out_locale = results.get_locale();
     let mut insert_buffer = Text::new();
 
-    let data_size = data_vect.size();
+    let number = data_vect.at(0);
+    let out_locale = number.get_locale();
+    let mut number: fmx_int32 = i32::from(number);
 
-    if data_size >= 2 {
-        let num = data_vect.at(0);
-        let mut number: fmx_int32 = i32::from(&num);
+    let base = data_vect.at_as_number(1);
+    let base: fmx_int32 = i32::from(base);
 
-        let base = data_vect.at_as_number(1);
-        let base: fmx_int32 = i32::from(base);
+    match base {
+        2 | 3 | 8 | 12 | 16 => {}
+        _ => return 960,
+    }
 
-        match base {
-            2 | 3 | 8 | 12 | 16 => {
-                if number == 0 {
-                    prepend_character(&mut out_text, &mut insert_buffer, '0');
-                } else {
-                    let neg: bool = number < 0;
-                    if neg {
-                        number = -number;
-                    }
-                    while number > 0 {
-                        let digit = (number % base) as u8;
-                        let ch = if digit < 10 { b'0' } else { b'A' - 10 } + digit;
-                        prepend_character(&mut out_text, &mut insert_buffer, ch as char);
-
-                        number /= base;
-                    }
-                    if neg {
-                        prepend_character(&mut out_text, &mut insert_buffer, '-');
-                    }
-                }
-                out_locale = num.get_locale();
-                error_result = 0;
-            }
-            _ => {}
+    if number == 0 {
+        out_text.assign("0");
+    } else {
+        let neg = number < 0;
+        if neg {
+            number = -number;
+        }
+        while number > 0 {
+            let digit = (number % base) as u8;
+            let ch = if digit < 10 { b'0' } else { b'A' - 10 } + digit;
+            prepend_character(&mut out_text, &mut insert_buffer, ch as char);
+            number /= base;
+        }
+        if neg {
+            prepend_character(&mut out_text, &mut insert_buffer, '-');
         }
     }
 
     results.set_as_text(out_text, out_locale);
-
-    error_result
+    0
 }
