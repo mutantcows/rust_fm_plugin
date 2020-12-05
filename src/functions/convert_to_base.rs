@@ -23,34 +23,35 @@ pub(crate) unsafe extern "C" fn rust_convert_to_base(
 
     if data_size >= 2 {
         let num = data_vect.at(0);
-        let number = num.get_as_number();
-        let mut number: fmx_int32 = number.get_as_long();
+        let mut number: fmx_int32 = i32::from(&num);
 
-        let base = data_vect.at(1);
-        let base = base.get_as_number();
-        let base: fmx_int32 = base.get_as_long();
+        let base = data_vect.at_as_number(1);
+        let base: fmx_int32 = i32::from(base);
 
-        if base == 2 || base == 3 || base == 8 || base == 12 || base == 16 {
-            if number == 0 {
-                prepend_character(&mut out_text, &mut insert_buffer, '0');
-            } else {
-                let neg: bool = number < 0;
-                if neg {
-                    number = -number;
-                }
-                while number > 0 {
-                    let digit = (number % base) as u8;
-                    let ch = if digit < 10 { b'0' } else { b'A' - 10 } + digit;
-                    prepend_character(&mut out_text, &mut insert_buffer, ch as char);
+        match base {
+            2 | 3 | 8 | 12 | 16 => {
+                if number == 0 {
+                    prepend_character(&mut out_text, &mut insert_buffer, '0');
+                } else {
+                    let neg: bool = number < 0;
+                    if neg {
+                        number = -number;
+                    }
+                    while number > 0 {
+                        let digit = (number % base) as u8;
+                        let ch = if digit < 10 { b'0' } else { b'A' - 10 } + digit;
+                        prepend_character(&mut out_text, &mut insert_buffer, ch as char);
 
-                    number /= base;
+                        number /= base;
+                    }
+                    if neg {
+                        prepend_character(&mut out_text, &mut insert_buffer, '-');
+                    }
                 }
-                if neg {
-                    prepend_character(&mut out_text, &mut insert_buffer, '-');
-                }
+                out_locale = num.get_locale();
+                error_result = 0;
             }
-            out_locale = num.get_locale();
-            error_result = 0;
+            _ => {}
         }
     }
 

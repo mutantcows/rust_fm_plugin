@@ -170,6 +170,24 @@ impl Drop for FixPt {
     }
 }
 
+impl From<FixPt> for i32 {
+    fn from(fix_pt: FixPt) -> i32 {
+        fix_pt.get_as_long()
+    }
+}
+
+impl From<Data> for i32 {
+    fn from(data: Data) -> i32 {
+        i32::from(data.get_as_number())
+    }
+}
+
+impl From<&Data> for i32 {
+    fn from(data: &Data) -> i32 {
+        i32::from(data.get_as_number())
+    }
+}
+
 pub(crate) struct Locale {
     pub(crate) ptr: *mut fmx_Locale,
     drop: bool,
