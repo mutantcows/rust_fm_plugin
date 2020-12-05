@@ -11,10 +11,6 @@ pub(crate) unsafe extern "C" fn rust_convert_to_base(
     results_ptr: *mut fmx_Data,
 ) -> fmx_errcode {
     let data_vect = DataVect::from_ptr(data_vect_ptr);
-    let mut results = Data::from_ptr(results_ptr);
-
-    let mut out_text = Text::new();
-    let mut insert_buffer = Text::new();
 
     let number = data_vect.at(0);
     let out_locale = number.get_locale();
@@ -27,6 +23,9 @@ pub(crate) unsafe extern "C" fn rust_convert_to_base(
         2 | 3 | 8 | 12 | 16 => {}
         _ => return 960,
     }
+
+    let mut out_text = Text::new();
+    let mut insert_buffer = Text::new();
 
     if number == 0 {
         out_text.assign("0");
@@ -46,6 +45,7 @@ pub(crate) unsafe extern "C" fn rust_convert_to_base(
         }
     }
 
+    let mut results = Data::from_ptr(results_ptr);
     results.set_as_text(out_text, out_locale);
     0
 }
