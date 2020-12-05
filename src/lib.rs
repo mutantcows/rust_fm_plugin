@@ -2,6 +2,7 @@
 #![allow(non_snake_case)]
 #![allow(dead_code)]
 
+use phf::phf_map;
 use std::ptr::null_mut;
 
 mod ffi;
@@ -28,6 +29,52 @@ char 10 "Y" or "n" for session/file shutdwon callbacks
 char 11 always "n"
 */
 const PLUGIN_OPTIONS: &str = "RUST1nnYnnn";
+
+const FUNCTIONS: phf::Map<fmx_int16, ExternalFunction> = phf_map! {
+    100i16 => ExternalFunction{
+        id: 100,
+        name: "RUST_ConvertToBase",
+        definition: "RUST_ConvertToBase( number ; base )",
+        description: "Converts the number into a string using the specified base",
+        min_args: 2,
+        max_args:2,
+        compatible_flags: PluginFlag::DisplayInAllDialogs as u32 | PluginFlag::FutureCompatible as u32,
+        function_ptr: Some(rust_convert_to_base),
+    },
+
+    200i16 => ExternalFunction{
+        id: 200,
+        name: "RUST_ExecuteSQL",
+        definition: "RUST_ExecuteSQL( fileName ; sqlQuery { ; arguments... } )",
+        description: "Performs SQL Query",
+        min_args: 2,
+        max_args: -1,
+        compatible_flags: PluginFlag::DisplayInAllDialogs as u32 | PluginFlag::FutureCompatible as u32,
+        function_ptr: Some(rust_execute_sql),
+    },
+
+    300i16 => ExternalFunction{
+        id: 300,
+        name: "RUST_ExecuteSQLTextResult",
+        definition: "RUST_ExecuteSQLTextResult( fileName ; sqlQuery ; fieldSeparator ; rowSeparator { ; arguments... } )",
+        description: "Performs SQL Query",
+        min_args: 4,
+        max_args: -1,
+        compatible_flags: PluginFlag::DisplayInAllDialogs as u32 | PluginFlag::FutureCompatible as u32,
+        function_ptr: Some(rust_execute_sql_text_result),
+    },
+
+    400i16 => ExternalFunction{
+        id: 400,
+        name: "RUST_PDFToJSON",
+        definition: "RUST_PDFToJSON( path )",
+        description: "Converts fields in pdf to JSON object.",
+        min_args: 1,
+        max_args: 1,
+        compatible_flags: PluginFlag::DisplayInAllDialogs as u32 | PluginFlag::FutureCompatible as u32,
+        function_ptr: Some(rust_pdf_to_json),
+    },
+};
 
 #[no_mangle]
 pub static mut gfmx_ExternCallPtr: *mut fmx_ExternCallStruct = null_mut();
@@ -56,77 +103,18 @@ unsafe extern "C" fn FMExternCallProc(pb: *mut fmx_ExternCallStruct) {
 }
 
 fn plugin_init(version: fmx_int16) -> u64 {
-    let mut extern_version: u64 = ExternVersion::DoNotEnable as u64;
     let plugin_id = QuadChar::new(PLUGIN_ID);
 
-    let flags: fmx_uint32 =
-        PluginFlag::DisplayInAllDialogs as u32 | PluginFlag::FutureCompatible as u32;
-
-    if version >= ExternVersion::V160 as i16 {
-        let convert_to_base_func = ExternalFunction::new(
-            100,
-            "RUST_ConvertToBase",
-            "RUST_ConvertToBase( number ; base )",
-            "Converts the number into a string using the specified base",
-            2,
-            2,
-            flags,
-            Some(rust_convert_to_base),
-        );
-
-        if convert_to_base_func.register(&plugin_id) != 0 {
-            return extern_version;
-        }
-
-        let execute_sql_func = ExternalFunction::new(
-            200,
-            "RUST_ExecuteSQL",
-            "RUST_ExecuteSQL( fileName ; sqlQuery { ; arguments... } )",
-            "Performs SQL Query",
-            2,
-            -1,
-            flags,
-            Some(rust_execute_sql),
-        );
-
-        if execute_sql_func.register(&plugin_id) != 0 {
-            return extern_version;
-        }
-
-        let execute_sql_text_result_func = ExternalFunction::new(
-            300,
-            "RUST_ExecuteSQLTextResult",
-            "RUST_ExecuteSQLTextResult( fileName ; sqlQuery ; fieldSeparator ; rowSeparator { ; arguments... } )",
-            "Performs SQL Query",
-            4,
-            -1,
-            flags,
-            Some(rust_execute_sql_text_result),
-        );
-
-        if execute_sql_text_result_func.register(&plugin_id) != 0 {
-            return extern_version;
-        }
-
-        let pdf_to_json_func = ExternalFunction::new(
-            400,
-            "RUST_PDFToJSON",
-            "RUST_PDFToJSON( path )",
-            "Converts fields in pdf to JSON object.",
-            1,
-            1,
-            flags,
-            Some(rust_pdf_to_json),
-        );
-
-        if pdf_to_json_func.register(&plugin_id) != 0 {
-            return extern_version;
-        }
-
-        extern_version = ExternVersion::V190 as u64;
+    if version < ExternVersion::V160 as i16 {
+        return ExternVersion::DoNotEnable as u64;
     }
 
-    extern_version
+    for f in FUNCTIONS.values() {
+        if f.register(&plugin_id) != 0 {
+            return ExternVersion::DoNotEnable as u64;
+        }
+    }
+    ExternVersion::V190 as u64
 }
 
 fn plugin_idle(idle_level: fmx_IdleLevel, _session_id: fmx_ptrtype) {
@@ -141,13 +129,11 @@ fn plugin_idle(idle_level: fmx_IdleLevel, _session_id: fmx_ptrtype) {
 }
 
 fn plugin_shutdown(version: fmx_int16) {
-    let plugin_id = QuadChar::new(PLUGIN_ID).ptr as *const fmx_QuadChar;
-    if version >= 57 {
-        let mut _x = fmx__fmxcpt::new();
-        unsafe { FM_ExprEnv_UnRegisterExternalFunction(plugin_id, 100, &mut _x) };
-        _x.check();
-        unsafe { FM_ExprEnv_UnRegisterExternalFunction(plugin_id, 200, &mut _x) };
-        _x.check();
+    let plugin_id = QuadChar::new(PLUGIN_ID);
+    if version >= ExternVersion::V160 as i16 {
+        for f in FUNCTIONS.values() {
+            f.unregister(&plugin_id);
+        }
     }
 }
 

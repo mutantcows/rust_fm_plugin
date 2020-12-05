@@ -15,6 +15,7 @@ widestring = "*"
 directories = "*"
 pdf_forms = "*"
 serde_json = "*"
+phf = { version = "*", features = ["macros"] }
 
 [build-dependencies]
 bindgen = "*"

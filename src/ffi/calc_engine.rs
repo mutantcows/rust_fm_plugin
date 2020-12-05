@@ -535,11 +535,12 @@ impl Drop for DataVect {
     }
 }
 
+#[derive(Clone)]
 pub(crate) struct ExternalFunction {
     pub(crate) id: fmx_int16,
-    pub(crate) name: Text,
-    pub(crate) definition: Text,
-    pub(crate) description: Text,
+    pub(crate) name: &'static str,
+    pub(crate) definition: &'static str,
+    pub(crate) description: &'static str,
     pub(crate) min_args: fmx_int16,
     pub(crate) max_args: fmx_int16,
     pub(crate) compatible_flags: fmx_uint32,
@@ -550,27 +551,19 @@ impl ExternalFunction {
     #[allow(clippy::too_many_arguments)]
     pub(crate) fn new(
         id: fmx_int16,
-        name: &str,
-        definition: &str,
-        description: &str,
+        name: &'static str,
+        definition: &'static str,
+        description: &'static str,
         min_args: fmx_int16,
         max_args: fmx_int16,
         compatible_flags: fmx_uint32,
         function_ptr: fmx_ExtPluginType,
     ) -> Self {
-        let mut fm_name = Text::new();
-        fm_name.assign(name);
-
-        let mut fm_desc = Text::new();
-        fm_desc.assign(description);
-
-        let mut fm_def = Text::new();
-        fm_def.assign(definition);
         Self {
             id,
-            name: fm_name,
-            definition: fm_def,
-            description: fm_desc,
+            name,
+            definition,
+            description,
             min_args,
             max_args,
             compatible_flags,
@@ -581,13 +574,22 @@ impl ExternalFunction {
     pub(crate) fn register(&self, plugin_id: &QuadChar) -> fmx_errcode {
         let mut _x = fmx__fmxcpt::new();
 
+        let mut name = Text::new();
+        name.assign(self.name);
+
+        let mut description = Text::new();
+        description.assign(self.description);
+
+        let mut definition = Text::new();
+        definition.assign(self.definition);
+
         let error = unsafe {
             FM_ExprEnv_RegisterExternalFunctionEx(
                 plugin_id.ptr,
                 self.id,
-                self.name.ptr,
-                self.definition.ptr,
-                self.description.ptr,
+                name.ptr,
+                definition.ptr,
+                description.ptr,
                 self.min_args,
                 self.max_args,
                 self.compatible_flags,
@@ -599,13 +601,19 @@ impl ExternalFunction {
         _x.check();
         error
     }
+
+    pub(crate) fn unregister(&self, plugin_id: &QuadChar) {
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_ExprEnv_UnRegisterExternalFunction(plugin_id.ptr, self.id, &mut _x) };
+        _x.check();
+    }
 }
 
 pub(crate) struct ExternalScriptStep {
     pub(crate) id: fmx_int16,
-    pub(crate) name: Text,
-    pub(crate) definition: Text,
-    pub(crate) description: Text,
+    pub(crate) name: &'static str,
+    pub(crate) definition: &'static str,
+    pub(crate) description: &'static str,
     pub(crate) compatible_flags: fmx_uint32,
     pub(crate) function_ptr: fmx_ExtPluginType,
 }
@@ -614,25 +622,17 @@ impl ExternalScriptStep {
     #[allow(clippy::too_many_arguments)]
     pub(crate) fn new(
         id: fmx_int16,
-        name: &str,
-        definition: &str,
-        description: &str,
+        name: &'static str,
+        definition: &'static str,
+        description: &'static str,
         compatible_flags: fmx_uint32,
         function_ptr: fmx_ExtPluginType,
     ) -> Self {
-        let mut fm_name = Text::new();
-        fm_name.assign(name);
-
-        let mut fm_desc = Text::new();
-        fm_desc.assign(description);
-
-        let mut fm_def = Text::new();
-        fm_def.assign(definition);
         Self {
             id,
-            name: fm_name,
-            definition: fm_def,
-            description: fm_desc,
+            name,
+            definition,
+            description,
             compatible_flags,
             function_ptr,
         }
@@ -641,13 +641,22 @@ impl ExternalScriptStep {
     pub(crate) fn register(&self, plugin_id: &QuadChar) -> fmx_errcode {
         let mut _x = fmx__fmxcpt::new();
 
+        let mut name = Text::new();
+        name.assign(self.name);
+
+        let mut description = Text::new();
+        description.assign(self.description);
+
+        let mut definition = Text::new();
+        definition.assign(self.definition);
+
         let error = unsafe {
             FM_ExprEnv_RegisterScriptStep(
                 plugin_id.ptr,
                 self.id,
-                self.name.ptr,
-                self.definition.ptr,
-                self.description.ptr,
+                name.ptr,
+                definition.ptr,
+                description.ptr,
                 self.compatible_flags,
                 self.function_ptr,
                 &mut _x,
@@ -656,5 +665,11 @@ impl ExternalScriptStep {
 
         _x.check();
         error
+    }
+
+    pub(crate) fn unregister(&self, plugin_id: &QuadChar) {
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_ExprEnv_UnRegisterScriptStep(plugin_id.ptr, self.id, &mut _x) };
+        _x.check();
     }
 }
