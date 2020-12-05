@@ -57,7 +57,7 @@ mod test {
     use super::*;
     #[test]
     fn logging() {
-        let result = write_to_file("test");
+        let result = write_to_file("");
         assert_eq!(result, Ok(()));
     }
 }

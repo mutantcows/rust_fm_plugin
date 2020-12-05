@@ -87,6 +87,44 @@ extern "C" {
         _x: *mut fmx__fmxcpt,
     ) -> fmx_errcode;
 
+    pub fn FM_ExprEnv_EvaluateConvertToFileMakerPath(
+        _self: *const fmx_ExprEnv,
+        inPath: *const fmx_Text,
+        inFormat: fmx_int32,
+        outFMPath: *mut fmx_Text,
+        _x: *mut fmx__fmxcpt,
+    ) -> fmx_errcode;
+
+    pub fn FM_ExprEnv_EvaluateConvertFromFileMakerPath(
+        _self: *const fmx_ExprEnv,
+        inFMPath: *const fmx_Text,
+        inFormat: fmx_int32,
+        outPath: *mut fmx_Text,
+        _x: *mut fmx__fmxcpt,
+    ) -> fmx_errcode;
+
+    pub fn FM_ExprEnv_RegisterExternalFunction(
+        pluginId: *const fmx_QuadChar,
+        functionId: c_short,
+        functionName: *const fmx_Text,
+        functionPrototype: *const fmx_Text,
+        minArgs: c_short,
+        maxArgs: c_short,
+        compatibleOnFlags: fmx_uint32,
+        funcPtr: fmx_ExtPluginType,
+        _x: *mut fmx__fmxcpt,
+    ) -> fmx_errcode;
+
+    pub fn FM_ExprEnv_SessionID(_self: *const fmx_ExprEnv, _x: *mut fmx__fmxcpt) -> fmx_ptrtype;
+
+    pub fn FM_ExprEnv_FileID(_self: *const fmx_ExprEnv, _x: *mut fmx__fmxcpt) -> fmx_ptrtype;
+
+    pub fn FM_ExprEnv_UnRegisterScriptStep(
+        pluginId: *const fmx_QuadChar,
+        scriptStepId: c_short,
+        _x: *mut fmx__fmxcpt,
+    ) -> fmx_errcode;
+
     pub fn FM_DataVect_Constructor1(_x: *mut fmx__fmxcpt) -> *mut fmx_DataVect;
 
     pub fn FM_DataVect_Size(_self: *const fmx_DataVect, _x: *mut fmx__fmxcpt) -> fmx_uint32;
@@ -154,10 +192,13 @@ extern "C" {
     ) -> *const fmx_BinaryData;
 
     pub fn FM_RowVect_Constructor1(_x: *mut fmx__fmxcpt) -> *mut fmx_RowVect;
+
     pub fn FM_RowVect_Delete(_self: *mut fmx_RowVect, _x: *mut fmx__fmxcpt);
 
     pub fn FM_RowVect_Size(_self: *const fmx_RowVect, _x: *mut fmx__fmxcpt) -> fmx_uint32;
+
     pub fn FM_RowVect_IsEmpty(_self: *const fmx_RowVect, _x: *mut fmx__fmxcpt) -> bool;
+
     pub fn FM_RowVect_At(
         _self: *const fmx_RowVect,
         position: fmx_uint32,
@@ -491,5 +532,129 @@ impl Drop for DataVect {
             unsafe { FM_DataVect_Delete(self.ptr, &mut _x) };
             _x.check();
         }
+    }
+}
+
+pub(crate) struct ExternalFunction {
+    pub(crate) id: fmx_int16,
+    pub(crate) name: Text,
+    pub(crate) definition: Text,
+    pub(crate) description: Text,
+    pub(crate) min_args: fmx_int16,
+    pub(crate) max_args: fmx_int16,
+    pub(crate) compatible_flags: fmx_uint32,
+    pub(crate) function_ptr: fmx_ExtPluginType,
+}
+
+impl ExternalFunction {
+    #[allow(clippy::too_many_arguments)]
+    pub(crate) fn new(
+        id: fmx_int16,
+        name: &str,
+        definition: &str,
+        description: &str,
+        min_args: fmx_int16,
+        max_args: fmx_int16,
+        compatible_flags: fmx_uint32,
+        function_ptr: fmx_ExtPluginType,
+    ) -> Self {
+        let mut fm_name = Text::new();
+        fm_name.assign(name);
+
+        let mut fm_desc = Text::new();
+        fm_desc.assign(description);
+
+        let mut fm_def = Text::new();
+        fm_def.assign(definition);
+        Self {
+            id,
+            name: fm_name,
+            definition: fm_def,
+            description: fm_desc,
+            min_args,
+            max_args,
+            compatible_flags,
+            function_ptr,
+        }
+    }
+
+    pub(crate) fn register(&self, plugin_id: &QuadChar) -> fmx_errcode {
+        let mut _x = fmx__fmxcpt::new();
+
+        let error = unsafe {
+            FM_ExprEnv_RegisterExternalFunctionEx(
+                plugin_id.ptr,
+                self.id,
+                self.name.ptr,
+                self.definition.ptr,
+                self.description.ptr,
+                self.min_args,
+                self.max_args,
+                self.compatible_flags,
+                self.function_ptr,
+                &mut _x,
+            )
+        };
+
+        _x.check();
+        error
+    }
+}
+
+pub(crate) struct ExternalScriptStep {
+    pub(crate) id: fmx_int16,
+    pub(crate) name: Text,
+    pub(crate) definition: Text,
+    pub(crate) description: Text,
+    pub(crate) compatible_flags: fmx_uint32,
+    pub(crate) function_ptr: fmx_ExtPluginType,
+}
+
+impl ExternalScriptStep {
+    #[allow(clippy::too_many_arguments)]
+    pub(crate) fn new(
+        id: fmx_int16,
+        name: &str,
+        definition: &str,
+        description: &str,
+        compatible_flags: fmx_uint32,
+        function_ptr: fmx_ExtPluginType,
+    ) -> Self {
+        let mut fm_name = Text::new();
+        fm_name.assign(name);
+
+        let mut fm_desc = Text::new();
+        fm_desc.assign(description);
+
+        let mut fm_def = Text::new();
+        fm_def.assign(definition);
+        Self {
+            id,
+            name: fm_name,
+            definition: fm_def,
+            description: fm_desc,
+            compatible_flags,
+            function_ptr,
+        }
+    }
+
+    pub(crate) fn register(&self, plugin_id: &QuadChar) -> fmx_errcode {
+        let mut _x = fmx__fmxcpt::new();
+
+        let error = unsafe {
+            FM_ExprEnv_RegisterScriptStep(
+                plugin_id.ptr,
+                self.id,
+                self.name.ptr,
+                self.definition.ptr,
+                self.description.ptr,
+                self.compatible_flags,
+                self.function_ptr,
+                &mut _x,
+            )
+        };
+
+        _x.check();
+        error
     }
 }
