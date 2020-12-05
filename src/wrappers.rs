@@ -1,7 +1,6 @@
+use crate::ffi::*;
 use std::ffi::CString;
 use widestring::{U16CString, WideCString};
-
-use crate::ffi::*;
 
 impl fmx__fmxcpt {
     pub(crate) fn check(&self) {
@@ -91,9 +90,15 @@ impl Text {
         _x.check();
     }
 
-    pub(crate) fn insert_text(&mut self, s: &Text, pos: u32) {
+    pub(crate) fn insert(&mut self, s: &Text, pos: u32) {
         let mut _x = fmx__fmxcpt::new();
         unsafe { FM_Text_InsertText(self.ptr, s.ptr, pos, &mut _x) };
+        _x.check();
+    }
+
+    pub(crate) fn append(&mut self, s: &Text) {
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_Text_AppendText(self.ptr, s.ptr, 0, s.size(), &mut _x) };
         _x.check();
     }
 
@@ -130,6 +135,12 @@ impl ToString for Text {
     fn to_string(&self) -> String {
         let str = self.get_unicode(0, self.size());
         str.to_string().unwrap()
+    }
+}
+
+impl From<Text> for u16 {
+    fn from(txt: Text) -> u16 {
+        unsafe { *txt.get_unicode(0, txt.size()).as_ptr() }
     }
 }
 

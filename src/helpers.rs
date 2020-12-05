@@ -50,7 +50,7 @@ pub(crate) fn prepend_character(txt: &mut Text, insert_buffer: &mut Text, ch: ch
     let mut tmp = [0; 1];
     let s = ch.encode_utf8(&mut tmp);
     insert_buffer.assign_unicode_with_length(s, 1);
-    txt.insert_text(insert_buffer, 0);
+    txt.insert(insert_buffer, 0);
 }
 
 #[cfg(test)]

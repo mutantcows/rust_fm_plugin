@@ -9,7 +9,6 @@ pub(crate) unsafe extern "C" fn rust_execute_sql(
     data_vect_ptr: *const fmx_DataVect,
     results_ptr: *mut fmx_Data,
 ) -> fmx_errcode {
-    let error_result: fmx_errcode = 0;
     let env = ExprEnv::from_ptr(env_ptr);
     let data_vect = DataVect::from_ptr(data_vect_ptr);
     let mut results = Data::from_ptr(results_ptr);
@@ -51,13 +50,12 @@ pub(crate) unsafe extern "C" fn rust_execute_sql(
         for j in 0..field_count {
             let field = record.at(j);
             let text = field.get_as_text();
-            out_text.insert_text(&text, out_text.size());
-            out_text.insert_text(&col_sep, out_text.size());
+            out_text.append(&text);
+            out_text.append(&col_sep);
         }
-        out_text.insert_text(&row_sep, out_text.size());
+        out_text.append(&row_sep);
     }
 
     results.set_as_text(out_text, out_locale);
-
-    error_result
+    0
 }

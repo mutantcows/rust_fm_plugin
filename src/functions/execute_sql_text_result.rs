@@ -9,7 +9,6 @@ pub(crate) unsafe extern "C" fn rust_execute_sql_text_result(
     data_vect_ptr: *const fmx_DataVect,
     results_ptr: *mut fmx_Data,
 ) -> fmx_errcode {
-    let error_result: fmx_errcode = 0;
     let env = ExprEnv::from_ptr(env_ptr);
     let data_vect = DataVect::from_ptr(data_vect_ptr);
     let mut results = Data::from_ptr(results_ptr);
@@ -20,13 +19,13 @@ pub(crate) unsafe extern "C" fn rust_execute_sql_text_result(
     let col_sep = data_vect.at_as_text(2);
     let col_sep = match col_sep.size() {
         0 => ',' as u16,
-        _ => *col_sep.get_unicode(0, 1).as_ptr(),
+        _ => u16::from(col_sep),
     };
 
     let row_sep = data_vect.at_as_text(3);
     let row_sep = match row_sep.size() {
         0 => '\n' as u16,
-        _ => *row_sep.get_unicode(0, 1).as_ptr(),
+        _ => u16::from(row_sep),
     };
 
     let mut parameters = DataVect::new();
@@ -50,10 +49,8 @@ pub(crate) unsafe extern "C" fn rust_execute_sql_text_result(
         row_sep,
     );
 
-    let r = result.get_as_text();
-
     let out_locale = result.get_locale();
-    results.set_as_text(r, out_locale);
-
-    error_result
+    let result = result.get_as_text();
+    results.set_as_text(result, out_locale);
+    0
 }

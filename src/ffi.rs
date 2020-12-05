@@ -146,6 +146,14 @@ extern "C" {
         _x: *mut fmx__fmxcpt,
     );
 
+    pub fn FM_Text_AppendText(
+        _self: *mut fmx_Text,
+        other: *const fmx_Text,
+        position: fmx_uint32,
+        size: fmx_uint32,
+        _x: *mut fmx__fmxcpt,
+    );
+
     pub fn FM_Data_GetLocale(_self: *const fmx_Data, _x: *mut fmx__fmxcpt) -> *const fmx_Locale;
 
     pub fn FM_DataVect_Constructor1(_x: *mut fmx__fmxcpt) -> *mut fmx_DataVect;
