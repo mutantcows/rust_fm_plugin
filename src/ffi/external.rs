@@ -1,9 +1,10 @@
 use super::*;
+use std::cmp::{Eq, PartialEq, PartialOrd};
 
 #[repr(C, packed)]
 #[derive(Debug, Copy, Clone)]
 pub struct fmx_ExternCallStruct {
-    pub extnVersion: fmx_int16,
+    pub extnVersion: ExternVersion,
     pub unusedID: fmx_unusedid,
     pub entryPoint: fmx_ExternCallProc,
     pub cfmCalls: fmx_boolean,
@@ -19,7 +20,9 @@ pub struct fmx_ExternCallStruct {
     pub cCurrentEnv: fmx_CurrentEnvCall,
 }
 
-pub(crate) enum ExternVersion {
+#[repr(i16)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd)]
+pub enum ExternVersion {
     BadExtn = -1,
     DoNotEnable = -2,
     V40 = 11,
