@@ -1,13 +1,12 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
-#![allow(dead_code)]
 
 use phf::phf_map;
 use std::ptr::null_mut;
 
-mod ffi;
+pub mod ffi;
 mod functions;
-mod helpers;
+pub mod helpers;
 mod script_steps;
 use ffi::*;
 use functions::*;
@@ -153,7 +152,7 @@ fn plugin_get_string(
         HelpUrl => PLUGIN_URL,
         Blank => "",
     };
-    write_to_u16_buff(out_buffer, out_buffer_size, string);
+    unsafe { write_to_u16_buff(out_buffer, out_buffer_size, string) };
 }
 
 fn session_notifications(_session_id: fmx_ptrtype) {}

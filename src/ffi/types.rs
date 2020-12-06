@@ -33,7 +33,7 @@ pub type fmx_ExtPluginType = Option<
         result: *mut fmx_Data,
     ) -> fmx_errcode,
 >;
-pub type fmx_StartScriptCall = ::std::option::Option<
+pub type fmx_StartScriptCall = Option<
     unsafe extern "C" fn(
         fileName: *const fmx_Text,
         scriptName: *const fmx_Text,
@@ -56,8 +56,7 @@ pub struct fmx_QuadChar {
 
 #[link(kind = "static", name = "FMWrapper")]
 extern "C" {
-
-    pub fn FM_QuadChar_Constructor2(
+    fn FM_QuadChar_Constructor2(
         c0: c_char,
         c1: c_char,
         c2: c_char,
@@ -65,11 +64,13 @@ extern "C" {
         _x: *mut fmx__fmxcpt,
     ) -> *mut fmx_QuadChar;
 
-    pub fn FM_QuadChar_Delete(_self: *mut fmx_QuadChar, _x: *mut fmx__fmxcpt);
+    fn FM_QuadChar_Delete(_self: *mut fmx_QuadChar, _x: *mut fmx__fmxcpt);
 
-    pub fn FM_Locale_Delete(_self: *mut fmx_Locale, _x: *mut fmx__fmxcpt);
-    pub fn FM_Locale_Constructor1(inputType: LocaleType, _x: *mut fmx__fmxcpt) -> *mut fmx_Locale;
-    pub fn FM_Locale_operatorAS(
+    fn FM_Locale_Delete(_self: *mut fmx_Locale, _x: *mut fmx__fmxcpt);
+
+    fn FM_Locale_Constructor1(inputType: LocaleType, _x: *mut fmx__fmxcpt) -> *mut fmx_Locale;
+
+    fn FM_Locale_operatorAS(
         _self: *mut fmx_Locale,
         rhs: *const fmx_Locale,
         _x: *mut fmx__fmxcpt,
@@ -77,20 +78,20 @@ extern "C" {
 
 }
 
-pub(crate) struct Locale {
+pub struct Locale {
     pub(crate) ptr: *mut fmx_Locale,
     drop: bool,
 }
 
 impl Locale {
-    pub(crate) fn new(input_type: LocaleType) -> Self {
+    pub fn new(input_type: LocaleType) -> Self {
         let mut _x = fmx__fmxcpt::new();
         let ptr = unsafe { FM_Locale_Constructor1(input_type, &mut _x) };
         _x.check();
         Self { ptr, drop: true }
     }
 
-    pub(crate) fn from_ptr(ptr: *const fmx_Locale) -> Self {
+    pub fn from_ptr(ptr: *const fmx_Locale) -> Self {
         Self {
             ptr: ptr as *mut fmx_Locale,
             drop: false,
@@ -108,13 +109,13 @@ impl Drop for Locale {
     }
 }
 
-pub(crate) struct QuadChar {
+pub struct QuadChar {
     pub(crate) ptr: *mut fmx_QuadChar,
     drop: bool,
 }
 
 impl QuadChar {
-    pub(crate) fn new(bytes: &[u8; 4]) -> Self {
+    pub fn new(bytes: &[u8; 4]) -> Self {
         let mut _x = fmx__fmxcpt::new();
         let b: &[i8; 4] = unsafe { &*(bytes as *const [u8; 4] as *const [i8; 4]) };
         let ptr = unsafe { FM_QuadChar_Constructor2(b[0], b[1], b[2], b[3], &mut _x) };

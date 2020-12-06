@@ -25,27 +25,35 @@ pub(crate) fn write_to_file(content: &str) -> Result<(), String> {
     Ok(())
 }
 
-pub(crate) fn log(content: &str) {
+pub fn log(content: &str) {
     write_to_file(content).unwrap_or(());
 }
 
-pub(crate) fn write_to_u16_buff(buffer: *mut c_ushort, buffer_size: c_uint, s: &str) {
+/// # Safety
+/// buffer size must be accurate and include enough room for str
+pub unsafe fn write_to_u16_buff(buffer: *mut c_ushort, buffer_size: c_uint, s: &str) {
     let c_string = WideCString::from_str(s).unwrap();
     let bytes = c_string.as_slice();
 
-    let string_bytes = unsafe { std::slice::from_raw_parts_mut(buffer, buffer_size as usize) };
-    string_bytes[..bytes.len()].copy_from_slice(bytes);
+    bytes_to_buff(buffer, buffer_size, bytes);
 }
 
-pub(crate) fn write_to_i8_buff(buffer: *mut c_char, buffer_size: c_uint, s: &str) {
+/// # Safety
+/// buffer size must be accurate and include enough room for str
+pub unsafe fn write_to_i8_buff(buffer: *mut c_char, buffer_size: c_uint, s: &str) {
     let c_string = CString::new(s).unwrap();
     let bytes = c_string.as_bytes_with_nul();
-    let bytes = unsafe { &*(bytes as *const [u8] as *const [i8]) };
-    let string_bytes = unsafe { std::slice::from_raw_parts_mut(buffer, buffer_size as usize) };
+    let bytes = &*(bytes as *const [u8] as *const [i8]);
+
+    bytes_to_buff(buffer, buffer_size, bytes);
+}
+
+unsafe fn bytes_to_buff<T: Copy>(buffer: *mut T, buffer_size: c_uint, bytes: &[T]) {
+    let string_bytes = std::slice::from_raw_parts_mut(buffer, buffer_size as usize);
     string_bytes[..bytes.len()].copy_from_slice(bytes);
 }
 
-pub(crate) fn prepend_character(txt: &mut Text, insert_buffer: &mut Text, ch: char) {
+pub fn prepend_character(txt: &mut Text, insert_buffer: &mut Text, ch: char) {
     let mut tmp = [0; 1];
     let s = ch.encode_utf8(&mut tmp);
     insert_buffer.assign_unicode_with_length(s, 1);

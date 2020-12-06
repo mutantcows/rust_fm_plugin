@@ -5,6 +5,7 @@ use super::*;
 pub struct fmx_DataVect {
     pub _address: u8,
 }
+
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct fmx_ExprEnv {
@@ -19,9 +20,9 @@ pub struct fmx_RowVect {
 
 #[link(kind = "static", name = "FMWrapper")]
 extern "C" {
-    pub fn FM_ExprEnv_Constructor1(_x: *mut fmx__fmxcpt) -> *mut fmx_ExprEnv;
+    fn FM_ExprEnv_Constructor1(_x: *mut fmx__fmxcpt) -> *mut fmx_ExprEnv;
 
-    pub fn FM_ExprEnv_RegisterScriptStep(
+    fn FM_ExprEnv_RegisterScriptStep(
         pluginId: *const fmx_QuadChar,
         scriptStepId: c_short,
         scriptStepName: *const fmx_Text,
@@ -32,7 +33,7 @@ extern "C" {
         _x: *mut fmx__fmxcpt,
     ) -> fmx_errcode;
 
-    pub fn FM_ExprEnv_RegisterExternalFunctionEx(
+    fn FM_ExprEnv_RegisterExternalFunctionEx(
         pluginId: *const fmx_QuadChar,
         functionId: c_short,
         functionName: *const fmx_Text,
@@ -45,13 +46,13 @@ extern "C" {
         _x: *mut fmx__fmxcpt,
     ) -> fmx_errcode;
 
-    pub fn FM_ExprEnv_UnRegisterExternalFunction(
+    fn FM_ExprEnv_UnRegisterExternalFunction(
         pluginId: *const fmx_QuadChar,
         functionId: c_short,
         _x: *mut fmx__fmxcpt,
     ) -> fmx_errcode;
 
-    pub fn FM_ExprEnv_ExecuteFileSQLTextResult(
+    fn FM_ExprEnv_ExecuteFileSQLTextResult(
         _self: *const fmx_ExprEnv,
         expression: *const fmx_Text,
         filename: *const fmx_Text,
@@ -62,7 +63,7 @@ extern "C" {
         _x: *mut fmx__fmxcpt,
     ) -> fmx_errcode;
 
-    pub fn FM_ExprEnv_ExecuteFileSQL(
+    fn FM_ExprEnv_ExecuteFileSQL(
         _self: *const fmx_ExprEnv,
         expression: *const fmx_Text,
         filename: *const fmx_Text,
@@ -71,23 +72,23 @@ extern "C" {
         _x: *mut fmx__fmxcpt,
     ) -> fmx_errcode;
 
-    pub fn FM_ExprEnv_Delete(_self: *mut fmx_ExprEnv, _x: *mut fmx__fmxcpt);
+    fn FM_ExprEnv_Delete(_self: *mut fmx_ExprEnv, _x: *mut fmx__fmxcpt);
 
-    pub fn FM_ExprEnv_Evaluate(
+    fn FM_ExprEnv_Evaluate(
         _self: *const fmx_ExprEnv,
         expression: *const fmx_Text,
         result: *mut fmx_Data,
         _x: *mut fmx__fmxcpt,
     ) -> fmx_errcode;
 
-    pub fn FM_ExprEnv_EvaluateGetFunction(
+    fn FM_ExprEnv_EvaluateGetFunction(
         _self: *const fmx_ExprEnv,
         functionValue: c_short,
         result: *mut fmx_Data,
         _x: *mut fmx__fmxcpt,
     ) -> fmx_errcode;
 
-    pub fn FM_ExprEnv_EvaluateConvertToFileMakerPath(
+    fn FM_ExprEnv_EvaluateConvertToFileMakerPath(
         _self: *const fmx_ExprEnv,
         inPath: *const fmx_Text,
         inFormat: FilePathFormat,
@@ -95,7 +96,7 @@ extern "C" {
         _x: *mut fmx__fmxcpt,
     ) -> fmx_errcode;
 
-    pub fn FM_ExprEnv_EvaluateConvertFromFileMakerPath(
+    fn FM_ExprEnv_EvaluateConvertFromFileMakerPath(
         _self: *const fmx_ExprEnv,
         inFMPath: *const fmx_Text,
         inFormat: FilePathFormat,
@@ -103,7 +104,9 @@ extern "C" {
         _x: *mut fmx__fmxcpt,
     ) -> fmx_errcode;
 
-    pub fn FM_ExprEnv_RegisterExternalFunction(
+    #[deprecated]
+    #[allow(dead_code)]
+    fn FM_ExprEnv_RegisterExternalFunction(
         pluginId: *const fmx_QuadChar,
         functionId: c_short,
         functionName: *const fmx_Text,
@@ -115,91 +118,87 @@ extern "C" {
         _x: *mut fmx__fmxcpt,
     ) -> fmx_errcode;
 
-    pub fn FM_ExprEnv_SessionID(_self: *const fmx_ExprEnv, _x: *mut fmx__fmxcpt) -> fmx_ptrtype;
+    fn FM_ExprEnv_SessionID(_self: *const fmx_ExprEnv, _x: *mut fmx__fmxcpt) -> fmx_ptrtype;
 
-    pub fn FM_ExprEnv_FileID(_self: *const fmx_ExprEnv, _x: *mut fmx__fmxcpt) -> fmx_ptrtype;
+    fn FM_ExprEnv_FileID(_self: *const fmx_ExprEnv, _x: *mut fmx__fmxcpt) -> fmx_ptrtype;
 
-    pub fn FM_ExprEnv_UnRegisterScriptStep(
+    fn FM_ExprEnv_UnRegisterScriptStep(
         pluginId: *const fmx_QuadChar,
         scriptStepId: c_short,
         _x: *mut fmx__fmxcpt,
     ) -> fmx_errcode;
 
-    pub fn FM_DataVect_Constructor1(_x: *mut fmx__fmxcpt) -> *mut fmx_DataVect;
+    fn FM_DataVect_Constructor1(_x: *mut fmx__fmxcpt) -> *mut fmx_DataVect;
 
-    pub fn FM_DataVect_Size(_self: *const fmx_DataVect, _x: *mut fmx__fmxcpt) -> fmx_uint32;
+    fn FM_DataVect_Size(_self: *const fmx_DataVect, _x: *mut fmx__fmxcpt) -> fmx_uint32;
 
-    pub fn FM_DataVect_At(
+    fn FM_DataVect_At(
         _self: *const fmx_DataVect,
         position: fmx_uint32,
         _x: *mut fmx__fmxcpt,
     ) -> *const fmx_Data;
 
-    pub fn FM_DataVect_AtAsText(
+    fn FM_DataVect_AtAsText(
         _self: *const fmx_DataVect,
         position: fmx_uint32,
         _x: *mut fmx__fmxcpt,
     ) -> *const fmx_Text;
 
-    pub fn FM_DataVect_AtAsNumber(
+    fn FM_DataVect_AtAsNumber(
         _self: *const fmx_DataVect,
         position: fmx_uint32,
         _x: *mut fmx__fmxcpt,
     ) -> *const fmx_FixPt;
 
-    pub fn FM_DataVect_PushBack(
-        _self: *mut fmx_DataVect,
-        data: *const fmx_Data,
-        _x: *mut fmx__fmxcpt,
-    );
+    fn FM_DataVect_PushBack(_self: *mut fmx_DataVect, data: *const fmx_Data, _x: *mut fmx__fmxcpt);
 
-    pub fn FM_DataVect_Delete(_self: *mut fmx_DataVect, _x: *mut fmx__fmxcpt);
+    fn FM_DataVect_Delete(_self: *mut fmx_DataVect, _x: *mut fmx__fmxcpt);
 
-    pub fn FM_DataVect_Clear(_self: *mut fmx_DataVect, _x: *mut fmx__fmxcpt);
+    fn FM_DataVect_Clear(_self: *mut fmx_DataVect, _x: *mut fmx__fmxcpt);
 
-    pub fn FM_DataVect_IsEmpty(_self: *const fmx_DataVect, _x: *mut fmx__fmxcpt) -> bool;
+    fn FM_DataVect_IsEmpty(_self: *const fmx_DataVect, _x: *mut fmx__fmxcpt) -> bool;
 
-    pub fn FM_DataVect_PopBack(_self: *mut fmx_DataVect, _x: *mut fmx__fmxcpt) -> *mut fmx_Data;
+    fn FM_DataVect_PopBack(_self: *mut fmx_DataVect, _x: *mut fmx__fmxcpt) -> *mut fmx_Data;
 
-    pub fn FM_DataVect_AtAsDate(
+    fn FM_DataVect_AtAsDate(
         _self: *const fmx_DataVect,
         position: fmx_uint32,
         _x: *mut fmx__fmxcpt,
     ) -> *const fmx_DateTime;
 
-    pub fn FM_DataVect_AtAsTime(
+    fn FM_DataVect_AtAsTime(
         _self: *const fmx_DataVect,
         position: fmx_uint32,
         _x: *mut fmx__fmxcpt,
     ) -> *const fmx_DateTime;
 
-    pub fn FM_DataVect_AtAsTimeStamp(
+    fn FM_DataVect_AtAsTimeStamp(
         _self: *const fmx_DataVect,
         position: fmx_uint32,
         _x: *mut fmx__fmxcpt,
     ) -> *const fmx_DateTime;
 
-    pub fn FM_DataVect_AtAsBoolean(
+    fn FM_DataVect_AtAsBoolean(
         _self: *const fmx_DataVect,
         position: fmx_uint32,
         _x: *mut fmx__fmxcpt,
     ) -> bool;
 
-    pub fn FM_DataVect_AtAsBinaryData(
+    fn FM_DataVect_AtAsBinaryData(
         _self: *const fmx_DataVect,
         position: fmx_uint32,
         _x: *mut fmx__fmxcpt,
     ) -> *const fmx_BinaryData;
 
-    pub fn FM_RowVect_Constructor1(_x: *mut fmx__fmxcpt) -> *mut fmx_RowVect;
+    fn FM_RowVect_Constructor1(_x: *mut fmx__fmxcpt) -> *mut fmx_RowVect;
 
-    pub fn FM_RowVect_Delete(_self: *mut fmx_RowVect, _x: *mut fmx__fmxcpt);
+    fn FM_RowVect_Delete(_self: *mut fmx_RowVect, _x: *mut fmx__fmxcpt);
 
-    pub fn FM_RowVect_Size(_self: *const fmx_RowVect, _x: *mut fmx__fmxcpt) -> fmx_uint32;
+    fn FM_RowVect_Size(_self: *const fmx_RowVect, _x: *mut fmx__fmxcpt) -> fmx_uint32;
 
-    pub fn FM_RowVect_IsEmpty(_self: *const fmx_RowVect, _x: *mut fmx__fmxcpt) -> bool;
+    fn FM_RowVect_IsEmpty(_self: *const fmx_RowVect, _x: *mut fmx__fmxcpt) -> bool;
 
-    pub fn FM_RowVect_At(
+    fn FM_RowVect_At(
         _self: *const fmx_RowVect,
         position: fmx_uint32,
         _x: *mut fmx__fmxcpt,
@@ -207,7 +206,7 @@ extern "C" {
 
 }
 
-pub(crate) enum PluginFlag {
+pub enum PluginFlag {
     DisplayInAllDialogs = 0b1111111100000000,
     MacCompatible = 0b0000000000000010,
     WinCompatible = 0b0000000000000100,
@@ -219,41 +218,41 @@ pub(crate) enum PluginFlag {
     FutureCompatible = 0b111111110000000000000000,
 }
 
-pub(crate) struct ExprEnv {
+pub struct ExprEnv {
     pub(crate) ptr: *mut fmx_ExprEnv,
     drop: bool,
 }
 
 impl ExprEnv {
-    pub(crate) fn new() -> Self {
+    pub fn new() -> Self {
         let mut _x = fmx__fmxcpt::new();
         let ptr = unsafe { FM_ExprEnv_Constructor1(&mut _x) };
         _x.check();
         ExprEnv { ptr, drop: true }
     }
 
-    pub(crate) fn from_ptr(ptr: *const fmx_ExprEnv) -> Self {
+    pub fn from_ptr(ptr: *const fmx_ExprEnv) -> Self {
         Self {
             ptr: ptr as *mut fmx_ExprEnv,
             drop: false,
         }
     }
 
-    pub(crate) fn session_id(&self) -> u64 {
+    pub fn session_id(&self) -> u64 {
         let mut _x = fmx__fmxcpt::new();
         let session_id = unsafe { FM_ExprEnv_SessionID(self.ptr, &mut _x) };
         _x.check();
         session_id
     }
 
-    pub(crate) fn file_id(&self) -> u64 {
+    pub fn file_id(&self) -> u64 {
         let mut _x = fmx__fmxcpt::new();
         let file_id = unsafe { FM_ExprEnv_FileID(self.ptr, &mut _x) };
         _x.check();
         file_id
     }
 
-    pub(crate) fn execute_file_sql_text_result(
+    pub fn execute_file_sql_text_result(
         &self,
         expression: Text,
         file_name: Text,
@@ -279,7 +278,7 @@ impl ExprEnv {
         error
     }
 
-    pub(crate) fn execute_file_sql(
+    pub fn execute_file_sql(
         &self,
         expression: Text,
         file_name: Text,
@@ -301,7 +300,7 @@ impl ExprEnv {
         error
     }
 
-    pub(crate) fn eval_get(&self, func: GetFunction) -> Data {
+    pub fn eval_get(&self, func: GetFunction) -> Data {
         let mut _x = fmx__fmxcpt::new();
         let result = Data::new();
         unsafe { FM_ExprEnv_EvaluateGetFunction(self.ptr, func as i16, result.ptr, &mut _x) };
@@ -309,7 +308,7 @@ impl ExprEnv {
         result
     }
 
-    pub(crate) fn from_fm_path(&self, path: Text, format: FilePathFormat) -> Text {
+    pub fn from_fm_path(&self, path: Text, format: FilePathFormat) -> Text {
         let mut _x = fmx__fmxcpt::new();
         let result = Text::new();
         unsafe {
@@ -321,7 +320,7 @@ impl ExprEnv {
         result
     }
 
-    pub(crate) fn to_fm_path(&self, path: Text, format: FilePathFormat) -> Text {
+    pub fn to_fm_path(&self, path: Text, format: FilePathFormat) -> Text {
         let mut _x = fmx__fmxcpt::new();
         let result = Text::new();
         unsafe {
@@ -344,7 +343,13 @@ impl Drop for ExprEnv {
     }
 }
 
-pub(crate) enum GetFunction {
+impl Default for ExprEnv {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+pub enum GetFunction {
     ApplicationVersion = 1001,
     CurrentDate = 1002,
     LastError = 1003,
@@ -470,34 +475,34 @@ pub(crate) enum GetFunction {
     PageCount = 1125,
 }
 
-pub(crate) struct RowVect {
+pub struct RowVect {
     pub(crate) ptr: *mut fmx_RowVect,
     drop: bool,
 }
 
 impl RowVect {
-    pub(crate) fn new() -> Self {
+    pub fn new() -> Self {
         let mut _x = fmx__fmxcpt::new();
         let ptr = unsafe { FM_RowVect_Constructor1(&mut _x) };
         _x.check();
         Self { ptr, drop: true }
     }
 
-    pub(crate) fn size(&self) -> fmx_uint32 {
+    pub fn size(&self) -> fmx_uint32 {
         let mut _x = fmx__fmxcpt::new();
         let size = unsafe { FM_RowVect_Size(self.ptr, &mut _x) };
         _x.check();
         size
     }
 
-    pub(crate) fn at(&self, position: fmx_uint32) -> DataVect {
+    pub fn at(&self, position: fmx_uint32) -> DataVect {
         let mut _x = fmx__fmxcpt::new();
         let ptr = unsafe { FM_RowVect_At(self.ptr, position, &mut _x) };
         _x.check();
         DataVect::from_ptr(ptr)
     }
 
-    pub(crate) fn is_empty(&self) -> bool {
+    pub fn is_empty(&self) -> bool {
         let mut _x = fmx__fmxcpt::new();
         let empty = unsafe { FM_RowVect_IsEmpty(self.ptr, &mut _x) };
         _x.check();
@@ -515,55 +520,61 @@ impl Drop for RowVect {
     }
 }
 
-pub(crate) struct DataVect {
+impl Default for RowVect {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+pub struct DataVect {
     pub(crate) ptr: *mut fmx_DataVect,
     drop: bool,
 }
 
 impl DataVect {
-    pub(crate) fn new() -> Self {
+    pub fn new() -> Self {
         let mut _x = fmx__fmxcpt::new();
         let ptr = unsafe { FM_DataVect_Constructor1(&mut _x) };
         _x.check();
         Self { ptr, drop: true }
     }
 
-    pub(crate) fn from_ptr(ptr: *const fmx_DataVect) -> Self {
+    pub fn from_ptr(ptr: *const fmx_DataVect) -> Self {
         Self {
             ptr: ptr as *mut fmx_DataVect,
             drop: false,
         }
     }
 
-    pub(crate) fn size(&self) -> fmx_uint32 {
+    pub fn size(&self) -> fmx_uint32 {
         let mut _x = fmx__fmxcpt::new();
         let size = unsafe { FM_DataVect_Size(self.ptr, &mut _x) };
         _x.check();
         size
     }
 
-    pub(crate) fn at(&self, position: fmx_uint32) -> Data {
+    pub fn at(&self, position: fmx_uint32) -> Data {
         let mut _x = fmx__fmxcpt::new();
         let data_ptr = unsafe { FM_DataVect_At(self.ptr, position, &mut _x) };
         _x.check();
         Data::from_ptr(data_ptr)
     }
 
-    pub(crate) fn at_as_text(&self, position: fmx_uint32) -> Text {
+    pub fn at_as_text(&self, position: fmx_uint32) -> Text {
         let mut _x = fmx__fmxcpt::new();
         let ptr = unsafe { FM_DataVect_AtAsText(self.ptr, position, &mut _x) };
         _x.check();
         Text::from_ptr(ptr)
     }
 
-    pub(crate) fn at_as_number(&self, position: fmx_uint32) -> FixPt {
+    pub fn at_as_number(&self, position: fmx_uint32) -> FixPt {
         let mut _x = fmx__fmxcpt::new();
         let ptr = unsafe { FM_DataVect_AtAsNumber(self.ptr, position, &mut _x) };
         _x.check();
         FixPt::from_ptr(ptr)
     }
 
-    pub(crate) fn push(&mut self, data: Data) {
+    pub fn push(&mut self, data: Data) {
         let mut _x = fmx__fmxcpt::new();
         unsafe { FM_DataVect_PushBack(self.ptr, data.ptr, &mut _x) };
         _x.check();
@@ -580,21 +591,27 @@ impl Drop for DataVect {
     }
 }
 
+impl Default for DataVect {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 #[derive(Clone)]
-pub(crate) struct ExternalFunction {
-    pub(crate) id: fmx_int16,
-    pub(crate) name: &'static str,
-    pub(crate) definition: &'static str,
-    pub(crate) description: &'static str,
-    pub(crate) min_args: fmx_int16,
-    pub(crate) max_args: fmx_int16,
-    pub(crate) compatible_flags: fmx_uint32,
-    pub(crate) function_ptr: fmx_ExtPluginType,
+pub struct ExternalFunction {
+    pub id: fmx_int16,
+    pub name: &'static str,
+    pub definition: &'static str,
+    pub description: &'static str,
+    pub min_args: fmx_int16,
+    pub max_args: fmx_int16,
+    pub compatible_flags: fmx_uint32,
+    pub function_ptr: fmx_ExtPluginType,
 }
 
 impl ExternalFunction {
     #[allow(clippy::too_many_arguments)]
-    pub(crate) fn new(
+    pub fn new(
         id: fmx_int16,
         name: &'static str,
         definition: &'static str,
@@ -616,7 +633,7 @@ impl ExternalFunction {
         }
     }
 
-    pub(crate) fn register(&self, plugin_id: &QuadChar) -> fmx_errcode {
+    pub fn register(&self, plugin_id: &QuadChar) -> fmx_errcode {
         let mut _x = fmx__fmxcpt::new();
 
         let mut name = Text::new();
@@ -647,25 +664,25 @@ impl ExternalFunction {
         error
     }
 
-    pub(crate) fn unregister(&self, plugin_id: &QuadChar) {
+    pub fn unregister(&self, plugin_id: &QuadChar) {
         let mut _x = fmx__fmxcpt::new();
         unsafe { FM_ExprEnv_UnRegisterExternalFunction(plugin_id.ptr, self.id, &mut _x) };
         _x.check();
     }
 }
 
-pub(crate) struct ExternalScriptStep {
-    pub(crate) id: fmx_int16,
-    pub(crate) name: &'static str,
-    pub(crate) definition: &'static str,
-    pub(crate) description: &'static str,
-    pub(crate) compatible_flags: fmx_uint32,
-    pub(crate) function_ptr: fmx_ExtPluginType,
+pub struct ExternalScriptStep {
+    pub id: fmx_int16,
+    pub name: &'static str,
+    pub definition: &'static str,
+    pub description: &'static str,
+    pub compatible_flags: fmx_uint32,
+    pub function_ptr: fmx_ExtPluginType,
 }
 
 impl ExternalScriptStep {
     #[allow(clippy::too_many_arguments)]
-    pub(crate) fn new(
+    pub fn new(
         id: fmx_int16,
         name: &'static str,
         definition: &'static str,
@@ -683,7 +700,7 @@ impl ExternalScriptStep {
         }
     }
 
-    pub(crate) fn register(&self, plugin_id: &QuadChar) -> fmx_errcode {
+    pub fn register(&self, plugin_id: &QuadChar) -> fmx_errcode {
         let mut _x = fmx__fmxcpt::new();
 
         let mut name = Text::new();
@@ -712,7 +729,7 @@ impl ExternalScriptStep {
         error
     }
 
-    pub(crate) fn unregister(&self, plugin_id: &QuadChar) {
+    pub fn unregister(&self, plugin_id: &QuadChar) {
         let mut _x = fmx__fmxcpt::new();
         unsafe { FM_ExprEnv_UnRegisterScriptStep(plugin_id.ptr, self.id, &mut _x) };
         _x.check();

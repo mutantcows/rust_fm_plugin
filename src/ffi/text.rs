@@ -10,21 +10,21 @@ pub struct fmx_Text {
 
 #[link(kind = "static", name = "FMWrapper")]
 extern "C" {
-    pub fn FM_Text_AssignUnicodeWithLength(
+    fn FM_Text_AssignUnicodeWithLength(
         _self: *mut fmx_Text,
         s: *const fmx_uint16,
         strlength: fmx_uint32,
         _x: *mut fmx__fmxcpt,
     );
 
-    pub fn FM_Text_InsertText(
+    fn FM_Text_InsertText(
         _self: *mut fmx_Text,
         other: *const fmx_Text,
         position: fmx_uint32,
         _x: *mut fmx__fmxcpt,
     );
 
-    pub fn FM_Text_AppendText(
+    fn FM_Text_AppendText(
         _self: *mut fmx_Text,
         other: *const fmx_Text,
         position: fmx_uint32,
@@ -32,90 +32,90 @@ extern "C" {
         _x: *mut fmx__fmxcpt,
     );
 
-    pub fn FM_Text_AssignWide(_self: *mut fmx_Text, s: *const u16, _x: *mut fmx__fmxcpt);
+    fn FM_Text_AssignWide(_self: *mut fmx_Text, s: *const u16, _x: *mut fmx__fmxcpt);
 
-    pub fn FM_Text_Assign(
+    fn FM_Text_Assign(
         _self: *mut fmx_Text,
         s: *const c_char,
         encoding: fmx_int32,
         _x: *mut fmx__fmxcpt,
     );
 
-    pub fn FM_Text_Constructor1(_x: *mut fmx__fmxcpt) -> *mut fmx_Text;
-    pub fn FM_Text_GetSize(_self: *const fmx_Text, _x: *mut fmx__fmxcpt) -> fmx_uint32;
+    fn FM_Text_Constructor1(_x: *mut fmx__fmxcpt) -> *mut fmx_Text;
+    fn FM_Text_GetSize(_self: *const fmx_Text, _x: *mut fmx__fmxcpt) -> fmx_uint32;
 
-    pub fn FM_Text_GetUnicode(
+    fn FM_Text_GetUnicode(
         _self: *const fmx_Text,
         s: *mut fmx_uint16,
         position: fmx_uint32,
         size: fmx_uint32,
         _x: *mut fmx__fmxcpt,
     );
-    pub fn FM_Text_Delete(_self: *mut fmx_Text, _x: *mut fmx__fmxcpt);
+    fn FM_Text_Delete(_self: *mut fmx_Text, _x: *mut fmx__fmxcpt);
 
 }
 
-pub(crate) struct Text {
+pub struct Text {
     pub(crate) ptr: *mut fmx_Text,
     drop: bool,
 }
 
 impl Text {
-    pub(crate) fn new() -> Self {
+    pub fn new() -> Self {
         let mut _x = fmx__fmxcpt::new();
         let ptr = unsafe { FM_Text_Constructor1(&mut _x) };
         _x.check();
         Self { ptr, drop: true }
     }
 
-    pub(crate) fn from_ptr(ptr: *const fmx_Text) -> Self {
+    pub fn from_ptr(ptr: *const fmx_Text) -> Self {
         Self {
             ptr: ptr as *mut fmx_Text,
             drop: false,
         }
     }
 
-    pub(crate) fn size(&self) -> fmx_uint32 {
+    pub fn size(&self) -> fmx_uint32 {
         let mut _x = fmx__fmxcpt::new();
         let size = unsafe { FM_Text_GetSize(self.ptr, &mut _x) };
         _x.check();
         size
     }
 
-    pub(crate) fn assign(&mut self, s: &str) {
+    pub fn assign(&mut self, s: &str) {
         let c_string: CString = CString::new(s).unwrap();
         let mut _x = fmx__fmxcpt::new();
         unsafe { FM_Text_Assign(self.ptr, c_string.as_ptr(), 1, &mut _x) };
         _x.check();
     }
 
-    pub(crate) fn assign_unicode_with_length(&mut self, s: &str, len: u32) {
+    pub fn assign_unicode_with_length(&mut self, s: &str, len: u32) {
         let c_string = WideCString::from_str(s).unwrap();
         let mut _x = fmx__fmxcpt::new();
         unsafe { FM_Text_AssignUnicodeWithLength(self.ptr, c_string.as_ptr(), len, &mut _x) };
         _x.check();
     }
 
-    pub(crate) fn assign_wide(&mut self, s: &str) {
+    pub fn assign_wide(&mut self, s: &str) {
         let c_string = WideCString::from_str(s).unwrap();
         let mut _x = fmx__fmxcpt::new();
         unsafe { FM_Text_AssignWide(self.ptr, c_string.as_ptr(), &mut _x) };
         _x.check();
     }
 
-    pub(crate) fn insert(&mut self, s: &Text, pos: u32) {
+    pub fn insert(&mut self, s: &Text, pos: u32) {
         let mut _x = fmx__fmxcpt::new();
         unsafe { FM_Text_InsertText(self.ptr, s.ptr, pos, &mut _x) };
         _x.check();
     }
 
-    pub(crate) fn append(&mut self, s: &Text) {
+    pub fn append(&mut self, s: &Text) {
         let mut _x = fmx__fmxcpt::new();
         unsafe { FM_Text_AppendText(self.ptr, s.ptr, 0, s.size(), &mut _x) };
         _x.check();
     }
 
-    pub(crate) fn get_unicode(&self, position: fmx_uint32, size: fmx_uint32) -> U16CString {
+    pub fn get_unicode(&self, position: fmx_uint32, size: fmx_uint32) -> U16CString {
         let mut _x = fmx__fmxcpt::new();
         let out_vec: Vec<u16> = vec![1; size as usize];
         let out_buffer = U16CString::new(out_vec).unwrap();
@@ -141,6 +141,12 @@ impl Drop for Text {
             unsafe { FM_Text_Delete(self.ptr, &mut _x) };
             _x.check();
         }
+    }
+}
+
+impl Default for Text {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

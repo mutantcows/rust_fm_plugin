@@ -2,9 +2,9 @@ use super::*;
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct fmx__fmxcpt {
-    pub m_vers: fmx_int32,
-    pub m_code: fmx_int32,
+pub(crate) struct fmx__fmxcpt {
+    m_vers: fmx_int32,
+    m_code: fmx_int32,
 }
 
 impl fmx__fmxcpt {

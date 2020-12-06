@@ -10,178 +10,174 @@ pub struct fmx_FixPt {
 
 #[link(kind = "static", name = "FMWrapper")]
 extern "C" {
-    pub fn FM_FixPt_AsLong(_self: *const fmx_FixPt, _x: *mut fmx__fmxcpt) -> fmx_int32;
+    fn FM_FixPt_AsLong(_self: *const fmx_FixPt, _x: *mut fmx__fmxcpt) -> fmx_int32;
 
-    pub fn FM_FixPt_Delete(_self: *mut fmx_FixPt, _x: *mut fmx__fmxcpt);
+    fn FM_FixPt_Delete(_self: *mut fmx_FixPt, _x: *mut fmx__fmxcpt);
 
-    pub fn FM_FixPt_Constructor1(
+    fn FM_FixPt_Constructor1(
         val: fmx_int32,
         precision: fmx_int32,
         _x: *mut fmx__fmxcpt,
     ) -> *mut fmx_FixPt;
 
-    pub fn FM_FixPt_Constructor2(
+    fn FM_FixPt_Constructor2(
         val: fmx_int32,
         precisionExample: *const fmx_FixPt,
         _x: *mut fmx__fmxcpt,
     ) -> *mut fmx_FixPt;
 
-    pub fn FM_FixPt_AssignInt(_self: *mut fmx_FixPt, that: fmx_int32, _x: *mut fmx__fmxcpt);
+    fn FM_FixPt_AssignInt(_self: *mut fmx_FixPt, that: fmx_int32, _x: *mut fmx__fmxcpt);
 
-    pub fn FM_FixPt_AssignInt64(_self: *mut fmx_FixPt, that: fmx_int64, _x: *mut fmx__fmxcpt);
+    fn FM_FixPt_AssignInt64(_self: *mut fmx_FixPt, that: fmx_int64, _x: *mut fmx__fmxcpt);
 
-    pub fn FM_FixPt_AssignDouble(_self: *mut fmx_FixPt, that: f64, _x: *mut fmx__fmxcpt);
+    fn FM_FixPt_AssignDouble(_self: *mut fmx_FixPt, that: f64, _x: *mut fmx__fmxcpt);
 
-    pub fn FM_FixPt_AssignFixPt(
-        _self: *mut fmx_FixPt,
-        that: *const fmx_FixPt,
-        _x: *mut fmx__fmxcpt,
-    );
+    fn FM_FixPt_AssignFixPt(_self: *mut fmx_FixPt, that: *const fmx_FixPt, _x: *mut fmx__fmxcpt);
 
-    pub fn FM_FixPt_operatorEQ(
+    fn FM_FixPt_operatorEQ(
         _self: *const fmx_FixPt,
         that: *const fmx_FixPt,
         _x: *mut fmx__fmxcpt,
     ) -> bool;
 
-    pub fn FM_FixPt_operatorNE(
+    fn FM_FixPt_operatorNE(
         _self: *const fmx_FixPt,
         that: *const fmx_FixPt,
         _x: *mut fmx__fmxcpt,
     ) -> bool;
 
-    pub fn FM_FixPt_operatorLT(
+    fn FM_FixPt_operatorLT(
         _self: *const fmx_FixPt,
         that: *const fmx_FixPt,
         _x: *mut fmx__fmxcpt,
     ) -> bool;
 
-    pub fn FM_FixPt_operatorLE(
+    fn FM_FixPt_operatorLE(
         _self: *const fmx_FixPt,
         that: *const fmx_FixPt,
         _x: *mut fmx__fmxcpt,
     ) -> bool;
 
-    pub fn FM_FixPt_operatorGT(
+    fn FM_FixPt_operatorGT(
         _self: *const fmx_FixPt,
         that: *const fmx_FixPt,
         _x: *mut fmx__fmxcpt,
     ) -> bool;
 
-    pub fn FM_FixPt_operatorGE(
+    fn FM_FixPt_operatorGE(
         _self: *const fmx_FixPt,
         that: *const fmx_FixPt,
         _x: *mut fmx__fmxcpt,
     ) -> bool;
 
-    pub fn FM_FixPt_Increment(_self: *mut fmx_FixPt, n: fmx_int32, _x: *mut fmx__fmxcpt);
+    fn FM_FixPt_Increment(_self: *mut fmx_FixPt, n: fmx_int32, _x: *mut fmx__fmxcpt);
 
-    pub fn FM_FixPt_Increment64(_self: *mut fmx_FixPt, n: fmx_int64, _x: *mut fmx__fmxcpt);
+    fn FM_FixPt_Increment64(_self: *mut fmx_FixPt, n: fmx_int64, _x: *mut fmx__fmxcpt);
 
-    pub fn FM_FixPt_Decrement(_self: *mut fmx_FixPt, n: fmx_int32, _x: *mut fmx__fmxcpt);
+    fn FM_FixPt_Decrement(_self: *mut fmx_FixPt, n: fmx_int32, _x: *mut fmx__fmxcpt);
 
-    pub fn FM_FixPt_Decrement64(_self: *mut fmx_FixPt, n: fmx_int64, _x: *mut fmx__fmxcpt);
+    fn FM_FixPt_Decrement64(_self: *mut fmx_FixPt, n: fmx_int64, _x: *mut fmx__fmxcpt);
 
-    pub fn FM_FixPt_Negate(_self: *mut fmx_FixPt, _x: *mut fmx__fmxcpt);
+    fn FM_FixPt_Negate(_self: *mut fmx_FixPt, _x: *mut fmx__fmxcpt);
 
-    pub fn FM_FixPt_GetPrecision(_self: *const fmx_FixPt, _x: *mut fmx__fmxcpt) -> fmx_int32;
+    fn FM_FixPt_GetPrecision(_self: *const fmx_FixPt, _x: *mut fmx__fmxcpt) -> fmx_int32;
 
-    pub fn FM_FixPt_SetPrecision(_self: *mut fmx_FixPt, precision: fmx_int32, _x: *mut fmx__fmxcpt);
+    fn FM_FixPt_SetPrecision(_self: *mut fmx_FixPt, precision: fmx_int32, _x: *mut fmx__fmxcpt);
 
-    pub fn FM_FixPt_Add(
+    fn FM_FixPt_Add(
         _self: *const fmx_FixPt,
         arg: *const fmx_FixPt,
         result: *mut fmx_FixPt,
         _x: *mut fmx__fmxcpt,
     );
 
-    pub fn FM_FixPt_Subtract(
+    fn FM_FixPt_Subtract(
         _self: *const fmx_FixPt,
         arg: *const fmx_FixPt,
         result: *mut fmx_FixPt,
         _x: *mut fmx__fmxcpt,
     );
 
-    pub fn FM_FixPt_Multiply(
+    fn FM_FixPt_Multiply(
         _self: *const fmx_FixPt,
         arg: *const fmx_FixPt,
         result: *mut fmx_FixPt,
         _x: *mut fmx__fmxcpt,
     );
 
-    pub fn FM_FixPt_Divide(
+    fn FM_FixPt_Divide(
         _self: *const fmx_FixPt,
         arg: *const fmx_FixPt,
         result: *mut fmx_FixPt,
         _x: *mut fmx__fmxcpt,
     ) -> fmx_errcode;
 
-    pub fn FM_FixPt_AsBool(_self: *const fmx_FixPt, _x: *mut fmx__fmxcpt) -> bool;
+    fn FM_FixPt_AsBool(_self: *const fmx_FixPt, _x: *mut fmx__fmxcpt) -> bool;
 
-    pub fn FM_FixPt_AsLong64(_self: *const fmx_FixPt, _x: *mut fmx__fmxcpt) -> fmx_int64;
+    fn FM_FixPt_AsLong64(_self: *const fmx_FixPt, _x: *mut fmx__fmxcpt) -> fmx_int64;
 
-    pub fn FM_FixPt_AsFloat(_self: *const fmx_FixPt, _x: *mut fmx__fmxcpt) -> f64;
+    fn FM_FixPt_AsFloat(_self: *const fmx_FixPt, _x: *mut fmx__fmxcpt) -> f64;
 }
 
 #[derive(Eq)]
-pub(crate) struct FixPt {
+pub struct FixPt {
     pub(crate) ptr: *mut fmx_FixPt,
     drop: bool,
 }
 
 impl FixPt {
-    pub(crate) fn new(val: fmx_int32, precision: fmx_int32) -> FixPt {
+    pub fn new(val: fmx_int32, precision: fmx_int32) -> FixPt {
         let mut _x = fmx__fmxcpt::new();
         let ptr = unsafe { FM_FixPt_Constructor1(val, precision, &mut _x) };
         _x.check();
         Self { ptr, drop: true }
     }
-    pub(crate) fn from_ptr(ptr: *const fmx_FixPt) -> FixPt {
+    pub fn from_ptr(ptr: *const fmx_FixPt) -> FixPt {
         Self {
             ptr: ptr as *mut fmx_FixPt,
             drop: false,
         }
     }
 
-    pub(crate) fn clone_precision(&self, val: i32) -> FixPt {
+    pub fn clone_precision(&self, val: i32) -> FixPt {
         let mut _x = fmx__fmxcpt::new();
         let ptr = unsafe { FM_FixPt_Constructor2(val, self.ptr, &mut _x) };
         _x.check();
         Self { ptr, drop: true }
     }
 
-    pub(crate) fn assign(&mut self, fixed_point: FixPt) {
+    pub fn assign(&mut self, fixed_point: FixPt) {
         let mut _x = fmx__fmxcpt::new();
         unsafe { FM_FixPt_AssignFixPt(self.ptr, fixed_point.ptr, &mut _x) };
         _x.check();
     }
 
-    pub(crate) fn assign_i32(&mut self, num: i32) {
+    pub fn assign_i32(&mut self, num: i32) {
         let mut _x = fmx__fmxcpt::new();
         unsafe { FM_FixPt_AssignInt(self.ptr, num, &mut _x) };
         _x.check();
     }
 
-    pub(crate) fn assign_i64(&mut self, num: i64) {
+    pub fn assign_i64(&mut self, num: i64) {
         let mut _x = fmx__fmxcpt::new();
         unsafe { FM_FixPt_AssignInt64(self.ptr, num, &mut _x) };
         _x.check();
     }
 
-    pub(crate) fn assign_float(&mut self, num: f64) {
+    pub fn assign_float(&mut self, num: f64) {
         let mut _x = fmx__fmxcpt::new();
         unsafe { FM_FixPt_AssignDouble(self.ptr, num, &mut _x) };
         _x.check();
     }
 
-    pub(crate) fn get_precision(&self) -> i32 {
+    pub fn get_precision(&self) -> i32 {
         let mut _x = fmx__fmxcpt::new();
         let precision = unsafe { FM_FixPt_GetPrecision(self.ptr, &mut _x) };
         _x.check();
         precision
     }
 
-    pub(crate) fn set_precision(&mut self, precision: i32) {
+    pub fn set_precision(&mut self, precision: i32) {
         let mut _x = fmx__fmxcpt::new();
         unsafe { FM_FixPt_SetPrecision(self.ptr, precision, &mut _x) };
         _x.check();
