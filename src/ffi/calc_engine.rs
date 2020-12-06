@@ -225,11 +225,32 @@ pub(crate) struct ExprEnv {
 }
 
 impl ExprEnv {
+    pub(crate) fn new() -> Self {
+        let mut _x = fmx__fmxcpt::new();
+        let ptr = unsafe { FM_ExprEnv_Constructor1(&mut _x) };
+        _x.check();
+        ExprEnv { ptr, drop: true }
+    }
+
     pub(crate) fn from_ptr(ptr: *const fmx_ExprEnv) -> Self {
         Self {
             ptr: ptr as *mut fmx_ExprEnv,
             drop: false,
         }
+    }
+
+    pub(crate) fn session_id(&self) -> u64 {
+        let mut _x = fmx__fmxcpt::new();
+        let session_id = unsafe { FM_ExprEnv_SessionID(self.ptr, &mut _x) };
+        _x.check();
+        session_id
+    }
+
+    pub(crate) fn file_id(&self) -> u64 {
+        let mut _x = fmx__fmxcpt::new();
+        let file_id = unsafe { FM_ExprEnv_FileID(self.ptr, &mut _x) };
+        _x.check();
+        file_id
     }
 
     pub(crate) fn execute_file_sql_text_result(
