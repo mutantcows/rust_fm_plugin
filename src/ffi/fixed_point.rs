@@ -1,6 +1,6 @@
 use super::*;
 use std::cmp::{Eq, Ord, Ordering, PartialEq, PartialOrd};
-use std::ops::{Add, AddAssign, Div, Mul, Neg, Sub, SubAssign};
+use std::ops::{Add, AddAssign, Div, Mul, Neg, Rem, Sub, SubAssign};
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -393,9 +393,27 @@ impl Div for FixPt {
     fn div(self, other: Self) -> Self {
         let mut _x = fmx__fmxcpt::new();
         let result = FixPt::default();
-        unsafe { FM_FixPt_Divide(self.ptr, other.ptr, result.ptr, &mut _x) };
+        let error = unsafe { FM_FixPt_Divide(self.ptr, other.ptr, result.ptr, &mut _x) };
         _x.check();
+        if error != 0 {
+            panic!();
+        }
         result
+    }
+}
+
+impl Rem for FixPt {
+    type Output = Self;
+
+    fn rem(self, other: Self) -> Self {
+        let mut _x = fmx__fmxcpt::new();
+        let result = FixPt::default();
+        let error = unsafe { FM_FixPt_Divide(self.ptr, other.ptr, result.ptr, &mut _x) };
+        _x.check();
+        if error != 0 {
+            panic!();
+        }
+        other - (self * result)
     }
 }
 
@@ -416,6 +434,12 @@ impl PartialEq for FixPt {
         let result = unsafe { FM_FixPt_operatorEQ(self.ptr, other.ptr, &mut _x) };
         _x.check();
         result
+    }
+}
+
+impl PartialEq<i32> for FixPt {
+    fn eq(&self, other: &i32) -> bool {
+        i32::from(self) == *other
     }
 }
 
