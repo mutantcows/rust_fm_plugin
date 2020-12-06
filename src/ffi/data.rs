@@ -48,21 +48,46 @@ extern "C" {
         env: *const fmx_ExprEnv,
         _x: *mut fmx__fmxcpt,
     ) -> bool;
-    pub fn FM_Data_IsEmpty(_self: *const fmx_Data, _x: *mut fmx__fmxcpt) -> bool;
-    pub fn FM_Data_IsValid(_self: *const fmx_Data, _x: *mut fmx__fmxcpt) -> bool;
-    pub fn FM_Data_IsFindRequest(_self: *const fmx_Data, _x: *mut fmx__fmxcpt) -> bool;
-    pub fn FM_Data_Clear(_self: *mut fmx_Data, newNativeType: fmx_int32, _x: *mut fmx__fmxcpt);
-    pub fn FM_Data_GetAsDate(_self: *const fmx_Data, _x: *mut fmx__fmxcpt) -> *const fmx_DateTime;
-    pub fn FM_Data_GetAsTime(_self: *const fmx_Data, _x: *mut fmx__fmxcpt) -> *const fmx_DateTime;
-    pub fn FM_Data_GetAsTimeStamp(
-        _self: *const fmx_Data,
+
+    pub fn FM_Data_GetNativeType(_self: *const fmx_Data, _x: *mut fmx__fmxcpt) -> fmx_int32;
+    pub fn FM_Data_ConvertData(_self: *mut fmx_Data, nativeType: fmx_int32, _x: *mut fmx__fmxcpt);
+    pub fn FM_Data_SetAsNumber(
+        _self: *mut fmx_Data,
+        numericData: *const fmx_FixPt,
+        nativeType: fmx_int32,
         _x: *mut fmx__fmxcpt,
-    ) -> *const fmx_DateTime;
-    pub fn FM_Data_GetAsBoolean(_self: *const fmx_Data, _x: *mut fmx__fmxcpt) -> bool;
-    pub fn FM_Data_GetBinaryData(
-        _self: *const fmx_Data,
+    );
+    pub fn FM_Data_SetAsDate(
+        _self: *mut fmx_Data,
+        dateData: *const fmx_DateTime,
+        nativeType: fmx_int32,
         _x: *mut fmx__fmxcpt,
-    ) -> *const fmx_BinaryData;
+    );
+    pub fn FM_Data_SetAsTime(
+        _self: *mut fmx_Data,
+        timeData: *const fmx_DateTime,
+        nativeType: fmx_int32,
+        _x: *mut fmx__fmxcpt,
+    );
+    pub fn FM_Data_SetAsTimeStamp(
+        _self: *mut fmx_Data,
+        timeStampData: *const fmx_DateTime,
+        nativeType: fmx_int32,
+        _x: *mut fmx__fmxcpt,
+    );
+    pub fn FM_Data_SetDateTime(
+        _self: *mut fmx_Data,
+        dateTimeData: *const fmx_DateTime,
+        dateTimeType: fmx_int32,
+        nativeType: fmx_int32,
+        _x: *mut fmx__fmxcpt,
+    );
+    pub fn FM_Data_SetBinaryData(
+        _self: *mut fmx_Data,
+        binaryData: *const fmx_BinaryData,
+        forceBinaryNativeType: bool,
+        _x: *mut fmx__fmxcpt,
+    );
 }
 
 pub(crate) struct Data {
