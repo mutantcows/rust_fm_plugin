@@ -102,10 +102,10 @@ unsafe extern "C" fn FMExternCallProc(pb: *mut fmx_ExternCallStruct) {
     }
 }
 
-fn plugin_init(version: fmx_int16) -> u64 {
+fn plugin_init(version: ExternVersion) -> u64 {
     let plugin_id = QuadChar::new(PLUGIN_ID);
 
-    if version < ExternVersion::V160 as i16 {
+    if version < ExternVersion::V160 {
         return ExternVersion::DoNotEnable as u64;
     }
 
@@ -128,9 +128,9 @@ fn plugin_idle(idle_level: fmx_IdleLevel, _session_id: fmx_ptrtype) {
     }
 }
 
-fn plugin_shutdown(version: fmx_int16) {
+fn plugin_shutdown(version: ExternVersion) {
     let plugin_id = QuadChar::new(PLUGIN_ID);
-    if version >= ExternVersion::V160 as i16 {
+    if version >= ExternVersion::V160 {
         for f in FUNCTIONS.values() {
             f.unregister(&plugin_id);
         }
