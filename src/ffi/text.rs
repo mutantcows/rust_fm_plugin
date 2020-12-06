@@ -156,3 +156,11 @@ impl From<Text> for u16 {
         unsafe { *txt.get_unicode(0, txt.size()).as_ptr() }
     }
 }
+
+impl From<&String> for Text {
+    fn from(txt: &String) -> Text {
+        let mut text = Text::new();
+        text.assign(txt);
+        text
+    }
+}
