@@ -431,6 +431,14 @@ impl PartialEq for FixPt {
         _x.check();
         result
     }
+
+    #[allow(clippy::partialeq_ne_impl)]
+    fn ne(&self, other: &FixPt) -> bool {
+        let mut _x = fmx__fmxcpt::new();
+        let result = unsafe { FM_FixPt_operatorNE(self.ptr, other.ptr, &mut _x) };
+        _x.check();
+        result
+    }
 }
 
 impl PartialEq<i32> for FixPt {
@@ -443,18 +451,43 @@ impl PartialOrd for FixPt {
     fn partial_cmp(&self, other: &FixPt) -> Option<Ordering> {
         Some(self.cmp(other))
     }
+
+    fn lt(&self, other: &Self) -> bool {
+        let mut _x = fmx__fmxcpt::new();
+        let lt = unsafe { FM_FixPt_operatorLT(self.ptr, other.ptr, &mut _x) };
+        _x.check();
+        lt
+    }
+
+    fn le(&self, other: &Self) -> bool {
+        let mut _x = fmx__fmxcpt::new();
+        let le = unsafe { FM_FixPt_operatorLE(self.ptr, other.ptr, &mut _x) };
+        _x.check();
+        le
+    }
+
+    fn gt(&self, other: &Self) -> bool {
+        let mut _x = fmx__fmxcpt::new();
+        let gt = unsafe { FM_FixPt_operatorGT(self.ptr, other.ptr, &mut _x) };
+        _x.check();
+        gt
+    }
+
+    fn ge(&self, other: &Self) -> bool {
+        let mut _x = fmx__fmxcpt::new();
+        let ge = unsafe { FM_FixPt_operatorGE(self.ptr, other.ptr, &mut _x) };
+        _x.check();
+        ge
+    }
 }
 
 impl Ord for FixPt {
-    fn cmp(&self, other: &FixPt) -> Ordering {
+    fn cmp(&self, other: &Self) -> Ordering {
         if self == other {
             return Ordering::Equal;
         }
 
-        let mut _x = fmx__fmxcpt::new();
-        let gt = unsafe { FM_FixPt_operatorGT(self.ptr, other.ptr, &mut _x) };
-        _x.check();
-        match gt {
+        match self > other {
             true => Ordering::Greater,
             false => Ordering::Less,
         }
