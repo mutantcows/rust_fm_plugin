@@ -90,7 +90,7 @@ extern "C" {
     pub fn FM_ExprEnv_EvaluateConvertToFileMakerPath(
         _self: *const fmx_ExprEnv,
         inPath: *const fmx_Text,
-        inFormat: fmx_int32,
+        inFormat: FilePathFormat,
         outFMPath: *mut fmx_Text,
         _x: *mut fmx__fmxcpt,
     ) -> fmx_errcode;
@@ -98,7 +98,7 @@ extern "C" {
     pub fn FM_ExprEnv_EvaluateConvertFromFileMakerPath(
         _self: *const fmx_ExprEnv,
         inFMPath: *const fmx_Text,
-        inFormat: fmx_int32,
+        inFormat: FilePathFormat,
         outPath: *mut fmx_Text,
         _x: *mut fmx__fmxcpt,
     ) -> fmx_errcode;
@@ -284,6 +284,30 @@ impl ExprEnv {
         let mut _x = fmx__fmxcpt::new();
         let result = Data::new();
         unsafe { FM_ExprEnv_EvaluateGetFunction(self.ptr, func as i16, result.ptr, &mut _x) };
+        _x.check();
+        result
+    }
+
+    pub(crate) fn from_fm_path(&self, path: Text, format: FilePathFormat) -> Text {
+        let mut _x = fmx__fmxcpt::new();
+        let result = Text::new();
+        unsafe {
+            FM_ExprEnv_EvaluateConvertFromFileMakerPath(
+                self.ptr, path.ptr, format, result.ptr, &mut _x,
+            )
+        };
+        _x.check();
+        result
+    }
+
+    pub(crate) fn to_fm_path(&self, path: Text, format: FilePathFormat) -> Text {
+        let mut _x = fmx__fmxcpt::new();
+        let result = Text::new();
+        unsafe {
+            FM_ExprEnv_EvaluateConvertToFileMakerPath(
+                self.ptr, path.ptr, format, result.ptr, &mut _x,
+            )
+        };
         _x.check();
         result
     }
@@ -672,4 +696,24 @@ impl ExternalScriptStep {
         unsafe { FM_ExprEnv_UnRegisterScriptStep(plugin_id.ptr, self.id, &mut _x) };
         _x.check();
     }
+}
+
+#[repr(i16)]
+pub enum PluginError {
+    NoError = 0,
+    Result1 = 1552,
+    Result2 = 1553,
+    Result3 = 1554,
+    Result4 = 1555,
+    Result5 = 1556,
+    Result6 = 1557,
+    Result7 = 1558,
+    Result8 = 1559,
+}
+
+#[repr(i32)]
+pub enum FilePathFormat {
+    PosixPath = 1,
+    WinPath = 2,
+    URLPath = 3,
 }
