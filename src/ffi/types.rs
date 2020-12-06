@@ -56,6 +56,9 @@ pub struct fmx_QuadChar {
 
 #[link(kind = "static", name = "FMWrapper")]
 extern "C" {
+    #[allow(dead_code)]
+    fn FM_QuadChar_Constructor1(_x: *mut fmx__fmxcpt) -> *mut fmx_QuadChar;
+
     fn FM_QuadChar_Constructor2(
         c0: c_char,
         c1: c_char,
@@ -64,12 +67,88 @@ extern "C" {
         _x: *mut fmx__fmxcpt,
     ) -> *mut fmx_QuadChar;
 
+    #[allow(dead_code)]
+    fn FM_QuadChar_Constructor3(
+        value: *const fmx_QuadChar,
+        _x: *mut fmx__fmxcpt,
+    ) -> *mut fmx_QuadChar;
+
+    #[allow(dead_code)]
+    fn FM_QuadChar_operatorAS(
+        _self: *mut fmx_QuadChar,
+        value: *const fmx_QuadChar,
+        _x: *mut fmx__fmxcpt,
+    ) -> *const fmx_QuadChar;
+
+    #[allow(dead_code)]
+    fn FM_QuadChar_operatorAR(
+        _self: *mut fmx_QuadChar,
+        i: ::std::os::raw::c_int,
+        _x: *mut fmx__fmxcpt,
+    ) -> fmx_uchar;
+
+    #[allow(dead_code)]
+    fn FM_QuadChar_operatorCAR(
+        _self: *const fmx_QuadChar,
+        i: ::std::os::raw::c_int,
+        _x: *mut fmx__fmxcpt,
+    ) -> fmx_uchar;
+
+    #[allow(dead_code)]
+    fn FM_QuadChar_operatorEQ(
+        _self: *const fmx_QuadChar,
+        value: *const fmx_QuadChar,
+        _x: *mut fmx__fmxcpt,
+    ) -> bool;
+
+    #[allow(dead_code)]
+    fn FM_QuadChar_operatorNE(
+        _self: *const fmx_QuadChar,
+        value: *const fmx_QuadChar,
+        _x: *mut fmx__fmxcpt,
+    ) -> bool;
+
+    #[allow(dead_code)]
+    fn FM_QuadChar_operatorLT(
+        _self: *const fmx_QuadChar,
+        value: *const fmx_QuadChar,
+        _x: *mut fmx__fmxcpt,
+    ) -> bool;
+
+    #[allow(dead_code)]
+    fn FM_QuadChar_operatorLE(
+        _self: *const fmx_QuadChar,
+        value: *const fmx_QuadChar,
+        _x: *mut fmx__fmxcpt,
+    ) -> bool;
+
+    #[allow(dead_code)]
+    fn FM_QuadChar_operatorGT(
+        _self: *const fmx_QuadChar,
+        value: *const fmx_QuadChar,
+        _x: *mut fmx__fmxcpt,
+    ) -> bool;
+
+    #[allow(dead_code)]
+    fn FM_QuadChar_operatorGE(
+        _self: *const fmx_QuadChar,
+        value: *const fmx_QuadChar,
+        _x: *mut fmx__fmxcpt,
+    ) -> bool;
+
+    #[allow(dead_code)]
+    fn FM_QuadChar_GetMacType(_self: *const fmx_QuadChar, _x: *mut fmx__fmxcpt) -> fmx_uint32;
+
+    #[allow(dead_code)]
+    fn FM_QuadChar_SetMacType(_self: *mut fmx_QuadChar, value: fmx_uint32, _x: *mut fmx__fmxcpt);
+
     fn FM_QuadChar_Delete(_self: *mut fmx_QuadChar, _x: *mut fmx__fmxcpt);
 
     fn FM_Locale_Delete(_self: *mut fmx_Locale, _x: *mut fmx__fmxcpt);
 
     fn FM_Locale_Constructor1(inputType: LocaleType, _x: *mut fmx__fmxcpt) -> *mut fmx_Locale;
 
+    #[allow(dead_code)]
     fn FM_Locale_operatorAS(
         _self: *mut fmx_Locale,
         rhs: *const fmx_Locale,
