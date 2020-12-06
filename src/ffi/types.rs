@@ -19,12 +19,12 @@ pub type fmx_ScriptControl = fmx_uchar;
 pub type fmx_IdleLevel = fmx_uchar;
 pub type fmx_ExternCallProc = Option<unsafe extern "C" fn(arg1: *mut fmx_ExternCallStruct)>;
 pub type fmx_CurrentEnvCall = Option<unsafe extern "C" fn(env: *mut fmx_ExprEnv) -> fmx_errcode>;
-pub type fmx_CharacterStyle_Face = c_ushort;
-pub type fmx_CharacterStyle_FontID = c_ushort;
-pub type fmx_CharacterStyle_FontSize = c_ushort;
-pub type fmx_CharacterStyle_ColorChannel = c_uchar;
-pub type fmx_CharacterStyle_ColorChannel16 = c_ushort;
-pub type fmx_CharacterStyle_FontScript = c_ushort;
+pub type fmx_fontface = c_ushort;
+pub type fmx_fontid = c_ushort;
+pub type fmx_fontsize = c_ushort;
+pub type fmx_colorchannel = c_uchar;
+pub type fmx_colorchannel16 = c_ushort;
+pub type fmx_fontscript = c_ushort;
 pub type fmx_ExtPluginType = Option<
     unsafe extern "C" fn(
         functionId: c_short,

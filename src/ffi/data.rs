@@ -26,33 +26,37 @@ extern "C" {
         _x: *mut fmx__fmxcpt,
     ) -> fmx_errcode;
 
+    #[deprecated]
+    #[allow(dead_code)]
     fn FM_Data_GetFontID(
         _self: *const fmx_Data,
         fontDisplayName: *const fmx_Text,
-        fontScript: fmx_CharacterStyle_FontScript,
+        fontScript: fmx_fontscript,
         env: *const fmx_ExprEnv,
         _x: *mut fmx__fmxcpt,
-    ) -> fmx_CharacterStyle_FontID;
+    ) -> fmx_fontid;
 
     fn FM_Data_GetPostscriptFontID(
         _self: *const fmx_Data,
         fontPostscriptName: *const fmx_Text,
         env: *const fmx_ExprEnv,
         _x: *mut fmx__fmxcpt,
-    ) -> fmx_CharacterStyle_FontID;
+    ) -> fmx_fontid;
 
+    #[deprecated]
+    #[allow(dead_code)]
     fn FM_Data_GetFontInfo(
         _self: *const fmx_Data,
-        font: fmx_CharacterStyle_FontID,
+        font: fmx_fontid,
         fontDisplayName: *mut fmx_Text,
-        fontScript: *mut fmx_CharacterStyle_FontScript,
+        fontScript: *mut fmx_fontscript,
         env: *const fmx_ExprEnv,
         _x: *mut fmx__fmxcpt,
     ) -> bool;
 
     fn FM_Data_GetPostscriptFontInfo(
         _self: *const fmx_Data,
-        font: fmx_CharacterStyle_FontID,
+        font: fmx_fontid,
         fontPostscriptName: *mut fmx_Text,
         env: *const fmx_ExprEnv,
         _x: *mut fmx__fmxcpt,
@@ -93,7 +97,7 @@ extern "C" {
     fn FM_Data_SetDateTime(
         _self: *mut fmx_Data,
         dateTimeData: *const fmx_DateTime,
-        dateTimeType: fmx_int32,
+        dateTimeType: DataType,
         nativeType: DataType,
         _x: *mut fmx__fmxcpt,
     );
@@ -177,11 +181,54 @@ impl Data {
         _x.check();
     }
 
+    pub fn set_datetime(
+        &mut self,
+        datetime: DateTime,
+        datetime_type: DataType,
+        native_type: DataType,
+    ) {
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_Data_SetDateTime(self.ptr, datetime.ptr, datetime_type, native_type, &mut _x) };
+        _x.check();
+    }
+
+    pub fn set_binarydata(&mut self, binary_data: BinaryData, force_type: bool) {
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_Data_SetBinaryData(self.ptr, binary_data.ptr, force_type, &mut _x) };
+        _x.check();
+    }
+
     pub fn get_data_type(&self) -> DataType {
         let mut _x = fmx__fmxcpt::new();
         let data_type = unsafe { FM_Data_GetNativeType(self.ptr, &mut _x) };
         _x.check();
         data_type
+    }
+
+    pub fn get_font_id<T: ToText>(&self, font_name: T, env: ExprEnv) -> fmx_fontid {
+        let name = font_name.to_text();
+        let mut _x = fmx__fmxcpt::new();
+        let font_id = unsafe { FM_Data_GetPostscriptFontID(self.ptr, name.ptr, env.ptr, &mut _x) };
+        _x.check();
+        if font_id == 0xFFFF {
+            panic!();
+        }
+        font_id
+    }
+
+    pub fn font_exists<T: ToText>(&self, font_id: fmx_fontid, font_name: T, env: ExprEnv) -> bool {
+        let name = font_name.to_text();
+        let mut _x = fmx__fmxcpt::new();
+        let font_exists =
+            unsafe { FM_Data_GetPostscriptFontInfo(self.ptr, font_id, name.ptr, env.ptr, &mut _x) };
+        _x.check();
+        font_exists
+    }
+
+    pub fn convert(&mut self, native_type: DataType) {
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_Data_ConvertData(self.ptr, native_type, &mut _x) };
+        _x.check();
     }
 }
 
