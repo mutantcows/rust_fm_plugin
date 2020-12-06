@@ -148,3 +148,24 @@ extern "C" {
 
     pub fn FM_DateTime_Delete(_self: *mut fmx_DateTime, _x: *mut fmx__fmxcpt);
 }
+
+pub(crate) struct DateTime {
+    pub(crate) ptr: *mut fmx_DateTime,
+    drop: bool,
+}
+
+impl DateTime {
+    pub(crate) fn new() -> Self {
+        let mut _x = fmx__fmxcpt::new();
+        let ptr = unsafe { FM_DateTime_Constructor1(&mut _x) };
+        _x.check();
+        Self { ptr, drop: true }
+    }
+
+    pub(crate) fn from_ptr(ptr: *const fmx_DateTime) -> Self {
+        Self {
+            ptr: ptr as *mut fmx_DateTime,
+            drop: false,
+        }
+    }
+}
