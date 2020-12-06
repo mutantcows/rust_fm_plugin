@@ -308,6 +308,15 @@ impl ExprEnv {
         result
     }
 
+    pub fn evaluate<T: ToText>(&self, expression: T) -> Data {
+        let expr_txt = expression.to_text();
+        let mut _x = fmx__fmxcpt::new();
+        let result = Data::new();
+        unsafe { FM_ExprEnv_Evaluate(self.ptr, expr_txt.ptr, result.ptr, &mut _x) };
+        _x.check();
+        result
+    }
+
     pub fn from_fm_path(&self, path: Text, format: FilePathFormat) -> Text {
         let mut _x = fmx__fmxcpt::new();
         let result = Text::new();
@@ -574,10 +583,65 @@ impl DataVect {
         FixPt::from_ptr(ptr)
     }
 
+    pub fn at_as_date(&self, position: fmx_uint32) -> DateTime {
+        let mut _x = fmx__fmxcpt::new();
+        let ptr = unsafe { FM_DataVect_AtAsDate(self.ptr, position, &mut _x) };
+        _x.check();
+        DateTime::from_ptr(ptr)
+    }
+
+    pub fn at_as_time(&self, position: fmx_uint32) -> DateTime {
+        let mut _x = fmx__fmxcpt::new();
+        let ptr = unsafe { FM_DataVect_AtAsTime(self.ptr, position, &mut _x) };
+        _x.check();
+        DateTime::from_ptr(ptr)
+    }
+
+    pub fn at_as_timestamp(&self, position: fmx_uint32) -> DateTime {
+        let mut _x = fmx__fmxcpt::new();
+        let ptr = unsafe { FM_DataVect_AtAsTimeStamp(self.ptr, position, &mut _x) };
+        _x.check();
+        DateTime::from_ptr(ptr)
+    }
+
+    pub fn at_as_binary(&self, position: fmx_uint32) -> BinaryData {
+        let mut _x = fmx__fmxcpt::new();
+        let ptr = unsafe { FM_DataVect_AtAsBinaryData(self.ptr, position, &mut _x) };
+        _x.check();
+        BinaryData::from_ptr(ptr)
+    }
+
+    pub fn at_as_bool(&self, position: fmx_uint32) -> bool {
+        let mut _x = fmx__fmxcpt::new();
+        let result = unsafe { FM_DataVect_AtAsBoolean(self.ptr, position, &mut _x) };
+        _x.check();
+        result
+    }
+
     pub fn push(&mut self, data: Data) {
         let mut _x = fmx__fmxcpt::new();
         unsafe { FM_DataVect_PushBack(self.ptr, data.ptr, &mut _x) };
         _x.check();
+    }
+
+    pub fn clear(&mut self) {
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_DataVect_Clear(self.ptr, &mut _x) };
+        _x.check();
+    }
+
+    pub fn is_empty(&mut self) -> bool {
+        let mut _x = fmx__fmxcpt::new();
+        let empty = unsafe { FM_DataVect_IsEmpty(self.ptr, &mut _x) };
+        _x.check();
+        empty
+    }
+
+    pub fn pop(&mut self) -> Data {
+        let mut _x = fmx__fmxcpt::new();
+        let result = unsafe { FM_DataVect_PopBack(self.ptr, &mut _x) };
+        _x.check();
+        Data::from_ptr(result)
     }
 }
 

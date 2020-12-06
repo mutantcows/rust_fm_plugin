@@ -157,6 +157,24 @@ impl ToString for Text {
     }
 }
 
+pub trait ToText {
+    fn to_text(self) -> Text;
+}
+
+impl ToText for Text {
+    fn to_text(self) -> Self {
+        self
+    }
+}
+
+impl ToText for String {
+    fn to_text(self) -> Text {
+        let mut txt = Text::new();
+        txt.assign(&self);
+        txt
+    }
+}
+
 impl From<Text> for u16 {
     fn from(txt: Text) -> u16 {
         unsafe { *txt.get_unicode(0, txt.size()).as_ptr() }

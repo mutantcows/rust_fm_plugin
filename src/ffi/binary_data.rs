@@ -144,3 +144,40 @@ extern "C" {
         _x: *mut fmx__fmxcpt,
     ) -> fmx_errcode;
 }
+
+pub struct BinaryData {
+    pub(crate) ptr: *mut fmx_BinaryData,
+    drop: bool,
+}
+
+impl BinaryData {
+    pub fn new() -> Self {
+        let mut _x = fmx__fmxcpt::new();
+        let ptr = unsafe { FM_BinaryData_Constructor1(&mut _x) };
+        _x.check();
+        Self { ptr, drop: true }
+    }
+
+    pub fn from_ptr(ptr: *const fmx_BinaryData) -> Self {
+        Self {
+            ptr: ptr as *mut fmx_BinaryData,
+            drop: false,
+        }
+    }
+}
+
+impl Drop for BinaryData {
+    fn drop(&mut self) {
+        if self.drop {
+            let mut _x = fmx__fmxcpt::new();
+            unsafe { FM_BinaryData_Delete(self.ptr, &mut _x) };
+            _x.check();
+        }
+    }
+}
+
+impl Default for BinaryData {
+    fn default() -> Self {
+        Self::new()
+    }
+}
