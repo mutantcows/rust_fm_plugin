@@ -140,13 +140,13 @@ fn plugin_shutdown(version: ExternVersion) {
 fn plugin_prefs() {}
 
 fn plugin_get_string(
-    which_string: fmx_uint32,
+    which_string: ExternStringType,
     _win_lang_id: fmx_uint32,
     out_buffer_size: fmx_uint32,
     out_buffer: *mut fmx_unichar16,
 ) {
     use ExternStringType::*;
-    let string = match ExternStringType::from(which_string) {
+    let string = match which_string {
         Name => PLUGIN_NAME,
         AppConfig => PLUGIN_DESCRIPTION,
         Options => PLUGIN_OPTIONS,

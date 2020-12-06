@@ -91,16 +91,29 @@ impl From<u8> for IdleType {
     }
 }
 
-pub(crate) enum ExternStringType {
-    Name,
-    AppConfig,
-    Options,
-    HelpUrl,
-    Blank,
+#[repr(i32)]
+pub enum ExternStringType {
+    Name = 128,
+    AppConfig = 129,
+    Options = 131,
+    HelpUrl = 132,
+    Blank = 0,
 }
 
 impl From<u32> for ExternStringType {
     fn from(num: u32) -> Self {
+        match num {
+            128 => Self::Name,
+            129 => Self::AppConfig,
+            131 => Self::Options,
+            132 => Self::HelpUrl,
+            _ => Self::Blank,
+        }
+    }
+}
+
+impl From<u8> for ExternStringType {
+    fn from(num: u8) -> Self {
         match num {
             128 => Self::Name,
             129 => Self::AppConfig,
