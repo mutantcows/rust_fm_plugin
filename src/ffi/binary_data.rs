@@ -1,4 +1,6 @@
 use super::*;
+use std::convert::TryFrom;
+use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
 
 #[repr(C)]
@@ -164,6 +166,60 @@ impl BinaryData {
             drop: false,
         }
     }
+
+    pub fn get_stream_count(&self) -> fmx_int32 {
+        let mut _x = fmx__fmxcpt::new();
+        let count = unsafe { FM_BinaryData_GetCount(self.ptr, &mut _x) };
+        _x.check();
+        count
+    }
+
+    pub fn get_stream_index(&self, stream_type: BinaryStreamType) -> fmx_int32 {
+        let mut _x = fmx__fmxcpt::new();
+        let quad = QuadChar::from(stream_type);
+        let index = unsafe { FM_BinaryData_GetIndex(self.ptr, quad.ptr, &mut _x) };
+        _x.check();
+        index
+    }
+
+    pub fn total_size(&self) -> fmx_uint32 {
+        let mut _x = fmx__fmxcpt::new();
+        let size = unsafe { FM_BinaryData_GetTotalSize(self.ptr, &mut _x) };
+        _x.check();
+        size
+    }
+
+    pub fn get_size(&self, index: fmx_int32) -> fmx_uint32 {
+        let mut _x = fmx__fmxcpt::new();
+        let size = unsafe { FM_BinaryData_GetSize(self.ptr, index, &mut _x) };
+        _x.check();
+        size
+    }
+
+    pub fn get_data(
+        &self,
+        index: fmx_int32,
+        offset: fmx_uint32,
+        amount: fmx_uint32,
+        buffer: &mut CStr,
+    ) -> fmx_errcode {
+        let mut _x = fmx__fmxcpt::new();
+        let ptr: *const c_char = std::ptr::null();
+        let x = unsafe { CStr::from_ptr(ptr) };
+        let ptr = buffer.as_ptr()
+        let error =
+            unsafe { FM_BinaryData_GetData(self.ptr, index, offset, amount, buffer.as_ptr(), &mut _x) };
+        _x.check();
+        error
+    }
+
+    pub fn get_type(&self, index: fmx_int32) -> BinaryStreamType {
+        let mut _x = fmx__fmxcpt::new();
+        let quad = QuadChar::empty();
+        unsafe { FM_BinaryData_GetType(self.ptr, index, quad.ptr, &mut _x) };
+        _x.check();
+        BinaryStreamType::from(quad)
+    }
 }
 
 impl Drop for BinaryData {
@@ -179,5 +235,75 @@ impl Drop for BinaryData {
 impl Default for BinaryData {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+#[derive(Debug)]
+pub enum BinaryStreamType {
+    FNAM,
+    JPEG,
+    GIF,
+    EPS,
+    META,
+    PNG,
+    BMP,
+    PDF,
+    FILE,
+    ZLIB,
+    FORK,
+    SND,
+    MAIN,
+    SIZE,
+    Other(String),
+}
+
+impl From<BinaryStreamType> for QuadChar {
+    fn from(stream_type: BinaryStreamType) -> QuadChar {
+        use BinaryStreamType::*;
+        match stream_type {
+            FNAM => QuadChar::new(b"FNAM"),
+            JPEG => QuadChar::new(b"JPEG"),
+            GIF => QuadChar::new(b"GIFf"),
+            EPS => QuadChar::new(b"EPSf"),
+            META => QuadChar::new(b"META"),
+            PNG => QuadChar::new(b"PNGf"),
+            BMP => QuadChar::new(b"BMPf"),
+            PDF => QuadChar::new(b"PDF "),
+            SIZE => QuadChar::new(b"SIZE"),
+            FILE => QuadChar::new(b"FILE"),
+            ZLIB => QuadChar::new(b"ZLIB"),
+            FORK => QuadChar::new(b"FORK"),
+            SND => QuadChar::new(b"snd "),
+            MAIN => QuadChar::new(b"MAIN"),
+            Other(txt) => {
+                let slice = txt.as_bytes();
+                let bytes = <&[u8; 4]>::try_from(&slice[..4]).unwrap();
+                QuadChar::new(bytes)
+            }
+        }
+    }
+}
+
+impl From<QuadChar> for BinaryStreamType {
+    fn from(quad: QuadChar) -> BinaryStreamType {
+        let txt = quad.to_string();
+        use BinaryStreamType::*;
+        match txt.as_ref() {
+            "FNAM" => FNAM,
+            "JPEG" => JPEG,
+            "GIF" => GIF,
+            "EPS" => EPS,
+            "META" => META,
+            "PNG" => PNG,
+            "BMP" => BMP,
+            "PDF" => PDF,
+            "SIZE" => SIZE,
+            "FILE" => FILE,
+            "ZLIB" => ZLIB,
+            "FORK" => FORK,
+            "SND" => SND,
+            "MAIN" => MAIN,
+            t => Other(t.to_string()),
+        }
     }
 }

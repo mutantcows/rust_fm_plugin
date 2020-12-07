@@ -83,14 +83,14 @@ extern "C" {
     #[allow(dead_code)]
     fn FM_QuadChar_operatorAR(
         _self: *mut fmx_QuadChar,
-        i: ::std::os::raw::c_int,
+        i: c_int,
         _x: *mut fmx__fmxcpt,
     ) -> fmx_uchar;
 
     #[allow(dead_code)]
     fn FM_QuadChar_operatorCAR(
         _self: *const fmx_QuadChar,
-        i: ::std::os::raw::c_int,
+        i: c_int,
         _x: *mut fmx__fmxcpt,
     ) -> fmx_uchar;
 
@@ -201,6 +201,13 @@ impl QuadChar {
         _x.check();
         Self { ptr, drop: true }
     }
+
+    pub fn empty() -> Self {
+        let mut _x = fmx__fmxcpt::new();
+        let ptr = unsafe { FM_QuadChar_Constructor1(&mut _x) };
+        _x.check();
+        Self { ptr, drop: true }
+    }
 }
 
 impl Drop for QuadChar {
@@ -291,4 +298,16 @@ pub enum LocaleType {
     BOD = 75, // Tibetan
 
     Invalid = 0xFFFF,
+}
+
+impl ToString for QuadChar {
+    fn to_string(&self) -> String {
+        let mut _x = fmx__fmxcpt::new();
+        let mut bytes = Vec::with_capacity(4);
+        for i in 0..4 {
+            bytes[i as usize] = unsafe { FM_QuadChar_operatorAR(self.ptr, i, &mut _x) };
+            _x.check();
+        }
+        unsafe { String::from_utf8_unchecked(bytes) }
+    }
 }
