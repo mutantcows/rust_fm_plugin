@@ -196,21 +196,21 @@ impl BinaryData {
         size
     }
 
-    pub fn get_data(
-        &self,
-        index: fmx_int32,
-        offset: fmx_uint32,
-        amount: fmx_uint32,
-        buffer: &mut CStr,
-    ) -> fmx_errcode {
+    /// # Safety
+    /// not proven safe yet
+    /// use at own risk
+    pub unsafe fn get_data(&self, index: i32, offset: u32, amount: usize) -> Vec<i8> {
+        let buffer = Vec::with_capacity(amount);
+        let mut b = std::mem::ManuallyDrop::new(buffer);
+        let (ptr, len, cap) = (b.as_mut_ptr(), b.len(), b.capacity());
+
         let mut _x = fmx__fmxcpt::new();
-        let ptr: *const c_char = std::ptr::null();
-        let x = unsafe { CStr::from_ptr(ptr) };
-        let ptr = buffer.as_ptr()
-        let error =
-            unsafe { FM_BinaryData_GetData(self.ptr, index, offset, amount, buffer.as_ptr(), &mut _x) };
+        let error = FM_BinaryData_GetData(self.ptr, index, offset, amount as u32, ptr, &mut _x);
         _x.check();
-        error
+        if error != 0 {
+            panic!();
+        }
+        Vec::from_raw_parts(ptr, len, cap)
     }
 
     pub fn get_type(&self, index: fmx_int32) -> BinaryStreamType {
