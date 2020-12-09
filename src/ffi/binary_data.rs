@@ -1,6 +1,7 @@
 use super::*;
 use std::convert::TryFrom;
 use std::ffi::{CStr, CString};
+use std::mem::ManuallyDrop;
 use std::os::raw::c_char;
 
 #[repr(C)]
@@ -201,8 +202,8 @@ impl BinaryData {
     /// use at own risk
     pub unsafe fn get_data(&self, index: i32, offset: u32, amount: usize) -> Vec<i8> {
         let buffer = Vec::with_capacity(amount);
-        let mut b = std::mem::ManuallyDrop::new(buffer);
-        let (ptr, len, cap) = (b.as_mut_ptr(), b.len(), b.capacity());
+        let mut buffer = ManuallyDrop::new(buffer);
+        let ptr = buffer.as_mut_ptr();
 
         let mut _x = fmx__fmxcpt::new();
         let error = FM_BinaryData_GetData(self.ptr, index, offset, amount as u32, ptr, &mut _x);
@@ -210,7 +211,7 @@ impl BinaryData {
         if error != 0 {
             panic!();
         }
-        Vec::from_raw_parts(ptr, len, cap)
+        Vec::from_raw_parts(ptr, amount, amount)
     }
 
     pub fn get_type(&self, index: fmx_int32) -> BinaryStreamType {
