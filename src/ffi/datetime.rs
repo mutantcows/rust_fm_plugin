@@ -1,4 +1,6 @@
 use super::*;
+use std::ffi::CString;
+use widestring::{U16CString, WideCString};
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -160,11 +162,99 @@ impl DateTime {
         Self { ptr, drop: true }
     }
 
+    pub fn from_str(date: &str, locale: Locale) -> Self {
+        let mut _x = fmx__fmxcpt::new();
+        let date_len = date.len() as u32;
+        let date = U16CString::from_str(date).unwrap();
+        let date_ptr = date.as_ptr();
+        let ptr = unsafe { FM_DateTime_Constructor2(date_ptr, date_len, locale.ptr, &mut _x) };
+        _x.check();
+        Self { ptr, drop: true }
+    }
+
+    pub fn from_text(text: Text, locale: Locale) -> Self {
+        let mut _x = fmx__fmxcpt::new();
+        let ptr = unsafe { FM_DateTime_Constructor3(text.ptr, locale.ptr, &mut _x) };
+        _x.check();
+        Self { ptr, drop: true }
+    }
+
+    pub fn normalize_fixed_point(&mut self, year: FixPt, month: FixPt, day: FixPt) {
+        let mut _x = fmx__fmxcpt::new();
+        let error = unsafe {
+            FM_DateTime_SetNormalizedDate2(self.ptr, year.ptr, month.ptr, day.ptr, &mut _x)
+        };
+        _x.check();
+        if error != 0 {
+            panic!();
+        }
+    }
+    pub fn normalize_i32(&mut self, year: i16, month: i16, day: i16) {
+        let mut _x = fmx__fmxcpt::new();
+        let error = unsafe { FM_DateTime_SetNormalizedDate1(self.ptr, year, month, day, &mut _x) };
+        _x.check();
+        if error != 0 {
+            panic!();
+        }
+    }
+
+    pub fn days_since_epoch(&mut self, days: i64) {
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_DateTime_SetDaysSinceEpoch(self.ptr, days, &mut _x) };
+        _x.check();
+    }
+
     pub fn from_ptr(ptr: *const fmx_DateTime) -> Self {
         Self {
             ptr: ptr as *mut fmx_DateTime,
             drop: false,
         }
+    }
+
+    pub fn is_leap_year(&self) -> bool {
+        let mut _x = fmx__fmxcpt::new();
+        let result = unsafe { FM_DateTime_IsLeapYear(self.ptr, &mut _x) };
+        _x.check();
+        result
+    }
+
+    pub fn day_of_week(&self) -> i16 {
+        let mut _x = fmx__fmxcpt::new();
+        let day = unsafe { FM_DateTime_DayOfWeek(self.ptr, &mut _x) };
+        _x.check();
+        day
+    }
+
+    pub fn day_of_year(&self) -> i16 {
+        let mut _x = fmx__fmxcpt::new();
+        let day = unsafe { FM_DateTime_DayOfYear(self.ptr, &mut _x) };
+        _x.check();
+        day
+    }
+
+    pub fn week_of_year(&self) -> i16 {
+        let mut _x = fmx__fmxcpt::new();
+        let day = unsafe { FM_DateTime_WeekOfYear(self.ptr, &mut _x) };
+        _x.check();
+        day
+    }
+
+    pub fn now(&mut self) {
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_DateTime_Now(self.ptr, &mut _x) };
+        _x.check();
+    }
+
+    pub fn set_date(&mut self, datetime: DateTime) {
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_DateTime_SetDate(self.ptr, datetime.ptr, &mut _x) };
+        _x.check();
+    }
+
+    pub fn set_time(&mut self, datetime: DateTime) {
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_DateTime_SetTime(self.ptr, datetime.ptr, &mut _x) };
+        _x.check();
     }
 }
 
@@ -181,5 +271,22 @@ impl Drop for DateTime {
 impl Default for DateTime {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+impl PartialEq for DateTime {
+    fn eq(&self, other: &DateTime) -> bool {
+        let mut _x = fmx__fmxcpt::new();
+        let result = unsafe { FM_DateTime_operatorEQ(self.ptr, other.ptr, &mut _x) };
+        _x.check();
+        result
+    }
+
+    #[allow(clippy::partialeq_ne_impl)]
+    fn ne(&self, other: &DateTime) -> bool {
+        let mut _x = fmx__fmxcpt::new();
+        let result = unsafe { FM_DateTime_operatorNE(self.ptr, other.ptr, &mut _x) };
+        _x.check();
+        result
     }
 }
