@@ -1,6 +1,5 @@
 use super::*;
-use std::ffi::CString;
-use widestring::{U16CString, WideCString};
+use widestring::U16CString;
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -179,7 +178,7 @@ impl DateTime {
         Self { ptr, drop: true }
     }
 
-    pub fn normalize_fixed_point(&mut self, year: FixPt, month: FixPt, day: FixPt) {
+    pub fn normalize_date_fixed_point(&mut self, year: FixPt, month: FixPt, day: FixPt) {
         let mut _x = fmx__fmxcpt::new();
         let error = unsafe {
             FM_DateTime_SetNormalizedDate2(self.ptr, year.ptr, month.ptr, day.ptr, &mut _x)
@@ -189,7 +188,8 @@ impl DateTime {
             panic!();
         }
     }
-    pub fn normalize_i32(&mut self, year: i16, month: i16, day: i16) {
+
+    pub fn normalize_date_i16(&mut self, year: i16, month: i16, day: i16) {
         let mut _x = fmx__fmxcpt::new();
         let error = unsafe { FM_DateTime_SetNormalizedDate1(self.ptr, year, month, day, &mut _x) };
         _x.check();
@@ -198,10 +198,73 @@ impl DateTime {
         }
     }
 
-    pub fn days_since_epoch(&mut self, days: i64) {
+    pub fn normalize_time_fixed_point(&mut self, hours: FixPt, minutes: FixPt, seconds: FixPt) {
+        let mut _x = fmx__fmxcpt::new();
+        let error = unsafe {
+            FM_DateTime_SetNormalizedTime2(self.ptr, hours.ptr, minutes.ptr, seconds.ptr, &mut _x)
+        };
+        _x.check();
+        if error != 0 {
+            panic!();
+        }
+    }
+
+    pub fn normalize_time_i64(
+        &mut self,
+        hours: i64,
+        minutes: i16,
+        seconds: i16,
+        milliseconds: i32,
+    ) {
+        let mut _x = fmx__fmxcpt::new();
+        let error = unsafe {
+            FM_DateTime_SetNormalizedTime1(self.ptr, hours, minutes, seconds, milliseconds, &mut _x)
+        };
+        _x.check();
+        if error != 0 {
+            panic!();
+        }
+    }
+
+    pub fn get_days_since_epoch(&mut self) -> i32 {
+        let mut _x = fmx__fmxcpt::new();
+        let days = unsafe { FM_DateTime_GetDaysSinceEpoch(self.ptr, &mut _x) };
+        _x.check();
+        days
+    }
+
+    pub fn get_seconds_since_epoch(&mut self) -> FixPt {
+        let mut _x = fmx__fmxcpt::new();
+        let results = FixPt::default();
+        unsafe { FM_DateTime_GetSecondsSinceEpoch(self.ptr, results.ptr, &mut _x) };
+        _x.check();
+        results
+    }
+
+    pub fn set_days_since_epoch(&mut self, days: i64) {
         let mut _x = fmx__fmxcpt::new();
         unsafe { FM_DateTime_SetDaysSinceEpoch(self.ptr, days, &mut _x) };
         _x.check();
+    }
+
+    pub fn set_seconds_since_epoch(&mut self, seconds: FixPt) {
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_DateTime_SetSecondsSinceEpoch(self.ptr, seconds.ptr, &mut _x) };
+        _x.check();
+    }
+
+    pub fn set_seconds_since_midnight(&mut self, seconds: FixPt) {
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_DateTime_SetSecsSinceMidnight(self.ptr, seconds.ptr, &mut _x) };
+        _x.check();
+    }
+
+    pub fn get_seconds_since_midnight(&mut self) -> FixPt {
+        let mut _x = fmx__fmxcpt::new();
+        let results = FixPt::default();
+        unsafe { FM_DateTime_GetSecsSinceMidnight(self.ptr, results.ptr, &mut _x) };
+        _x.check();
+        results
     }
 
     pub fn from_ptr(ptr: *const fmx_DateTime) -> Self {
@@ -243,6 +306,63 @@ impl DateTime {
         let mut _x = fmx__fmxcpt::new();
         unsafe { FM_DateTime_Now(self.ptr, &mut _x) };
         _x.check();
+    }
+
+    pub fn hours(&self) -> i32 {
+        let mut _x = fmx__fmxcpt::new();
+        let hours = unsafe { FM_DateTime_GetHour(self.ptr, &mut _x) };
+        _x.check();
+        hours
+    }
+
+    pub fn minutes(&self) -> i16 {
+        let mut _x = fmx__fmxcpt::new();
+        let minutes = unsafe { FM_DateTime_GetMinute(self.ptr, &mut _x) };
+        _x.check();
+        minutes
+    }
+
+    pub fn seconds(&self) -> i16 {
+        let mut _x = fmx__fmxcpt::new();
+        let seconds = unsafe { FM_DateTime_GetSec(self.ptr, &mut _x) };
+        _x.check();
+        seconds
+    }
+
+    pub fn milliseconds(&self) -> i32 {
+        let mut _x = fmx__fmxcpt::new();
+        let milliseconds = unsafe { FM_DateTime_GetUSec(self.ptr, &mut _x) };
+        _x.check();
+        milliseconds
+    }
+
+    pub fn seconds_fixed_point(&self) -> FixPt {
+        let mut _x = fmx__fmxcpt::new();
+        let results = FixPt::default();
+        unsafe { FM_DateTime_GetSeconds(self.ptr, results.ptr, &mut _x) };
+        _x.check();
+        results
+    }
+
+    pub fn day(&self) -> i16 {
+        let mut _x = fmx__fmxcpt::new();
+        let day = unsafe { FM_DateTime_GetDay(self.ptr, &mut _x) };
+        _x.check();
+        day
+    }
+
+    pub fn month(&self) -> i16 {
+        let mut _x = fmx__fmxcpt::new();
+        let month = unsafe { FM_DateTime_GetMonth(self.ptr, &mut _x) };
+        _x.check();
+        month
+    }
+
+    pub fn year(&self) -> i16 {
+        let mut _x = fmx__fmxcpt::new();
+        let year = unsafe { FM_DateTime_GetYear(self.ptr, &mut _x) };
+        _x.check();
+        year
     }
 
     pub fn set_date(&mut self, datetime: DateTime) {
