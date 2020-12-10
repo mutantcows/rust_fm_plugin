@@ -1,6 +1,5 @@
 use super::*;
 use std::convert::TryFrom;
-use std::ffi::{CStr, CString};
 use std::mem::ManuallyDrop;
 use std::os::raw::c_char;
 
@@ -26,12 +25,14 @@ extern "C" {
         _x: *mut fmx__fmxcpt,
     ) -> *mut fmx_BinaryData;
 
+    #[allow(dead_code)]
     fn FM_BinaryData_Constructor4(
         name: *const fmx_Text,
         context: *mut fmx_uint32,
         _x: *mut fmx__fmxcpt,
     ) -> *mut fmx_BinaryData;
 
+    #[allow(dead_code)]
     fn FM_BinaryData_operatorAS(
         _self: *mut fmx_BinaryData,
         source: *const fmx_BinaryData,
@@ -148,6 +149,7 @@ extern "C" {
     ) -> fmx_errcode;
 }
 
+#[derive(Eq)]
 pub struct BinaryData {
     pub(crate) ptr: *mut fmx_BinaryData,
     drop: bool,
@@ -157,6 +159,24 @@ impl BinaryData {
     pub fn new() -> Self {
         let mut _x = fmx__fmxcpt::new();
         let ptr = unsafe { FM_BinaryData_Constructor1(&mut _x) };
+        _x.check();
+        Self { ptr, drop: true }
+    }
+
+    pub fn to_owned(&self) -> Self {
+        let mut _x = fmx__fmxcpt::new();
+        let ptr = unsafe { FM_BinaryData_Constructor2(self.ptr, &mut _x) };
+        _x.check();
+        Self { ptr, drop: true }
+    }
+
+    pub fn from_buffer(name: Text, buffer: Vec<i8>) -> Self {
+        let mut _x = fmx__fmxcpt::new();
+        let buffer_size = buffer.len() as u32;
+        let mut buffer = ManuallyDrop::new(buffer);
+        let ptr = buffer.as_mut_ptr();
+
+        let ptr = unsafe { FM_BinaryData_Constructor3(name.ptr, buffer_size as u32, ptr, &mut _x) };
         _x.check();
         Self { ptr, drop: true }
     }
@@ -220,6 +240,109 @@ impl BinaryData {
         unsafe { FM_BinaryData_GetType(self.ptr, index, quad.ptr, &mut _x) };
         _x.check();
         BinaryStreamType::from(quad)
+    }
+
+    pub fn add_stream(&self, stream_type: BinaryStreamType, buffer: Vec<i8>) {
+        let mut _x = fmx__fmxcpt::new();
+        let quad = QuadChar::from(stream_type);
+        let size = buffer.len() as u32;
+        let mut buffer = ManuallyDrop::new(buffer);
+        let buffer_ptr = buffer.as_mut_ptr();
+        let error = unsafe { FM_BinaryData_Add(self.ptr, quad.ptr, size, buffer_ptr, &mut _x) };
+        _x.check();
+        if error != 0 {
+            panic!();
+        }
+    }
+
+    pub fn remove_stream(&self, stream_type: BinaryStreamType) {
+        let mut _x = fmx__fmxcpt::new();
+        let quad = QuadChar::from(stream_type);
+        let success = unsafe { FM_BinaryData_Remove(self.ptr, quad.ptr, &mut _x) };
+        _x.check();
+        if !success {
+            panic!();
+        }
+    }
+
+    pub fn remove_all(&self) {
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_BinaryData_RemoveAll(self.ptr, &mut _x) };
+        _x.check();
+    }
+
+    pub fn add_header(&self, stream_type: BinaryStreamType, context: &mut u32) {
+        let mut _x = fmx__fmxcpt::new();
+        let quad = QuadChar::from(stream_type);
+        let error = unsafe { FM_BinaryData_AddBegin(self.ptr, quad.ptr, context, &mut _x) };
+        _x.check();
+        if error != 0 {
+            panic!();
+        }
+    }
+
+    pub fn append_stream(&self, context: u32, buffer: Vec<i8>) {
+        let mut _x = fmx__fmxcpt::new();
+        let size = buffer.len() as u32;
+        let mut buffer = ManuallyDrop::new(buffer);
+        let buffer_ptr = buffer.as_mut_ptr();
+        let error =
+            unsafe { FM_BinaryData_AddAppend(self.ptr, context, size, buffer_ptr, &mut _x) };
+        _x.check();
+        if error != 0 {
+            panic!();
+        }
+    }
+
+    pub fn add_footer(&self, context: u32) {
+        let mut _x = fmx__fmxcpt::new();
+        let error = unsafe { FM_BinaryData_AddFinish(self.ptr, context, &mut _x) };
+        _x.check();
+        if error != 0 {
+            panic!();
+        }
+    }
+
+    pub fn get_file_names(&self) -> Text {
+        let mut _x = fmx__fmxcpt::new();
+        let file_paths = Text::new();
+        let error = unsafe { FM_BinaryData_GetFNAMData(self.ptr, file_paths.ptr, &mut _x) };
+        _x.check();
+        if error != 0 {
+            panic!();
+        }
+        file_paths
+    }
+
+    pub fn add_file_paths(&self, file_paths: Text) {
+        let mut _x = fmx__fmxcpt::new();
+        let error = unsafe { FM_BinaryData_AddFNAMData(self.ptr, file_paths.ptr, &mut _x) };
+        _x.check();
+        if error != 0 {
+            panic!();
+        }
+    }
+
+    pub fn get_dimensions(&self) -> (i16, i16) {
+        let mut _x = fmx__fmxcpt::new();
+        let mut height = 0;
+        let mut width = 0;
+        let error =
+            unsafe { FM_BinaryData_GetSIZEData(self.ptr, &mut width, &mut height, &mut _x) };
+        _x.check();
+        if error != 0 {
+            panic!();
+        }
+        (width, height)
+    }
+
+    pub fn set_dimensions(&self, height: i16, width: i16) {
+        let mut _x = fmx__fmxcpt::new();
+        let error = unsafe { FM_BinaryData_AddSIZEData(self.ptr, width, height, &mut _x) };
+        _x.check();
+        if error != 0 {
+            panic!();
+        }
     }
 }
 
@@ -306,5 +429,22 @@ impl From<QuadChar> for BinaryStreamType {
             "MAIN" => MAIN,
             t => Other(t.to_string()),
         }
+    }
+}
+
+impl PartialEq for BinaryData {
+    fn eq(&self, other: &BinaryData) -> bool {
+        let mut _x = fmx__fmxcpt::new();
+        let result = unsafe { FM_BinaryData_operatorEQ(self.ptr, other.ptr, &mut _x) };
+        _x.check();
+        result
+    }
+
+    #[allow(clippy::partialeq_ne_impl)]
+    fn ne(&self, other: &BinaryData) -> bool {
+        let mut _x = fmx__fmxcpt::new();
+        let result = unsafe { FM_BinaryData_operatorNE(self.ptr, other.ptr, &mut _x) };
+        _x.check();
+        result
     }
 }
