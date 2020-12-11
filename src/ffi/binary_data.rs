@@ -170,13 +170,17 @@ impl BinaryData {
         Self { ptr, drop: true }
     }
 
-    pub fn from_buffer(name: Text, buffer: Vec<i8>) -> Self {
+    pub fn from_buffer<T: ToText>(name: T, buffer: Vec<i8>) -> Self {
         let mut _x = fmx__fmxcpt::new();
+        let name = name.to_text();
         let buffer_size = buffer.len() as u32;
         let mut buffer = ManuallyDrop::new(buffer);
-        let ptr = buffer.as_mut_ptr();
+        let buffer_ptr = buffer.as_mut_ptr();
 
-        let ptr = unsafe { FM_BinaryData_Constructor3(name.ptr, buffer_size as u32, ptr, &mut _x) };
+        let ptr = unsafe {
+            FM_BinaryData_Constructor3(name.ptr, buffer_size as u32, buffer_ptr, &mut _x)
+        };
+        unsafe { ManuallyDrop::drop(&mut buffer) };
         _x.check();
         Self { ptr, drop: true }
     }
@@ -249,6 +253,7 @@ impl BinaryData {
         let mut buffer = ManuallyDrop::new(buffer);
         let buffer_ptr = buffer.as_mut_ptr();
         let error = unsafe { FM_BinaryData_Add(self.ptr, quad.ptr, size, buffer_ptr, &mut _x) };
+        unsafe { ManuallyDrop::drop(&mut buffer) };
         _x.check();
         if error != 0 {
             panic!();
@@ -288,6 +293,7 @@ impl BinaryData {
         let buffer_ptr = buffer.as_mut_ptr();
         let error =
             unsafe { FM_BinaryData_AddAppend(self.ptr, context, size, buffer_ptr, &mut _x) };
+        unsafe { ManuallyDrop::drop(&mut buffer) };
         _x.check();
         if error != 0 {
             panic!();
@@ -348,9 +354,11 @@ impl BinaryData {
 
 impl Drop for BinaryData {
     fn drop(&mut self) {
+        crate::helpers::log("dropping bin data");
         if self.drop {
             let mut _x = fmx__fmxcpt::new();
             unsafe { FM_BinaryData_Delete(self.ptr, &mut _x) };
+            crate::helpers::log("dropped bin data");
             _x.check();
         }
     }
