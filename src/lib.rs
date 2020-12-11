@@ -73,6 +73,17 @@ const FUNCTIONS: phf::Map<fmx_int16, ExternalFunction> = phf_map! {
         compatible_flags: PluginFlag::DisplayInAllDialogs as u32 | PluginFlag::FutureCompatible as u32,
         function_ptr: Some(rust_pdf_to_json),
     },
+
+    500i16 => ExternalFunction{
+        id: 500,
+        name: "RUST_InsertFile",
+        definition: "RUST_InsertFile( path )",
+        description: "Inserts file into container.",
+        min_args: 1,
+        max_args: 1,
+        compatible_flags: PluginFlag::DisplayInAllDialogs as u32 | PluginFlag::FutureCompatible as u32,
+        function_ptr: Some(rust_insert_file),
+    },
 };
 
 #[no_mangle]
