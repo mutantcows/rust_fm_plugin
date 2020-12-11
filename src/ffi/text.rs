@@ -1,5 +1,5 @@
 use super::*;
-use std::ffi::CString;
+use std::ffi::{CString, OsStr};
 use widestring::{U16CString, WideCString};
 
 #[repr(C)]
@@ -186,5 +186,21 @@ impl From<&String> for Text {
         let mut text = Text::new();
         text.assign(txt);
         text
+    }
+}
+
+impl From<&OsStr> for Text {
+    fn from(txt: &OsStr) -> Text {
+        let mut text = Text::new();
+        text.assign(&*txt.to_string_lossy());
+        text
+    }
+}
+
+impl ToText for &OsStr {
+    fn to_text(self) -> Text {
+        let mut txt = Text::new();
+        txt.assign(&*self.to_string_lossy());
+        txt
     }
 }
