@@ -1,7 +1,7 @@
 use crate::ffi::*;
 use std::ffi::CString;
 use std::os::raw::{c_char, c_uint, c_ushort};
-use widestring::WideCString;
+use widestring::U16CString;
 
 pub(crate) fn write_to_file(content: &str) -> Result<(), String> {
     use directories::UserDirs;
@@ -32,7 +32,7 @@ pub fn log(content: &str) {
 /// # Safety
 /// buffer size must be accurate and include enough room for str
 pub unsafe fn write_to_u16_buff(buffer: *mut c_ushort, buffer_size: c_uint, s: &str) {
-    let c_string = WideCString::from_str(s).unwrap();
+    let c_string = U16CString::from_str(s).unwrap();
     let bytes = c_string.as_slice();
 
     bytes_to_buff(buffer, buffer_size, bytes);

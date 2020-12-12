@@ -1,6 +1,6 @@
 use super::*;
 use std::ffi::{CString, OsStr};
-use widestring::{U16CString, WideCString};
+use widestring::U16CString;
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -8,7 +8,8 @@ pub struct fmx_Text {
     pub _address: u8,
 }
 
-#[link(kind = "static", name = "FMWrapper")]
+#[cfg_attr(target_os = "macos", link(kind = "framework", name = "FMWrapper"))]
+#[cfg_attr(target_os = "windows", link(kind = "static", name = "FMWrapper"))]
 extern "C" {
     fn FM_Text_AssignUnicodeWithLength(
         _self: *mut fmx_Text,
@@ -90,14 +91,14 @@ impl Text {
     }
 
     pub fn assign_unicode_with_length(&mut self, s: &str, len: u32) {
-        let c_string = WideCString::from_str(s).unwrap();
+        let c_string = U16CString::from_str(s).unwrap();
         let mut _x = fmx__fmxcpt::new();
         unsafe { FM_Text_AssignUnicodeWithLength(self.ptr, c_string.as_ptr(), len, &mut _x) };
         _x.check();
     }
 
     pub fn assign_wide(&mut self, s: &str) {
-        let c_string = WideCString::from_str(s).unwrap();
+        let c_string = U16CString::from_str(s).unwrap();
         let mut _x = fmx__fmxcpt::new();
         unsafe { FM_Text_AssignWide(self.ptr, c_string.as_ptr(), &mut _x) };
         _x.check();

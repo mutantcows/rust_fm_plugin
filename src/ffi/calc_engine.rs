@@ -18,7 +18,8 @@ pub struct fmx_RowVect {
     pub _address: u8,
 }
 
-#[link(kind = "static", name = "FMWrapper")]
+#[cfg_attr(target_os = "macos", link(kind = "framework", name = "FMWrapper"))]
+#[cfg_attr(target_os = "windows", link(kind = "static", name = "FMWrapper"))]
 extern "C" {
     fn FM_ExprEnv_Constructor1(_x: *mut fmx__fmxcpt) -> *mut fmx_ExprEnv;
 
