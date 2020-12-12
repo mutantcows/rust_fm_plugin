@@ -8,11 +8,10 @@ use std::path::Path;
 #[no_mangle]
 pub(crate) unsafe extern "C" fn rust_insert_file(
     _func_id: c_short,
-    env_ptr: *const fmx_ExprEnv,
+    _env_ptr: *const fmx_ExprEnv,
     data_vect_ptr: *const fmx_DataVect,
     results_ptr: *mut fmx_Data,
 ) -> fmx_errcode {
-    let env = ExprEnv::from_ptr(env_ptr);
     let data_vect = DataVect::from_ptr(data_vect_ptr);
     let mut results = Data::from_ptr(results_ptr);
 

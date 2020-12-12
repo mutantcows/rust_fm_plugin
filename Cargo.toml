@@ -21,3 +21,8 @@ phf = { version = "*", features = ["macros"] }
 bindgen = "*"
 cc = "*"
 libc = "*"
+
+[package.metadata.cargo-post.dependencies]
+directories = "*"
+toml = "*"
+serde = { version = "1.0", features = ["derive"] }

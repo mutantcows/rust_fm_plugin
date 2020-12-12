@@ -1,0 +1,6 @@
+[filemaker]
+ext_path = "/path/to/Extentions"
+bin_path = "/Applications/FileMaker Pro.app"
+
+[plugin]
+name = "plugin name"
