@@ -1,13 +1,23 @@
 use super::*;
-use std::os::raw::{c_char, c_int, c_longlong, c_short, c_uchar, c_uint, c_ulonglong, c_ushort};
+use std::os::raw::{c_char, c_int, c_short, c_uchar, c_uint, c_ushort};
+#[cfg(target_os = "macos")]
+use std::os::raw::{c_long, c_ulong};
+#[cfg(target_os = "windows")]
+use std::os::raw::{c_longlong, c_ulonglong};
 
 pub type fmx_uint16 = c_ushort;
 pub type fmx_int16 = c_short;
 pub type fmx_uchar = c_uchar;
 pub type fmx_int32 = c_int;
 pub type fmx_uint32 = c_uint;
+#[cfg(target_os = "windows")]
 pub type fmx_int64 = c_longlong;
+#[cfg(target_os = "macos")]
+pub type fmx_int64 = c_long;
+#[cfg(target_os = "windows")]
 pub type fmx_uint64 = c_ulonglong;
+#[cfg(target_os = "macos")]
+pub type fmx_uint64 = c_ulong;
 pub type fmx_ptrtype = fmx_uint64;
 #[cfg(target_os = "macos")]
 pub type fmx_unusedid = fmx_int32;
