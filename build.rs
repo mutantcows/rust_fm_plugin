@@ -1,9 +1,12 @@
 use std::env;
 use std::error::Error;
 use std::path::Path;
+#[cfg(any(target_os = "windows", target_os = "macos"))]
 use std::process;
 mod config;
-use config::{read_config, BuildError, Config};
+#[cfg(any(target_os = "windows", target_os = "macos"))]
+use config::BuildError;
+use config::{read_config, Config};
 
 fn main() -> Result<(), Box<dyn Error>> {
     let manifest = env!("CARGO_MANIFEST_DIR");
@@ -48,7 +51,7 @@ fn kill_filemaker(config: &Config) -> Result<(), Box<dyn Error>> {
 }
 
 #[cfg(target_os = "linux")]
-fn kill_filemaker(config: &Config) -> Result<(), Box<dyn Error>> {
+fn kill_filemaker(_config: &Config) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
