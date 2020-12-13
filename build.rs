@@ -1,35 +1,28 @@
+use std::env;
 use std::error::Error;
 use std::path::Path;
 use std::process;
-
-#[cfg(target_os = "macos")]
-fn main() -> Result<(), Box<dyn Error>> {
-    let manifest = env!("CARGO_MANIFEST_DIR");
-    let config = read_config(Path::new(manifest)).unwrap();
-
-    kill_filemaker(&config)?;
-
-    println!(
-        r"cargo:rustc-link-search=framework={}/libraries/Mac",
-        manifest
-    );
-
-    Ok(())
-}
-
-#[cfg(target_os = "windows")]
-fn main() -> Result<(), Box<dyn Error>> {
-    let manifest = env!("CARGO_MANIFEST_DIR");
-    let config = read_config(Path::new(manifest)).unwrap();
-
-    kill_filemaker(&config)?;
-
-    println!(r"cargo:rustc-link-search={}/libraries/Win/x64", manifest);
-    Ok(())
-}
-
 mod config;
 use config::{read_config, BuildError, Config};
+
+fn main() -> Result<(), Box<dyn Error>> {
+    let manifest = env!("CARGO_MANIFEST_DIR");
+    let config = read_config(Path::new(manifest)).unwrap();
+
+    if env::var("PROFILE").unwrap() == "release" {
+        kill_filemaker(&config)?;
+    }
+
+    if cfg!(target_os = "windows") {
+        println!(r"cargo:rustc-link-search={}/libraries/Win/x64", manifest);
+    } else if cfg!(target_os = "macos") {
+        println!(
+            r"cargo:rustc-link-search=framework={}/libraries/Mac",
+            manifest
+        );
+    }
+    Ok(())
+}
 
 #[cfg(target_os = "windows")]
 fn kill_filemaker(config: &Config) -> Result<(), Box<dyn Error>> {
