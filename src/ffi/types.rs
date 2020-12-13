@@ -1,6 +1,6 @@
 use super::*;
 use std::os::raw::{c_char, c_int, c_short, c_uchar, c_uint, c_ushort};
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", target_os = "linux"))]
 use std::os::raw::{c_long, c_ulong};
 #[cfg(target_os = "windows")]
 use std::os::raw::{c_longlong, c_ulonglong};
