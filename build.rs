@@ -48,7 +48,9 @@ fn kill_filemaker(config: &Config) -> Result<(), Box<dyn Error>> {
 }
 
 #[cfg(target_os = "linux")]
-fn kill_filemaker(config: &Config) -> Result<(), Box<dyn Error>> {}
+fn kill_filemaker(config: &Config) -> Result<(), Box<dyn Error>> {
+    Ok(())
+}
 
 #[allow(dead_code)]
 fn run_bindgen() {
