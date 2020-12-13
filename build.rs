@@ -15,29 +15,6 @@ fn main() -> Result<(), Box<dyn Error>> {
     );
 
     Ok(())
-
-    // // The bindgen::Builder is the main entry point
-    // // to bindgen, and lets you build up options for
-    // // the resulting bindings.
-    // let bindings = bindgen::Builder::default()
-    //     .clang_arg("--language=c++")
-    //     .clang_arg("-std=c++14")
-    //     // The input header we would like to generate
-    //     // bindings for.
-    //     .header("headers/FMWrapper.h")
-    //     // Tell cargo to invalidate the built crate whenever any of the
-    //     // included header files changed.
-    //     .parse_callbacks(Box::new(bindgen::CargoCallbacks))
-    //     // Finish the builder and generate the bindings.
-    //     .generate()
-    //     // Unwrap the Result and panic on failure.
-    //     .expect("Unable to generate bindings");
-
-    // // Write the bindings to the $OUT_DIR/bindings.rs file.
-    // // let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
-    // bindings
-    //     .write_to_file("bindings.rs")
-    //     .expect("Couldn't write bindings!");
 }
 
 #[cfg(target_os = "windows")]
@@ -52,7 +29,6 @@ fn main() -> Result<(), Box<dyn Error>> {
 }
 
 mod config;
-
 use config::{read_config, BuildError, Config};
 
 #[cfg(target_os = "windows")]
@@ -73,4 +49,19 @@ fn kill_filemaker(config: &Config) -> Result<(), Box<dyn Error>> {
     let app = app_path.file_stem().ok_or(BuildError::FileMaker)?;
     process::Command::new("pkill").arg(app).spawn().ok();
     Ok(())
+}
+
+#[allow(dead_code)]
+fn run_bindgen() {
+    let bindings = bindgen::Builder::default()
+        .clang_arg("--language=c++")
+        .clang_arg("-std=c++14")
+        .header("headers/FMWrapper.h")
+        .parse_callbacks(Box::new(bindgen::CargoCallbacks))
+        .generate()
+        .expect("Unable to generate bindings");
+
+    bindings
+        .write_to_file("bindings.rs")
+        .expect("Couldn't write bindings!");
 }
