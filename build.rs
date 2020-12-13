@@ -3,7 +3,7 @@ use std::path::Path;
 use std::process;
 
 #[cfg(target_os = "macos")]
-fn main() {
+fn main() -> Result<(), Box<dyn Error>> {
     let manifest = env!("CARGO_MANIFEST_DIR");
     let config = read_config(Path::new(manifest)).unwrap();
 
@@ -13,6 +13,8 @@ fn main() {
         r"cargo:rustc-link-search=framework={}/libraries/Mac",
         manifest
     );
+
+    Ok(())
 
     // // The bindgen::Builder is the main entry point
     // // to bindgen, and lets you build up options for
@@ -68,7 +70,7 @@ fn kill_filemaker(config: &Config) -> Result<(), Box<dyn Error>> {
 #[cfg(target_os = "macos")]
 fn kill_filemaker(config: &Config) -> Result<(), Box<dyn Error>> {
     let app_path = Path::new(&config.filemaker.bin_path);
-    let app = app_path.file_stem().ok_or(PostBuildError::FileMaker)?;
+    let app = app_path.file_stem().ok_or(BuildError::FileMaker)?;
     process::Command::new("pkill").arg(app).spawn().ok();
     Ok(())
 }
