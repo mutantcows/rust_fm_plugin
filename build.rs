@@ -9,7 +9,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let manifest = env!("CARGO_MANIFEST_DIR");
     let config = read_config(Path::new(manifest)).unwrap();
 
-    if env::var("PROFILE").unwrap() == "release" {
+    if env::var("PROFILE").unwrap() == "release" && !cfg!(target_os = "linux") {
         kill_filemaker(&config)?;
     }
 
@@ -20,7 +20,10 @@ fn main() -> Result<(), Box<dyn Error>> {
             r"cargo:rustc-link-search=framework={}/libraries/Mac",
             manifest
         );
+    } else if cfg!(target_os = "linux") {
+        println!(r"cargo:rustc-link-search={}/libraries/Linux", manifest);
     }
+
     Ok(())
 }
 
@@ -43,6 +46,9 @@ fn kill_filemaker(config: &Config) -> Result<(), Box<dyn Error>> {
     process::Command::new("pkill").arg(app).spawn().ok();
     Ok(())
 }
+
+#[cfg(target_os = "linux")]
+fn kill_filemaker(config: &Config) -> Result<(), Box<dyn Error>> {}
 
 #[allow(dead_code)]
 fn run_bindgen() {
