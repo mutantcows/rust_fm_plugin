@@ -7,9 +7,9 @@ use config::{read_config, BuildError, Config};
 
 fn main() -> Result<(), Box<dyn Error>> {
     let manifest = env!("CARGO_MANIFEST_DIR");
-    let config = read_config(Path::new(manifest)).unwrap();
 
     if env::var("PROFILE").unwrap() == "release" && !cfg!(target_os = "linux") {
+        let config = read_config(Path::new(manifest)).unwrap();
         kill_filemaker(&config)?;
     }
 
