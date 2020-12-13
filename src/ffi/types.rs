@@ -12,14 +12,14 @@ pub type fmx_int32 = c_int;
 pub type fmx_uint32 = c_uint;
 #[cfg(target_os = "windows")]
 pub type fmx_int64 = c_longlong;
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", target_os = "linux"))]
 pub type fmx_int64 = c_long;
 #[cfg(target_os = "windows")]
 pub type fmx_uint64 = c_ulonglong;
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", target_os = "linux"))]
 pub type fmx_uint64 = c_ulong;
 pub type fmx_ptrtype = fmx_uint64;
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", target_os = "linux"))]
 pub type fmx_unusedid = fmx_int32;
 #[cfg(target_os = "windows")]
 pub type fmx_unusedid = fmx_int16;
