@@ -59,7 +59,9 @@ fn kill_filemaker(_config: &Config) -> Result<(), Box<dyn Error>> {
 fn run_bindgen() {
     let bindings = bindgen::Builder::default()
         .clang_arg("--language=c++")
-        .clang_arg("-std=c++14")
+        // .clang_arg("-std=c++14")
+        .clang_arg("-std=c++1y")
+        .clang_arg("-stdlib=libc++")
         .header("headers/FMWrapper.h")
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
         .generate()
