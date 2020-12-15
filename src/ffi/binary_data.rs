@@ -11,6 +11,7 @@ pub struct fmx_BinaryData {
 
 #[cfg_attr(target_os = "macos", link(kind = "framework", name = "FMWrapper"))]
 #[cfg_attr(target_os = "windows", link(kind = "static", name = "FMWrapper"))]
+#[cfg_attr(target_os = "linux", link(kind = "static", name = "FMWrapper"))]
 extern "C" {
     fn FM_BinaryData_Constructor1(_x: *mut fmx__fmxcpt) -> *mut fmx_BinaryData;
     fn FM_BinaryData_Constructor2(
