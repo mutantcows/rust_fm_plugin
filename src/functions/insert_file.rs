@@ -55,7 +55,10 @@ impl FileMakerFunction for InsertFile {
         let file_path = args.at_as_text(0).to_string();
         let file_path = Path::new(&file_path);
 
-        let mut f = File::open(&file_path).expect("no file found");
+        let mut f = match File::open(&file_path) {
+            Ok(file) => file,
+            Err(_) => return 99,
+        };
         let file_info = metadata(&file_path).expect("unable to read metadata");
         let mut buffer = vec![0; file_info.len() as usize];
         f.read_exact(&mut buffer).expect("buffer overflow");
