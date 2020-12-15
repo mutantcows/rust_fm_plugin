@@ -10,7 +10,7 @@ pub struct fmx_FixPt {
 
 #[cfg_attr(target_os = "macos", link(kind = "framework", name = "FMWrapper"))]
 #[cfg_attr(target_os = "windows", link(kind = "static", name = "FMWrapper"))]
-#[cfg_attr(target_os = "linux", link(kind = "static", name = "FMWrapper"))]
+#[cfg_attr(target_os = "linux", link(kind = "dylib", name = "FMWrapper"))]
 extern "C" {
     fn FM_FixPt_AsLong(_self: *const fmx_FixPt, _x: *mut fmx__fmxcpt) -> fmx_int32;
 

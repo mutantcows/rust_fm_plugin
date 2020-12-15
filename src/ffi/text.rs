@@ -10,7 +10,7 @@ pub struct fmx_Text {
 
 #[cfg_attr(target_os = "macos", link(kind = "framework", name = "FMWrapper"))]
 #[cfg_attr(target_os = "windows", link(kind = "static", name = "FMWrapper"))]
-#[cfg_attr(target_os = "linux", link(kind = "static", name = "FMWrapper"))]
+#[cfg_attr(target_os = "linux", link(kind = "dylib", name = "FMWrapper"))]
 extern "C" {
     fn FM_Text_AssignUnicodeWithLength(
         _self: *mut fmx_Text,
