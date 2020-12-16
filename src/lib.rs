@@ -38,7 +38,7 @@ const FUNCTIONS: phf::Map<fmx_int16, ExternalFunction> = phf_map! {
         min_args: 2,
         max_args:2,
         compatible_flags: PluginFlag::DisplayInAllDialogs as u32 | PluginFlag::FutureCompatible as u32,
-        function_ptr: Some(rust_convert_to_base),
+        function_ptr: Some(ConvertToBase::extern_func),
     },
 
     200i16 => ExternalFunction{
@@ -49,7 +49,7 @@ const FUNCTIONS: phf::Map<fmx_int16, ExternalFunction> = phf_map! {
         min_args: 2,
         max_args: -1,
         compatible_flags: PluginFlag::DisplayInAllDialogs as u32 | PluginFlag::FutureCompatible as u32,
-        function_ptr: Some(rust_execute_sql),
+        function_ptr: Some(ExecuteSQL::extern_func),
     },
 
     300i16 => ExternalFunction{
@@ -60,7 +60,7 @@ const FUNCTIONS: phf::Map<fmx_int16, ExternalFunction> = phf_map! {
         min_args: 4,
         max_args: -1,
         compatible_flags: PluginFlag::DisplayInAllDialogs as u32 | PluginFlag::FutureCompatible as u32,
-        function_ptr: Some(rust_execute_sql_text_result),
+        function_ptr: Some(ExecuteSQLTextResult::extern_func),
     },
 
     400i16 => ExternalFunction{
@@ -71,7 +71,7 @@ const FUNCTIONS: phf::Map<fmx_int16, ExternalFunction> = phf_map! {
         min_args: 1,
         max_args: 1,
         compatible_flags: PluginFlag::DisplayInAllDialogs as u32 | PluginFlag::FutureCompatible as u32,
-        function_ptr: Some(rust_pdf_to_json),
+        function_ptr: Some(PDFToJSON::extern_func),
     },
 
     500i16 => ExternalFunction{
@@ -82,7 +82,7 @@ const FUNCTIONS: phf::Map<fmx_int16, ExternalFunction> = phf_map! {
         min_args: 1,
         max_args: 1,
         compatible_flags: PluginFlag::DisplayInAllDialogs as u32 | PluginFlag::FutureCompatible as u32,
-        function_ptr: Some(InsertFile::external),
+        function_ptr: Some(InsertFile::extern_func),
     },
 };
 

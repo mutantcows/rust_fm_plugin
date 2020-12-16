@@ -821,3 +821,20 @@ pub enum FilePathFormat {
     WinPath = 2,
     URLPath = 3,
 }
+
+pub trait FileMakerFunction {
+    fn function(id: i16, env: &ExprEnv, args: &DataVect, result: &mut Data) -> i16;
+
+    extern "C" fn extern_func(
+        id: c_short,
+        env_ptr: *const fmx_ExprEnv,
+        args_ptr: *const fmx_DataVect,
+        result_ptr: *mut fmx_Data,
+    ) -> i16 {
+        let arguments = DataVect::from_ptr(args_ptr);
+        let env = ExprEnv::from_ptr(env_ptr);
+        let mut result = Data::from_ptr(result_ptr);
+
+        Self::function(id, &env, &arguments, &mut result)
+    }
+}
