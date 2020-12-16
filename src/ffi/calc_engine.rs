@@ -663,6 +663,32 @@ impl Default for DataVect {
     }
 }
 
+impl<'a> IntoIterator for &'a DataVect {
+    type Item = Data;
+    type IntoIter = DataVectIterator<'a>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        DataVectIterator {
+            data_vect: self,
+            index: 0,
+        }
+    }
+}
+
+pub struct DataVectIterator<'a> {
+    data_vect: &'a DataVect,
+    index: usize,
+}
+
+impl<'a> Iterator for DataVectIterator<'a> {
+    type Item = Data;
+    fn next(&mut self) -> Option<Data> {
+        let result = self.data_vect.at(self.index as u32);
+        self.index += 1;
+        Some(result)
+    }
+}
+
 #[derive(Clone)]
 pub struct ExternalFunction {
     pub id: fmx_int16,
