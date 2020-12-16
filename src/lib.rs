@@ -169,3 +169,11 @@ fn plugin_get_string(
 fn session_notifications(_session_id: fmx_ptrtype) {}
 
 fn file_notifications(_session_id: fmx_ptrtype, _file_id: fmx_ptrtype) {}
+
+struct Plugin<T>
+where
+    T: FileMakerFunction,
+{
+    name: String,
+    functions: Vec<T>,
+}
