@@ -39,7 +39,7 @@ pub type fmx_colorchannel = c_uchar;
 pub type fmx_colorchannel16 = c_ushort;
 pub type fmx_fontscript = c_ushort;
 pub type fmx_ExtPluginType = Option<
-    unsafe extern "C" fn(
+    extern "C" fn(
         functionId: c_short,
         env: *const fmx_ExprEnv,
         parms: *const fmx_DataVect,

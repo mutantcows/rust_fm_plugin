@@ -21,7 +21,7 @@ const PLUGIN_URL: &str = "http://httpbin.org/get?id=";
 first 4 chars are the plugin id
 char 5 always 1
 char 6 "Y" or "n" to enable configure button in prefs
-char 7 alwast "n"
+char 7 always "n"
 char 8 "Y" or "n" to enable init and shutdown callbacks
 char 9 "Y" or "n" for idle callback
 char 10 "Y" or "n" for session/file shutdwon callbacks
@@ -170,10 +170,121 @@ fn session_notifications(_session_id: fmx_ptrtype) {}
 
 fn file_notifications(_session_id: fmx_ptrtype, _file_id: fmx_ptrtype) {}
 
-struct Plugin<T>
-where
-    T: FileMakerFunction,
-{
-    name: String,
-    functions: Vec<T>,
+pub struct PluginConfig {
+    pub id: [char; 4],
+    pub name: &'static str,
+    pub description: &'static str,
+    pub url: &'static str,
+    pub configure_button: bool,
+    pub init_and_shutdown: bool,
+    pub idle: bool,
+    pub shutdown: bool,
+    functions: Vec<fmx_ExtPluginType>,
+}
+
+impl PluginConfig {
+    fn get_string(
+        &self,
+        which_string: ExternStringType,
+        _win_lang_id: fmx_uint32,
+        out_buffer_size: fmx_uint32,
+        out_buffer: *mut fmx_unichar16,
+    ) {
+        use ExternStringType::*;
+        let string = match which_string {
+            Name => self.name.to_string(),
+            AppConfig => self.description.to_string(),
+            Options => {
+                let mut options: String = self.id.iter().collect();
+                options.push('1');
+                options.push(if self.configure_button { 'Y' } else { 'n' });
+                options.push('n');
+                options.push(if self.init_and_shutdown { 'Y' } else { 'n' });
+                options.push(if self.idle { 'Y' } else { 'n' });
+                options.push(if self.shutdown { 'Y' } else { 'n' });
+                options.push('n');
+                options
+            }
+            HelpUrl => self.url.to_string(),
+            Blank => "".to_string(),
+        };
+        unsafe { write_to_u16_buff(out_buffer, out_buffer_size, &string) };
+    }
+
+    pub fn register_function<T: FileMakerFunction>(&mut self, _function: T) {
+        self.functions.push(Some(T::extern_func))
+    }
+}
+
+impl Default for PluginConfig {
+    fn default() -> Self {
+        PluginConfig {
+            id: ['0'; 4],
+            description: "",
+            name: "",
+            url: "",
+            configure_button: false,
+            init_and_shutdown: true,
+            idle: false,
+            shutdown: false,
+            functions: Vec::new(),
+        }
+    }
+}
+
+trait Plugin {
+    fn id() -> [char; 4];
+    fn name() -> &'static str;
+    fn description() -> &'static str;
+    fn url() -> &'static str;
+    fn enable_configure_button() -> bool {
+        false
+    }
+    fn enable_init_and_shutdown() -> bool {
+        true
+    }
+    fn enable_idle() -> bool {
+        false
+    }
+    fn enable_shutdown() -> bool {
+        false
+    }
+    fn register_functions() -> Vec<ExternalFunction>;
+}
+
+struct MyPlugin;
+
+impl Plugin for MyPlugin {
+    fn id() -> [char; 4] {
+        ['R', 'U', 'S', 'T']
+    }
+
+    fn name() -> &'static str {
+        "RUST_PLUGIN"
+    }
+
+    fn description() -> &'static str {
+        "Great Plugin"
+    }
+
+    fn url() -> &'static str {
+        "http://wow.com"
+    }
+
+    fn register_functions() -> Vec<ExternalFunction> {
+        let mut functions = Vec::new();
+        let func = ExternalFunction {
+            id: 100,
+            name: "RUST_ConvertToBase",
+            definition: "RUST_ConvertToBase( number ; base )",
+            description: "Converts the number into a string using the specified base",
+            min_args: 2,
+            max_args: 2,
+            compatible_flags: PluginFlag::DisplayInAllDialogs as u32
+                | PluginFlag::FutureCompatible as u32,
+            function_ptr: Some(ConvertToBase::extern_func),
+        };
+        functions.push(func);
+        functions
+    }
 }
