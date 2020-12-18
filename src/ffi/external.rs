@@ -60,7 +60,7 @@ impl From<u8> for FMExternCallType {
 }
 
 #[derive(Debug)]
-pub(crate) enum FMExternCallType {
+pub enum FMExternCallType {
     Init,
     Idle,
     Shutdown,
@@ -70,7 +70,7 @@ pub(crate) enum FMExternCallType {
     FileShutdown,
 }
 
-pub(crate) enum IdleType {
+pub enum IdleType {
     Idle,
     NotIdle,
     ScriptPaused,

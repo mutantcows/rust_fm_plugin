@@ -4,14 +4,11 @@
 use std::str::from_utf8;
 
 pub mod ffi;
-mod functions;
 pub mod helpers;
-mod script_steps;
 use ffi::*;
-use functions::*;
 use helpers::*;
 
-trait Plugin {
+pub trait Plugin {
     fn id() -> &'static [u8; 4];
     fn name() -> &'static str;
     fn description() -> &'static str;
@@ -30,7 +27,9 @@ trait Plugin {
     }
     fn register_functions() -> Vec<ExternalFunction>;
 
-    fn get_string(
+    /// # Safety
+    /// talks to C
+    unsafe fn get_string(
         which_string: ExternStringType,
         _win_lang_id: fmx_uint32,
         out_buffer_size: fmx_uint32,
@@ -62,7 +61,7 @@ trait Plugin {
             HelpUrl => Self::url().to_string(),
             Blank => "".to_string(),
         };
-        unsafe { write_to_u16_buff(out_buffer, out_buffer_size, &string) };
+        write_to_u16_buff(out_buffer, out_buffer_size, &string)
     }
 
     fn initialize(version: ExternVersion) -> u64 {
@@ -113,89 +112,6 @@ trait Plugin {
     fn un_safe();
 }
 
-// struct MyPlugin;
-
-// impl Plugin for MyPlugin {
-//     fn id() -> &'static [u8; 4] {
-//         &b"RUST"
-//     }
-
-//     fn name() -> &'static str {
-//         "RUST_PLUGIN"
-//     }
-
-//     fn description() -> &'static str {
-//         "Great Plugin"
-//     }
-
-//     fn url() -> &'static str {
-//         "http://wow.com"
-//     }
-
-//     fn register_functions() -> Vec<ExternalFunction> {
-//         vec![ExternalFunction {
-//             id: 100,
-//             name: "RUST_ConvertToBase",
-//             definition: "RUST_ConvertToBase( number ; base )",
-//             description: "Converts the number into a string using the specified base",
-//             min_args: 2,
-//             max_args: 2,
-//             compatible_flags: PluginFlag::DisplayInAllDialogs as u32
-//                 | PluginFlag::FutureCompatible as u32,
-//             function_ptr: Some(ConvertToBase::extern_func),
-//         },
-//          ExternalFunction{
-//             id: 200,
-//             name: "RUST_ExecuteSQL",
-//             definition: "RUST_ExecuteSQL( fileName ; sqlQuery { ; arguments... } )",
-//             description: "Performs SQL Query",
-//             min_args: 2,
-//             max_args: -1,
-//             compatible_flags: PluginFlag::DisplayInAllDialogs as u32 | PluginFlag::FutureCompatible as u32,
-//             function_ptr: Some(ExecuteSQL::extern_func),
-//         },
-//          ExternalFunction{
-//             id: 300,
-//             name: "RUST_ExecuteSQLTextResult",
-//             definition: "RUST_ExecuteSQLTextResult( fileName ; sqlQuery ; fieldSeparator ; rowSeparator { ; arguments... } )",
-//             description: "Performs SQL Query",
-//             min_args: 4,
-//             max_args: -1,
-//             compatible_flags: PluginFlag::DisplayInAllDialogs as u32 | PluginFlag::FutureCompatible as u32,
-//             function_ptr: Some(ExecuteSQLTextResult::extern_func),
-//         },
-//          ExternalFunction{
-//             id: 400,
-//             name: "RUST_PDFToJSON",
-//             definition: "RUST_PDFToJSON( path )",
-//             description: "Converts fields in pdf to JSON object.",
-//             min_args: 1,
-//             max_args: 1,
-//             compatible_flags: PluginFlag::DisplayInAllDialogs as u32 | PluginFlag::FutureCompatible as u32,
-//             function_ptr: Some(PDFToJSON::extern_func),
-//         },
-//          ExternalFunction{
-//             id: 500,
-//             name: "RUST_InsertFile",
-//             definition: "RUST_InsertFile( path )",
-//             description: "Inserts file into container.",
-//             min_args: 1,
-//             max_args: 1,
-//             compatible_flags: PluginFlag::DisplayInAllDialogs as u32 | PluginFlag::FutureCompatible as u32,
-//             function_ptr: Some(InsertFile::extern_func),
-//         }]
-//     }
-
-//     fn session_notifications(_session_id: fmx_ptrtype) {}
-//     fn file_notifications(_session_id: fmx_ptrtype, _file_id: fmx_ptrtype) {}
-//     fn preferences() {}
-//     fn idle() {}
-//     fn not_idle() {}
-//     fn script_paused() {}
-//     fn script_running() {}
-//     fn un_safe() {}
-// }
-
 #[macro_export]
 macro_rules! register_plugin {
     ($x:ident) => {
@@ -226,5 +142,3 @@ macro_rules! register_plugin {
         }
     };
 }
-
-// register_plugin!(MyPlugin);
