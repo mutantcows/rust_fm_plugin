@@ -1,4 +1,5 @@
 use super::*;
+use std::ops::BitOr;
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -208,6 +209,7 @@ extern "C" {
 
 }
 
+#[repr(u32)]
 pub enum PluginFlag {
     DisplayInAllDialogs = 0b1111111100000000,
     MacCompatible = 0b0000000000000010,
@@ -218,6 +220,14 @@ pub enum PluginFlag {
     WebDirectCompatible = 0b0000000001000000,
     AllDeviceCompatible = 0b0000000001111110,
     FutureCompatible = 0b111111110000000000000000,
+}
+
+impl BitOr for PluginFlag {
+    type Output = u32;
+
+    fn bitor(self, rhs: Self) -> Self::Output {
+        self as u32 | rhs as u32
+    }
 }
 
 pub struct ExprEnv {
