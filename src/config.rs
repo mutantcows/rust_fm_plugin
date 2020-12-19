@@ -58,6 +58,11 @@ pub fn kill_filemaker(manifest_dir: &str) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
+#[cfg(target_os = "linux")]
+pub fn kill_filemaker(manifest_dir: &str) -> Result<(), Box<dyn Error>> {
+    Ok(())
+}
+
 #[cfg(target_os = "windows")]
 fn kill_filemaker_command(config: &Config) -> Result<(), Box<dyn Error>> {
     let app_path = Path::new(&config.filemaker.bin_path);
