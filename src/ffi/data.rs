@@ -3,7 +3,7 @@ use super::*;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct fmx_Data {
-    pub _address: u8,
+    _address: u8,
 }
 
 #[cfg_attr(target_os = "macos", link(kind = "framework", name = "FMWrapper"))]

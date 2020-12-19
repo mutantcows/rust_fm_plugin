@@ -9,7 +9,7 @@ use std::path::Path;
 use std::process;
 
 #[derive(Debug)]
-pub enum BuildError {
+pub(crate) enum BuildError {
     LogFile,
     FileMaker,
     Bundle,
@@ -24,23 +24,23 @@ impl Display for BuildError {
 impl Error for BuildError {}
 
 #[derive(Deserialize, Debug)]
-pub struct Config {
-    pub filemaker: FileMaker,
-    pub plugin: Plugin,
+pub(crate) struct Config {
+    pub(crate) filemaker: FileMaker,
+    pub(crate) plugin: Plugin,
 }
 
 #[derive(Deserialize, Debug)]
-pub struct FileMaker {
-    pub ext_path: String,
-    pub bin_path: String,
+pub(crate) struct FileMaker {
+    pub(crate) ext_path: String,
+    pub(crate) bin_path: String,
 }
 
 #[derive(Deserialize, Debug)]
-pub struct Plugin {
-    pub name: String,
+pub(crate) struct Plugin {
+    pub(crate) name: String,
 }
 
-pub fn read_config(config_path: &Path) -> Result<Config, Box<dyn Error>> {
+pub(crate) fn read_config(config_path: &Path) -> Result<Config, Box<dyn Error>> {
     let config_path = config_path.join("config.toml");
     let contents = read_to_string(&config_path)?;
 
@@ -50,22 +50,9 @@ pub fn read_config(config_path: &Path) -> Result<Config, Box<dyn Error>> {
 
 #[cfg(any(target_os = "windows", target_os = "macos"))]
 pub fn kill_filemaker(manifest_dir: &str) -> Result<(), Box<dyn Error>> {
-    let manifest = env!("CARGO_MANIFEST_DIR");
-
     if env::var("PROFILE").unwrap() == "release" {
         let config = read_config(Path::new(manifest_dir))?;
         kill_filemaker_command(&config)?;
-    }
-
-    if cfg!(target_os = "windows") {
-        println!(r"cargo:rustc-link-search={}/libraries/Win/x64", manifest);
-    } else if cfg!(target_os = "macos") {
-        println!(
-            r"cargo:rustc-link-search=framework={}/libraries/Mac",
-            manifest
-        );
-    } else if cfg!(target_os = "linux") {
-        println!(r"cargo:rustc-link-search={}/libraries/Linux", manifest);
     }
 
     Ok(())

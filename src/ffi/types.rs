@@ -58,13 +58,13 @@ pub type fmx_StartScriptCall = Option<
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct fmx_Locale {
-    pub _address: u8,
+    _address: u8,
 }
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct fmx_QuadChar {
-    pub _address: u8,
+    _address: u8,
 }
 
 #[cfg_attr(target_os = "macos", link(kind = "framework", name = "FMWrapper"))]

@@ -10,7 +10,7 @@ use crate::config::{read_config, BuildError, Config};
 
 pub fn bundle_plugin() -> Result<(), Box<dyn Error>> {
     let config_path =
-        Path::new(option_env!("CRATE_MANIFEST_DIR").ok_or("CRATE_MANIFEST_DIR env not set")?);
+        Path::new(option_env!("CRATE_MANIFEST_DIR").ok_or("CRATE_MANIFEST_DIR not set")?);
     let config = read_config(config_path)?;
     clear_log_file()?;
     bundle_plugin_command(&config)?;
@@ -42,7 +42,7 @@ fn launch_filemaker(config: &Config) -> Result<(), Box<dyn Error>> {
 
 #[cfg(target_os = "windows")]
 fn bundle_plugin_command(config: &Config) -> Result<(), Box<dyn Error>> {
-    let out_dir = option_env!("CRATE_OUT_DIR").ok_or("CRATE_OUT_DIR env not set")?;
+    let out_dir = option_env!("CRATE_OUT_DIR").ok_or("CRATE_OUT_DIR not set")?;
     let package_name = get_package_name()?;
     let from = format!("{}\\{}.dll", out_dir, package_name);
     let to = format!("{}/{}.fmx64", config.filemaker.ext_path, config.plugin.name);
@@ -75,7 +75,7 @@ fn bundle_plugin_command(config: &Config) -> Result<(), Box<dyn Error>> {
 
 fn get_package_name() -> Result<String, Box<dyn Error>> {
     Ok(
-        Path::new(option_env!("CRATE_MANIFEST_DIR").ok_or("CRATE_MANIFEST_DIR env not set")?)
+        Path::new(option_env!("CRATE_MANIFEST_DIR").ok_or("CRATE_MANIFEST_DIR not set")?)
             .file_name()
             .ok_or(BuildError::Bundle)?
             .to_string_lossy()
