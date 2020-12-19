@@ -1,8 +1,8 @@
 use super::*;
 use std::os::raw::{c_char, c_int, c_short, c_uchar, c_uint, c_ushort};
-#[cfg(any(target_os = "macos", target_os = "linux"))]
+#[cfg(target_family = "unix")]
 use std::os::raw::{c_long, c_ulong};
-#[cfg(target_os = "windows")]
+#[cfg(target_family = "windows")]
 use std::os::raw::{c_longlong, c_ulonglong};
 
 pub type fmx_uint16 = c_ushort;
@@ -10,18 +10,18 @@ pub type fmx_int16 = c_short;
 pub type fmx_uchar = c_uchar;
 pub type fmx_int32 = c_int;
 pub type fmx_uint32 = c_uint;
-#[cfg(target_os = "windows")]
+#[cfg(target_family = "windows")]
 pub type fmx_int64 = c_longlong;
-#[cfg(any(target_os = "macos", target_os = "linux"))]
+#[cfg(target_family = "unix")]
 pub type fmx_int64 = c_long;
-#[cfg(target_os = "windows")]
+#[cfg(target_family = "windows")]
 pub type fmx_uint64 = c_ulonglong;
-#[cfg(any(target_os = "macos", target_os = "linux"))]
+#[cfg(target_family = "unix")]
 pub type fmx_uint64 = c_ulong;
 pub type fmx_ptrtype = fmx_uint64;
-#[cfg(any(target_os = "macos", target_os = "linux"))]
+#[cfg(target_family = "unix")]
 pub type fmx_unusedid = fmx_int32;
-#[cfg(target_os = "windows")]
+#[cfg(target_family = "windows")]
 pub type fmx_unusedid = fmx_int16;
 pub type fmx_errcode = c_short;
 pub type fmx_unichar16 = c_ushort;

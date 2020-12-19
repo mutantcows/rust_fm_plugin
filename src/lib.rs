@@ -3,9 +3,13 @@
 
 use std::str::from_utf8;
 
+pub mod config;
 pub mod ffi;
 pub mod helpers;
-use ffi::*;
+pub mod post_build;
+pub use config::kill_filemaker;
+pub use ffi::*;
+pub use helpers::log;
 use helpers::*;
 
 pub trait Plugin {

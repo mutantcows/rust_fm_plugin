@@ -1,4 +1,3 @@
-use crate::ffi::*;
 use std::ffi::CString;
 use std::os::raw::{c_char, c_uint, c_ushort};
 use widestring::U16CString;
@@ -29,18 +28,15 @@ pub fn log(content: &str) {
     write_to_file(content).unwrap_or(());
 }
 
-/// # Safety
-/// buffer size must be accurate and include enough room for str
-pub unsafe fn write_to_u16_buff(buffer: *mut c_ushort, buffer_size: c_uint, s: &str) {
+pub(crate) unsafe fn write_to_u16_buff(buffer: *mut c_ushort, buffer_size: c_uint, s: &str) {
     let c_string = U16CString::from_str(s).unwrap();
     let bytes = c_string.as_slice();
 
     bytes_to_buff(buffer, buffer_size, bytes);
 }
 
-/// # Safety
-/// buffer size must be accurate and include enough room for str
-pub unsafe fn write_to_i8_buff(buffer: *mut c_char, buffer_size: c_uint, s: &str) {
+#[allow(dead_code)]
+pub(crate) unsafe fn write_to_i8_buff(buffer: *mut c_char, buffer_size: c_uint, s: &str) {
     let c_string = CString::new(s).unwrap();
     let bytes = c_string.as_bytes_with_nul();
     let bytes = &*(bytes as *const [u8] as *const [i8]);
@@ -48,16 +44,9 @@ pub unsafe fn write_to_i8_buff(buffer: *mut c_char, buffer_size: c_uint, s: &str
     bytes_to_buff(buffer, buffer_size, bytes);
 }
 
-unsafe fn bytes_to_buff<T: Copy>(buffer: *mut T, buffer_size: c_uint, bytes: &[T]) {
+pub(crate) unsafe fn bytes_to_buff<T: Copy>(buffer: *mut T, buffer_size: c_uint, bytes: &[T]) {
     let string_bytes = std::slice::from_raw_parts_mut(buffer, buffer_size as usize);
     string_bytes[..bytes.len()].copy_from_slice(bytes);
-}
-
-pub fn prepend_character(txt: &mut Text, insert_buffer: &mut Text, ch: char) {
-    let mut tmp = [0; 1];
-    let s = ch.encode_utf8(&mut tmp);
-    insert_buffer.assign_unicode_with_length(s, 1);
-    txt.insert(insert_buffer, 0);
 }
 
 #[cfg(test)]
@@ -65,7 +54,6 @@ mod test {
     use super::*;
     #[test]
     fn logging() {
-        let result = write_to_file("");
-        assert_eq!(result, Ok(()));
+        write_to_file("").unwrap();
     }
 }
