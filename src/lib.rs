@@ -7,6 +7,7 @@ pub mod config;
 pub mod ffi;
 pub mod helpers;
 pub mod post_build;
+#[cfg(not(target_os = "linux"))]
 pub use config::kill_filemaker;
 pub use ffi::*;
 pub use helpers::log;
