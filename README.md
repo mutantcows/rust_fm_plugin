@@ -91,7 +91,7 @@ pub struct MyFunction;
 impl FileMakerFunction for MyFunction {
     fn function(id: i16, env: &ExprEnv, args: &DataVect, result: &mut Data) -> FMError {
         //log some info to the desktop (plugin.log)
-        log("some troublshooting info");
+        log("some troubleshooting info");
 
         ...
 
