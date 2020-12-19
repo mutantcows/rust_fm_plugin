@@ -55,7 +55,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 `lib.rs:`
 
 ```rust
-use fm_plugin::{Plugin, register_plugin, log, FMError};
+use fm_plugin::{Plugin, register_plugin, log, FMError, ExternalFunction, FileMakerFunction};
 use fm_plugin::PluginFlag::*;
 
 struct MyPlugin;
@@ -78,7 +78,7 @@ impl Plugin for MyPlugin {
             min_args: 2,
             max_args: 2,
             compatible_flags: DisplayInAllDialogs | FutureCompatible,
-            function_ptr: Some(ConvertToBase::extern_func),
+            function_ptr: Some(MyFunction::extern_func),
             }
         ]
     }
