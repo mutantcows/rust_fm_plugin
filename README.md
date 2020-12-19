@@ -1,5 +1,5 @@
 # fm_plugin
-### A Rust wrapper for the FileMaker plug-in SDK.
+### A Rust wrapper for the FileMaker plug-in SDK
 
 `Cargo.toml:`
 
@@ -7,7 +7,6 @@
 [lib]
 path = "src/lib.rs"
 crate-type = ["cdylib"]
-
 
 [dependencies]
 fm_plugin = "0.1.0"
@@ -27,7 +26,7 @@ fm_plugin = "0.1.0"
 ```toml
 [filemaker]
 ext_path = "path/to/filemaker/Extensions"
-bin_path = "path/to/filemaker/executable"
+bin_path = "path/to/filemaker/executable.exe"
 
 [plugin]
 name = "my_plugin"
@@ -56,7 +55,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 `lib.rs:`
 
 ```rust
-use fm_plugin::{Plugin, register_plugin};
+use fm_plugin::{Plugin, register_plugin, log, FMError};
 use fm_plugin::PluginFlag::*;
 
 struct MyPlugin;
@@ -91,7 +90,12 @@ pub struct MyFunction;
 
 impl FileMakerFunction for MyFunction {
     fn function(id: i16, env: &ExprEnv, args: &DataVect, result: &mut Data) -> FMError {
+        //log some info to the desktop (plugin.log)
+        log("some troublshooting info");
+
         ...
+
+        FMError::NoError
     }
 }
 
@@ -100,7 +104,7 @@ register_plugin!(MyPlugin);
 
 `cargo install cargo-post`
 
-If you set up the build/post_build scripts as shown abvove, running `cargo post build --release` will:
+If you set up the build/post_build scripts as shown above, running `cargo post build --release` will:
 
 1. Quit FileMaker
 2. Compile the library
