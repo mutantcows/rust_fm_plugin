@@ -7,6 +7,7 @@ license = "MIT"
 description = "Build plug-ins for use with FileMaker Pro and FileMaker Server."
 keywords = ["filemaker", "plugin", "filemaker-sdk", "sdk"]
 categories = ["external-ffi-bindings"]
+repository = "https://github.com/mutantcows/rust_fm_plugin/"
 
 [lib]
 path = "src/lib.rs"
