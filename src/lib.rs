@@ -35,9 +35,9 @@ pub trait Plugin {
     /// talks to C
     unsafe fn get_string(
         which_string: ExternStringType,
-        _win_lang_id: fmx_uint32,
-        out_buffer_size: fmx_uint32,
-        out_buffer: *mut fmx_unichar16,
+        _win_lang_id: u32,
+        out_buffer_size: u32,
+        out_buffer: *mut u16,
     ) {
         use ExternStringType::*;
         let string = match which_string {
@@ -76,7 +76,7 @@ pub trait Plugin {
         }
 
         for f in Self::register_functions() {
-            if f.register(&plugin_id) != 0 {
+            if f.register(&plugin_id) != FMError::NoError {
                 return ExternVersion::DoNotEnable as u64;
             }
         }

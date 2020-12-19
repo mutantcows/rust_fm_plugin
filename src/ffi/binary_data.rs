@@ -21,7 +21,7 @@ extern "C" {
 
     fn FM_BinaryData_Constructor3(
         name: *const fmx_Text,
-        amount: fmx_uint32,
+        amount: u32,
         buffer: *mut c_char,
         _x: *mut fmx__fmxcpt,
     ) -> *mut fmx_BinaryData;
@@ -29,7 +29,7 @@ extern "C" {
     #[allow(dead_code)]
     fn FM_BinaryData_Constructor4(
         name: *const fmx_Text,
-        context: *mut fmx_uint32,
+        context: *mut u32,
         _x: *mut fmx__fmxcpt,
     ) -> *mut fmx_BinaryData;
 
@@ -52,46 +52,42 @@ extern "C" {
         _x: *mut fmx__fmxcpt,
     ) -> bool;
 
-    fn FM_BinaryData_GetCount(_self: *const fmx_BinaryData, _x: *mut fmx__fmxcpt) -> fmx_int32;
+    fn FM_BinaryData_GetCount(_self: *const fmx_BinaryData, _x: *mut fmx__fmxcpt) -> i32;
 
     fn FM_BinaryData_GetIndex(
         _self: *const fmx_BinaryData,
         dataType: *const fmx_QuadChar,
         _x: *mut fmx__fmxcpt,
-    ) -> fmx_int32;
+    ) -> i32;
 
-    fn FM_BinaryData_GetTotalSize(_self: *const fmx_BinaryData, _x: *mut fmx__fmxcpt)
-        -> fmx_uint32;
+    fn FM_BinaryData_GetTotalSize(_self: *const fmx_BinaryData, _x: *mut fmx__fmxcpt) -> u32;
 
     fn FM_BinaryData_GetType(
         _self: *const fmx_BinaryData,
-        index: fmx_int32,
+        index: i32,
         dataType: *mut fmx_QuadChar,
         _x: *mut fmx__fmxcpt,
     );
 
-    fn FM_BinaryData_GetSize(
-        _self: *const fmx_BinaryData,
-        index: fmx_int32,
-        _x: *mut fmx__fmxcpt,
-    ) -> fmx_uint32;
+    fn FM_BinaryData_GetSize(_self: *const fmx_BinaryData, index: i32, _x: *mut fmx__fmxcpt)
+        -> u32;
 
     fn FM_BinaryData_GetData(
         _self: *const fmx_BinaryData,
-        index: fmx_int32,
-        offset: fmx_uint32,
-        amount: fmx_uint32,
+        index: i32,
+        offset: u32,
+        amount: u32,
         buffer: *mut c_char,
         _x: *mut fmx__fmxcpt,
-    ) -> fmx_errcode;
+    ) -> FMError;
 
     fn FM_BinaryData_Add(
         _self: *mut fmx_BinaryData,
         dataType: *const fmx_QuadChar,
-        amount: fmx_uint32,
+        amount: u32,
         buffer: *mut c_char,
         _x: *mut fmx__fmxcpt,
-    ) -> fmx_errcode;
+    ) -> FMError;
 
     fn FM_BinaryData_Remove(
         _self: *mut fmx_BinaryData,
@@ -106,48 +102,48 @@ extern "C" {
         _self: *const fmx_BinaryData,
         filepathlist: *mut fmx_Text,
         _x: *mut fmx__fmxcpt,
-    ) -> fmx_errcode;
+    ) -> FMError;
 
     fn FM_BinaryData_AddFNAMData(
         _self: *mut fmx_BinaryData,
         filepathlist: *const fmx_Text,
         _x: *mut fmx__fmxcpt,
-    ) -> fmx_errcode;
+    ) -> FMError;
 
     fn FM_BinaryData_GetSIZEData(
         _self: *const fmx_BinaryData,
         width: *mut c_short,
         height: *mut c_short,
         _x: *mut fmx__fmxcpt,
-    ) -> fmx_errcode;
+    ) -> FMError;
 
     fn FM_BinaryData_AddSIZEData(
         _self: *mut fmx_BinaryData,
         width: c_short,
         height: c_short,
         _x: *mut fmx__fmxcpt,
-    ) -> fmx_errcode;
+    ) -> FMError;
 
     fn FM_BinaryData_AddBegin(
         _self: *mut fmx_BinaryData,
         dataType: *const fmx_QuadChar,
-        context: *mut fmx_uint32,
+        context: *mut u32,
         _x: *mut fmx__fmxcpt,
-    ) -> fmx_errcode;
+    ) -> FMError;
 
     fn FM_BinaryData_AddAppend(
         _self: *mut fmx_BinaryData,
-        context: fmx_uint32,
-        amount: fmx_uint32,
+        context: u32,
+        amount: u32,
         buffer: *mut c_char,
         _x: *mut fmx__fmxcpt,
-    ) -> fmx_errcode;
+    ) -> FMError;
 
     fn FM_BinaryData_AddFinish(
         _self: *mut fmx_BinaryData,
-        context: fmx_uint32,
+        context: u32,
         _x: *mut fmx__fmxcpt,
-    ) -> fmx_errcode;
+    ) -> FMError;
 }
 
 #[derive(Eq)]
@@ -193,14 +189,14 @@ impl BinaryData {
         }
     }
 
-    pub fn get_stream_count(&self) -> fmx_int32 {
+    pub fn get_stream_count(&self) -> i32 {
         let mut _x = fmx__fmxcpt::new();
         let count = unsafe { FM_BinaryData_GetCount(self.ptr, &mut _x) };
         _x.check();
         count
     }
 
-    pub fn get_stream_index(&self, stream_type: BinaryStreamType) -> fmx_int32 {
+    pub fn get_stream_index(&self, stream_type: BinaryStreamType) -> i32 {
         let mut _x = fmx__fmxcpt::new();
         let quad = QuadChar::from(stream_type);
         let index = unsafe { FM_BinaryData_GetIndex(self.ptr, quad.ptr, &mut _x) };
@@ -208,14 +204,14 @@ impl BinaryData {
         index
     }
 
-    pub fn total_size(&self) -> fmx_uint32 {
+    pub fn total_size(&self) -> u32 {
         let mut _x = fmx__fmxcpt::new();
         let size = unsafe { FM_BinaryData_GetTotalSize(self.ptr, &mut _x) };
         _x.check();
         size
     }
 
-    pub fn get_size(&self, index: fmx_int32) -> fmx_uint32 {
+    pub fn get_size(&self, index: i32) -> u32 {
         let mut _x = fmx__fmxcpt::new();
         let size = unsafe { FM_BinaryData_GetSize(self.ptr, index, &mut _x) };
         _x.check();
@@ -233,13 +229,13 @@ impl BinaryData {
         let mut _x = fmx__fmxcpt::new();
         let error = FM_BinaryData_GetData(self.ptr, index, offset, amount as u32, ptr, &mut _x);
         _x.check();
-        if error != 0 {
+        if error != FMError::NoError {
             panic!();
         }
         Vec::from_raw_parts(ptr, amount, amount)
     }
 
-    pub fn get_type(&self, index: fmx_int32) -> BinaryStreamType {
+    pub fn get_type(&self, index: i32) -> BinaryStreamType {
         let mut _x = fmx__fmxcpt::new();
         let quad = QuadChar::empty();
         unsafe { FM_BinaryData_GetType(self.ptr, index, quad.ptr, &mut _x) };
@@ -256,7 +252,7 @@ impl BinaryData {
         let error = unsafe { FM_BinaryData_Add(self.ptr, quad.ptr, size, buffer_ptr, &mut _x) };
         unsafe { ManuallyDrop::drop(&mut buffer) };
         _x.check();
-        if error != 0 {
+        if error != FMError::NoError {
             panic!();
         }
     }
@@ -282,7 +278,7 @@ impl BinaryData {
         let quad = QuadChar::from(stream_type);
         let error = unsafe { FM_BinaryData_AddBegin(self.ptr, quad.ptr, context, &mut _x) };
         _x.check();
-        if error != 0 {
+        if error != FMError::NoError {
             panic!();
         }
     }
@@ -296,7 +292,7 @@ impl BinaryData {
             unsafe { FM_BinaryData_AddAppend(self.ptr, context, size, buffer_ptr, &mut _x) };
         unsafe { ManuallyDrop::drop(&mut buffer) };
         _x.check();
-        if error != 0 {
+        if error != FMError::NoError {
             panic!();
         }
     }
@@ -305,7 +301,7 @@ impl BinaryData {
         let mut _x = fmx__fmxcpt::new();
         let error = unsafe { FM_BinaryData_AddFinish(self.ptr, context, &mut _x) };
         _x.check();
-        if error != 0 {
+        if error != FMError::NoError {
             panic!();
         }
     }
@@ -315,7 +311,7 @@ impl BinaryData {
         let file_paths = Text::new();
         let error = unsafe { FM_BinaryData_GetFNAMData(self.ptr, file_paths.ptr, &mut _x) };
         _x.check();
-        if error != 0 {
+        if error != FMError::NoError {
             panic!();
         }
         file_paths
@@ -325,7 +321,7 @@ impl BinaryData {
         let mut _x = fmx__fmxcpt::new();
         let error = unsafe { FM_BinaryData_AddFNAMData(self.ptr, file_paths.ptr, &mut _x) };
         _x.check();
-        if error != 0 {
+        if error != FMError::NoError {
             panic!();
         }
     }
@@ -337,7 +333,7 @@ impl BinaryData {
         let error =
             unsafe { FM_BinaryData_GetSIZEData(self.ptr, &mut width, &mut height, &mut _x) };
         _x.check();
-        if error != 0 {
+        if error != FMError::NoError {
             panic!();
         }
         (width, height)
@@ -347,7 +343,7 @@ impl BinaryData {
         let mut _x = fmx__fmxcpt::new();
         let error = unsafe { FM_BinaryData_AddSIZEData(self.ptr, width, height, &mut _x) };
         _x.check();
-        if error != 0 {
+        if error != FMError::NoError {
             panic!();
         }
     }

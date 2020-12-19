@@ -10,7 +10,7 @@ pub struct fmx_ExternCallStruct {
     pub cfmCalls: fmx_boolean,
     pub whichCall: fmx_ExternCallSwitch,
     pub unsafeCalls: fmx_boolean,
-    pub parm1: fmx_uchar,
+    pub parm1: u8,
     pub parm2: fmx_ptrtype,
     pub parm3: fmx_ptrtype,
     pub instanceID: fmx_ptrtype,

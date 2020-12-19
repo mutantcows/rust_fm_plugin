@@ -15,8 +15,8 @@ extern "C" {
     fn FM_DateTime_Constructor1(_x: *mut fmx__fmxcpt) -> *mut fmx_DateTime;
 
     fn FM_DateTime_Constructor2(
-        dateString: *const fmx_unichar16,
-        dateLength: fmx_uint32,
+        dateString: *const u16,
+        dateLength: u32,
         intl: *const fmx_Locale,
         _x: *mut fmx__fmxcpt,
     ) -> *mut fmx_DateTime;
@@ -41,11 +41,11 @@ extern "C" {
 
     fn FM_DateTime_IsLeapYear(_self: *const fmx_DateTime, _x: *mut fmx__fmxcpt) -> bool;
 
-    fn FM_DateTime_DayOfWeek(_self: *const fmx_DateTime, _x: *mut fmx__fmxcpt) -> fmx_int16;
+    fn FM_DateTime_DayOfWeek(_self: *const fmx_DateTime, _x: *mut fmx__fmxcpt) -> i16;
 
-    fn FM_DateTime_DayOfYear(_self: *const fmx_DateTime, _x: *mut fmx__fmxcpt) -> fmx_int16;
+    fn FM_DateTime_DayOfYear(_self: *const fmx_DateTime, _x: *mut fmx__fmxcpt) -> i16;
 
-    fn FM_DateTime_WeekOfYear(_self: *const fmx_DateTime, _x: *mut fmx__fmxcpt) -> fmx_int16;
+    fn FM_DateTime_WeekOfYear(_self: *const fmx_DateTime, _x: *mut fmx__fmxcpt) -> i16;
 
     fn FM_DateTime_Now(_self: *mut fmx_DateTime, _x: *mut fmx__fmxcpt);
 
@@ -57,11 +57,11 @@ extern "C" {
 
     fn FM_DateTime_SetNormalizedDate1(
         _self: *mut fmx_DateTime,
-        month: fmx_int16,
-        day: fmx_int16,
-        year: fmx_int16,
+        month: i16,
+        day: i16,
+        year: i16,
         _x: *mut fmx__fmxcpt,
-    ) -> fmx_errcode;
+    ) -> FMError;
 
     fn FM_DateTime_SetNormalizedDate2(
         _self: *mut fmx_DateTime,
@@ -69,7 +69,7 @@ extern "C" {
         month: *const fmx_FixPt,
         day: *const fmx_FixPt,
         _x: *mut fmx__fmxcpt,
-    ) -> fmx_errcode;
+    ) -> FMError;
 
     fn FM_DateTime_SetDaysSinceEpoch(
         _self: *mut fmx_DateTime,
@@ -86,11 +86,11 @@ extern "C" {
     fn FM_DateTime_SetNormalizedTime1(
         _self: *mut fmx_DateTime,
         hour: fmx_int64,
-        minute: fmx_int16,
-        sec: fmx_int16,
-        usec: fmx_int32,
+        minute: i16,
+        sec: i16,
+        usec: i32,
         _x: *mut fmx__fmxcpt,
-    ) -> fmx_errcode;
+    ) -> FMError;
 
     fn FM_DateTime_SetNormalizedTime2(
         _self: *mut fmx_DateTime,
@@ -98,7 +98,7 @@ extern "C" {
         minute: *const fmx_FixPt,
         sec: *const fmx_FixPt,
         _x: *mut fmx__fmxcpt,
-    ) -> fmx_errcode;
+    ) -> FMError;
 
     fn FM_DateTime_SetSecsSinceMidnight(
         _self: *mut fmx_DateTime,
@@ -112,22 +112,21 @@ extern "C" {
         _x: *mut fmx__fmxcpt,
     );
 
-    fn FM_DateTime_GetYear(_self: *const fmx_DateTime, _x: *mut fmx__fmxcpt) -> fmx_int16;
+    fn FM_DateTime_GetYear(_self: *const fmx_DateTime, _x: *mut fmx__fmxcpt) -> i16;
 
-    fn FM_DateTime_GetMonth(_self: *const fmx_DateTime, _x: *mut fmx__fmxcpt) -> fmx_int16;
+    fn FM_DateTime_GetMonth(_self: *const fmx_DateTime, _x: *mut fmx__fmxcpt) -> i16;
 
-    fn FM_DateTime_GetDay(_self: *const fmx_DateTime, _x: *mut fmx__fmxcpt) -> fmx_int16;
+    fn FM_DateTime_GetDay(_self: *const fmx_DateTime, _x: *mut fmx__fmxcpt) -> i16;
 
-    fn FM_DateTime_GetDaysSinceEpoch(_self: *const fmx_DateTime, _x: *mut fmx__fmxcpt)
-        -> fmx_int32;
+    fn FM_DateTime_GetDaysSinceEpoch(_self: *const fmx_DateTime, _x: *mut fmx__fmxcpt) -> i32;
 
-    fn FM_DateTime_GetHour(_self: *const fmx_DateTime, _x: *mut fmx__fmxcpt) -> fmx_int32;
+    fn FM_DateTime_GetHour(_self: *const fmx_DateTime, _x: *mut fmx__fmxcpt) -> i32;
 
-    fn FM_DateTime_GetMinute(_self: *const fmx_DateTime, _x: *mut fmx__fmxcpt) -> fmx_int16;
+    fn FM_DateTime_GetMinute(_self: *const fmx_DateTime, _x: *mut fmx__fmxcpt) -> i16;
 
-    fn FM_DateTime_GetSec(_self: *const fmx_DateTime, _x: *mut fmx__fmxcpt) -> fmx_int16;
+    fn FM_DateTime_GetSec(_self: *const fmx_DateTime, _x: *mut fmx__fmxcpt) -> i16;
 
-    fn FM_DateTime_GetUSec(_self: *const fmx_DateTime, _x: *mut fmx__fmxcpt) -> fmx_int32;
+    fn FM_DateTime_GetUSec(_self: *const fmx_DateTime, _x: *mut fmx__fmxcpt) -> i32;
 
     fn FM_DateTime_GetSeconds(
         _self: *const fmx_DateTime,
@@ -186,7 +185,7 @@ impl DateTime {
             FM_DateTime_SetNormalizedDate2(self.ptr, year.ptr, month.ptr, day.ptr, &mut _x)
         };
         _x.check();
-        if error != 0 {
+        if error != FMError::NoError {
             panic!();
         }
     }
@@ -195,7 +194,7 @@ impl DateTime {
         let mut _x = fmx__fmxcpt::new();
         let error = unsafe { FM_DateTime_SetNormalizedDate1(self.ptr, year, month, day, &mut _x) };
         _x.check();
-        if error != 0 {
+        if error != FMError::NoError {
             panic!();
         }
     }
@@ -206,7 +205,7 @@ impl DateTime {
             FM_DateTime_SetNormalizedTime2(self.ptr, hours.ptr, minutes.ptr, seconds.ptr, &mut _x)
         };
         _x.check();
-        if error != 0 {
+        if error != FMError::NoError {
             panic!();
         }
     }
@@ -223,7 +222,7 @@ impl DateTime {
             FM_DateTime_SetNormalizedTime1(self.ptr, hours, minutes, seconds, milliseconds, &mut _x)
         };
         _x.check();
-        if error != 0 {
+        if error != FMError::NoError {
             panic!();
         }
     }

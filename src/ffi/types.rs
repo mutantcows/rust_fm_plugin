@@ -1,50 +1,38 @@
 use super::*;
-use std::os::raw::{c_char, c_int, c_short, c_uchar, c_uint, c_ushort};
-#[cfg(target_family = "unix")]
-use std::os::raw::{c_long, c_ulong};
-#[cfg(target_family = "windows")]
-use std::os::raw::{c_longlong, c_ulonglong};
 
-pub type fmx_uint16 = c_ushort;
-pub type fmx_int16 = c_short;
-pub type fmx_uchar = c_uchar;
-pub type fmx_int32 = c_int;
-pub type fmx_uint32 = c_uint;
 #[cfg(target_family = "windows")]
-pub type fmx_int64 = c_longlong;
+pub type fmx_int64 = i64;
 #[cfg(target_family = "unix")]
-pub type fmx_int64 = c_long;
+pub type fmx_int64 = i32;
 #[cfg(target_family = "windows")]
-pub type fmx_uint64 = c_ulonglong;
+pub type fmx_uint64 = u64;
 #[cfg(target_family = "unix")]
-pub type fmx_uint64 = c_ulong;
-pub type fmx_ptrtype = fmx_uint64;
+pub type fmx_uint64 = u32;
 #[cfg(target_family = "unix")]
-pub type fmx_unusedid = fmx_int32;
+pub type fmx_unusedid = i32;
 #[cfg(target_family = "windows")]
-pub type fmx_unusedid = fmx_int16;
-pub type fmx_errcode = c_short;
-pub type fmx_unichar16 = c_ushort;
-pub type fmx_unichar = fmx_unichar16;
-pub type fmx_boolean = c_char;
-pub type fmx_ExternCallSwitch = fmx_uchar;
-pub type fmx_ScriptControl = fmx_uchar;
-pub type fmx_IdleLevel = fmx_uchar;
+pub type fmx_unusedid = i16;
+
+pub type fmx_ptrtype = u64;
+pub type fmx_boolean = i8;
+pub type fmx_ExternCallSwitch = u8;
+pub type fmx_ScriptControl = u8;
+pub type fmx_IdleLevel = u8;
 pub type fmx_ExternCallProc = Option<unsafe extern "C" fn(arg1: *mut fmx_ExternCallStruct)>;
-pub type fmx_CurrentEnvCall = Option<unsafe extern "C" fn(env: *mut fmx_ExprEnv) -> fmx_errcode>;
-pub type fmx_fontface = c_ushort;
-pub type fmx_fontid = c_ushort;
-pub type fmx_fontsize = c_ushort;
-pub type fmx_colorchannel = c_uchar;
-pub type fmx_colorchannel16 = c_ushort;
-pub type fmx_fontscript = c_ushort;
+pub type fmx_CurrentEnvCall = Option<unsafe extern "C" fn(env: *mut fmx_ExprEnv) -> FMError>;
+pub type fmx_fontface = u16;
+pub type fmx_fontid = u16;
+pub type fmx_fontsize = u16;
+pub type fmx_colorchannel = u8;
+pub type fmx_colorchannel16 = u16;
+pub type fmx_fontscript = u16;
 pub type fmx_ExtPluginType = Option<
     extern "C" fn(
-        functionId: c_short,
+        functionId: i16,
         env: *const fmx_ExprEnv,
         parms: *const fmx_DataVect,
         result: *mut fmx_Data,
-    ) -> fmx_errcode,
+    ) -> FMError,
 >;
 pub type fmx_StartScriptCall = Option<
     unsafe extern "C" fn(
@@ -52,7 +40,7 @@ pub type fmx_StartScriptCall = Option<
         scriptName: *const fmx_Text,
         control: fmx_ScriptControl,
         parameter: *const fmx_Data,
-    ) -> fmx_errcode,
+    ) -> FMError,
 >;
 
 #[repr(C)]
@@ -75,10 +63,10 @@ extern "C" {
     fn FM_QuadChar_Constructor1(_x: *mut fmx__fmxcpt) -> *mut fmx_QuadChar;
 
     fn FM_QuadChar_Constructor2(
-        c0: c_char,
-        c1: c_char,
-        c2: c_char,
-        c3: c_char,
+        c0: i8,
+        c1: i8,
+        c2: i8,
+        c3: i8,
         _x: *mut fmx__fmxcpt,
     ) -> *mut fmx_QuadChar;
 
@@ -96,18 +84,10 @@ extern "C" {
     ) -> *const fmx_QuadChar;
 
     #[allow(dead_code)]
-    fn FM_QuadChar_operatorAR(
-        _self: *mut fmx_QuadChar,
-        i: c_int,
-        _x: *mut fmx__fmxcpt,
-    ) -> fmx_uchar;
+    fn FM_QuadChar_operatorAR(_self: *mut fmx_QuadChar, i: i32, _x: *mut fmx__fmxcpt) -> u8;
 
     #[allow(dead_code)]
-    fn FM_QuadChar_operatorCAR(
-        _self: *const fmx_QuadChar,
-        i: c_int,
-        _x: *mut fmx__fmxcpt,
-    ) -> fmx_uchar;
+    fn FM_QuadChar_operatorCAR(_self: *const fmx_QuadChar, i: i32, _x: *mut fmx__fmxcpt) -> u8;
 
     #[allow(dead_code)]
     fn FM_QuadChar_operatorEQ(
@@ -152,10 +132,10 @@ extern "C" {
     ) -> bool;
 
     #[allow(dead_code)]
-    fn FM_QuadChar_GetMacType(_self: *const fmx_QuadChar, _x: *mut fmx__fmxcpt) -> fmx_uint32;
+    fn FM_QuadChar_GetMacType(_self: *const fmx_QuadChar, _x: *mut fmx__fmxcpt) -> u32;
 
     #[allow(dead_code)]
-    fn FM_QuadChar_SetMacType(_self: *mut fmx_QuadChar, value: fmx_uint32, _x: *mut fmx__fmxcpt);
+    fn FM_QuadChar_SetMacType(_self: *mut fmx_QuadChar, value: u32, _x: *mut fmx__fmxcpt);
 
     fn FM_QuadChar_Delete(_self: *mut fmx_QuadChar, _x: *mut fmx__fmxcpt);
 

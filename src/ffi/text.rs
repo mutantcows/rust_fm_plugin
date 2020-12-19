@@ -14,43 +14,38 @@ pub struct fmx_Text {
 extern "C" {
     fn FM_Text_AssignUnicodeWithLength(
         _self: *mut fmx_Text,
-        s: *const fmx_uint16,
-        strlength: fmx_uint32,
+        s: *const u16,
+        strlength: u32,
         _x: *mut fmx__fmxcpt,
     );
 
     fn FM_Text_InsertText(
         _self: *mut fmx_Text,
         other: *const fmx_Text,
-        position: fmx_uint32,
+        position: u32,
         _x: *mut fmx__fmxcpt,
     );
 
     fn FM_Text_AppendText(
         _self: *mut fmx_Text,
         other: *const fmx_Text,
-        position: fmx_uint32,
-        size: fmx_uint32,
+        position: u32,
+        size: u32,
         _x: *mut fmx__fmxcpt,
     );
 
     fn FM_Text_AssignWide(_self: *mut fmx_Text, s: *const u16, _x: *mut fmx__fmxcpt);
 
-    fn FM_Text_Assign(
-        _self: *mut fmx_Text,
-        s: *const c_char,
-        encoding: fmx_int32,
-        _x: *mut fmx__fmxcpt,
-    );
+    fn FM_Text_Assign(_self: *mut fmx_Text, s: *const c_char, encoding: i32, _x: *mut fmx__fmxcpt);
 
     fn FM_Text_Constructor1(_x: *mut fmx__fmxcpt) -> *mut fmx_Text;
-    fn FM_Text_GetSize(_self: *const fmx_Text, _x: *mut fmx__fmxcpt) -> fmx_uint32;
+    fn FM_Text_GetSize(_self: *const fmx_Text, _x: *mut fmx__fmxcpt) -> u32;
 
     fn FM_Text_GetUnicode(
         _self: *const fmx_Text,
-        s: *mut fmx_uint16,
-        position: fmx_uint32,
-        size: fmx_uint32,
+        s: *mut u16,
+        position: u32,
+        size: u32,
         _x: *mut fmx__fmxcpt,
     );
     fn FM_Text_Delete(_self: *mut fmx_Text, _x: *mut fmx__fmxcpt);
@@ -77,7 +72,7 @@ impl Text {
         }
     }
 
-    pub fn size(&self) -> fmx_uint32 {
+    pub fn size(&self) -> u32 {
         let mut _x = fmx__fmxcpt::new();
         let size = unsafe { FM_Text_GetSize(self.ptr, &mut _x) };
         _x.check();
@@ -117,7 +112,7 @@ impl Text {
         _x.check();
     }
 
-    pub fn get_unicode(&self, position: fmx_uint32, size: fmx_uint32) -> U16CString {
+    pub fn get_unicode(&self, position: u32, size: u32) -> U16CString {
         let mut _x = fmx__fmxcpt::new();
         let out_vec: Vec<u16> = vec![1; size as usize];
         let out_buffer = U16CString::new(out_vec).unwrap();

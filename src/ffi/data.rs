@@ -26,7 +26,7 @@ extern "C" {
         sourceLocale: *const fmx_Locale,
         nativeType: DataType,
         _x: *mut fmx__fmxcpt,
-    ) -> fmx_errcode;
+    ) -> FMError;
 
     #[deprecated]
     #[allow(dead_code)]

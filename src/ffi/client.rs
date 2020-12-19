@@ -1,16 +1,17 @@
-use super::*;
-
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub(crate) struct fmx__fmxcpt {
-    m_vers: fmx_int32,
-    m_code: fmx_int32,
+    m_vers: i32,
+    m_code: i32,
 }
 
 impl fmx__fmxcpt {
     pub(crate) fn check(&self) {
-        if self.m_code != 0 {
-            panic!();
+        match self.m_code {
+            0 => {}
+            1 => panic!("BadAlloc"),
+            2 => panic!("Unknown"),
+            _ => panic!(),
         }
     }
 

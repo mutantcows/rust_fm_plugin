@@ -12,23 +12,19 @@ pub struct fmx_FixPt {
 #[cfg_attr(target_os = "windows", link(kind = "static", name = "FMWrapper"))]
 #[cfg_attr(target_os = "linux", link(kind = "dylib", name = "FMWrapper"))]
 extern "C" {
-    fn FM_FixPt_AsLong(_self: *const fmx_FixPt, _x: *mut fmx__fmxcpt) -> fmx_int32;
+    fn FM_FixPt_AsLong(_self: *const fmx_FixPt, _x: *mut fmx__fmxcpt) -> i32;
 
     fn FM_FixPt_Delete(_self: *mut fmx_FixPt, _x: *mut fmx__fmxcpt);
 
-    fn FM_FixPt_Constructor1(
-        val: fmx_int32,
-        precision: fmx_int32,
-        _x: *mut fmx__fmxcpt,
-    ) -> *mut fmx_FixPt;
+    fn FM_FixPt_Constructor1(val: i32, precision: i32, _x: *mut fmx__fmxcpt) -> *mut fmx_FixPt;
 
     fn FM_FixPt_Constructor2(
-        val: fmx_int32,
+        val: i32,
         precisionExample: *const fmx_FixPt,
         _x: *mut fmx__fmxcpt,
     ) -> *mut fmx_FixPt;
 
-    fn FM_FixPt_AssignInt(_self: *mut fmx_FixPt, that: fmx_int32, _x: *mut fmx__fmxcpt);
+    fn FM_FixPt_AssignInt(_self: *mut fmx_FixPt, that: i32, _x: *mut fmx__fmxcpt);
 
     fn FM_FixPt_AssignInt64(_self: *mut fmx_FixPt, that: fmx_int64, _x: *mut fmx__fmxcpt);
 
@@ -72,19 +68,19 @@ extern "C" {
         _x: *mut fmx__fmxcpt,
     ) -> bool;
 
-    fn FM_FixPt_Increment(_self: *mut fmx_FixPt, n: fmx_int32, _x: *mut fmx__fmxcpt);
+    fn FM_FixPt_Increment(_self: *mut fmx_FixPt, n: i32, _x: *mut fmx__fmxcpt);
 
     fn FM_FixPt_Increment64(_self: *mut fmx_FixPt, n: fmx_int64, _x: *mut fmx__fmxcpt);
 
-    fn FM_FixPt_Decrement(_self: *mut fmx_FixPt, n: fmx_int32, _x: *mut fmx__fmxcpt);
+    fn FM_FixPt_Decrement(_self: *mut fmx_FixPt, n: i32, _x: *mut fmx__fmxcpt);
 
     fn FM_FixPt_Decrement64(_self: *mut fmx_FixPt, n: fmx_int64, _x: *mut fmx__fmxcpt);
 
     fn FM_FixPt_Negate(_self: *mut fmx_FixPt, _x: *mut fmx__fmxcpt);
 
-    fn FM_FixPt_GetPrecision(_self: *const fmx_FixPt, _x: *mut fmx__fmxcpt) -> fmx_int32;
+    fn FM_FixPt_GetPrecision(_self: *const fmx_FixPt, _x: *mut fmx__fmxcpt) -> i32;
 
-    fn FM_FixPt_SetPrecision(_self: *mut fmx_FixPt, precision: fmx_int32, _x: *mut fmx__fmxcpt);
+    fn FM_FixPt_SetPrecision(_self: *mut fmx_FixPt, precision: i32, _x: *mut fmx__fmxcpt);
 
     fn FM_FixPt_Add(
         _self: *const fmx_FixPt,
@@ -112,7 +108,7 @@ extern "C" {
         arg: *const fmx_FixPt,
         result: *mut fmx_FixPt,
         _x: *mut fmx__fmxcpt,
-    ) -> fmx_errcode;
+    ) -> FMError;
 
     fn FM_FixPt_AsBool(_self: *const fmx_FixPt, _x: *mut fmx__fmxcpt) -> bool;
 
@@ -128,7 +124,7 @@ pub struct FixPt {
 }
 
 impl FixPt {
-    pub fn new(val: fmx_int32, precision: fmx_int32) -> FixPt {
+    pub fn new(val: i32, precision: i32) -> FixPt {
         let mut _x = fmx__fmxcpt::new();
         let ptr = unsafe { FM_FixPt_Constructor1(val, precision, &mut _x) };
         _x.check();
@@ -393,7 +389,7 @@ impl Div for FixPt {
         let result = FixPt::default();
         let error = unsafe { FM_FixPt_Divide(self.ptr, other.ptr, result.ptr, &mut _x) };
         _x.check();
-        if error != 0 {
+        if error != FMError::NoError {
             panic!();
         }
         result
@@ -408,7 +404,7 @@ impl Rem for FixPt {
         let result = FixPt::default();
         let error = unsafe { FM_FixPt_Divide(self.ptr, other.ptr, result.ptr, &mut _x) };
         _x.check();
-        if error != 0 {
+        if error != FMError::NoError {
             panic!();
         }
         other - (self * result)
