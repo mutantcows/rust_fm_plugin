@@ -4,6 +4,7 @@ use std::error::Error;
 use std::fmt::{Display, Formatter};
 use std::fs::read_to_string;
 use std::path::Path;
+
 #[cfg(any(target_os = "windows", target_os = "macos"))]
 use std::process;
 
@@ -41,18 +42,18 @@ pub struct Plugin {
 
 pub fn read_config(config_path: &Path) -> Result<Config, Box<dyn Error>> {
     let config_path = config_path.join("config.toml");
-    let contents = read_to_string(config_path)?;
+    let contents = read_to_string(&config_path)?;
 
     let config: Config = toml::from_str(&contents)?;
     Ok(config)
 }
 
 #[cfg(any(target_os = "windows", target_os = "macos"))]
-pub fn kill_filemaker() -> Result<(), Box<dyn Error>> {
+pub fn kill_filemaker(manifest_dir: &str) -> Result<(), Box<dyn Error>> {
     let manifest = env!("CARGO_MANIFEST_DIR");
 
     if env::var("PROFILE").unwrap() == "release" {
-        let config = read_config(Path::new(manifest)).unwrap();
+        let config = read_config(Path::new(manifest_dir))?;
         kill_filemaker_command(&config)?;
     }
 
