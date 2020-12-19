@@ -7,7 +7,6 @@ pub mod config;
 pub mod ffi;
 pub mod helpers;
 pub mod post_build;
-#[cfg(not(target_os = "linux"))]
 pub use config::kill_filemaker;
 pub use ffi::*;
 pub use helpers::log;
@@ -32,8 +31,7 @@ pub trait Plugin {
     }
     fn register_functions() -> Vec<ExternalFunction>;
 
-    /// # Safety
-    /// talks to C
+    #[doc(hidden)]
     unsafe fn get_string(
         which_string: ExternStringType,
         _win_lang_id: u32,
@@ -69,6 +67,7 @@ pub trait Plugin {
         write_to_u16_buff(out_buffer, out_buffer_size, &string)
     }
 
+    #[doc(hidden)]
     fn initialize(version: ExternVersion) -> u64 {
         let plugin_id = QuadChar::new(Self::id());
 
@@ -90,6 +89,7 @@ pub trait Plugin {
 
     fn preferences();
 
+    #[doc(hidden)]
     fn shutdown(version: ExternVersion) {
         let plugin_id = QuadChar::new(Self::id());
         if version >= ExternVersion::V160 {
@@ -99,6 +99,7 @@ pub trait Plugin {
         }
     }
 
+    #[doc(hidden)]
     fn idle_callback(idle_level: fmx_IdleLevel, _session_id: fmx_ptrtype) {
         use IdleType::*;
         match IdleType::from(idle_level) {
