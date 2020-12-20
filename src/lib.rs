@@ -110,9 +110,9 @@ pub trait Plugin {
     }
     fn register_functions() -> Vec<ExternalFunction>;
 
-    fn session_notifications(_session_id: fmx_ptrtype);
+    fn session_notifications(session_id: fmx_ptrtype);
 
-    fn file_notifications(_session_id: fmx_ptrtype, _file_id: fmx_ptrtype);
+    fn file_notifications(session_id: fmx_ptrtype, file_id: fmx_ptrtype);
 
     fn preferences();
 
