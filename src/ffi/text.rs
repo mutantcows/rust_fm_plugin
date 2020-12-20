@@ -36,7 +36,7 @@ extern "C" {
 
     fn FM_Text_AssignWide(_self: *mut fmx_Text, s: *const u16, _x: *mut fmx__fmxcpt);
 
-    fn FM_Text_Assign(_self: *mut fmx_Text, s: *const c_char, encoding: i32, _x: *mut fmx__fmxcpt);
+    fn FM_Text_Assign(_self: *mut fmx_Text, s: *const i8, encoding: i32, _x: *mut fmx__fmxcpt);
 
     fn FM_Text_Constructor1(_x: *mut fmx__fmxcpt) -> *mut fmx_Text;
     fn FM_Text_GetSize(_self: *const fmx_Text, _x: *mut fmx__fmxcpt) -> u32;

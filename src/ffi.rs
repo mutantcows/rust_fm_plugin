@@ -14,6 +14,5 @@ pub use data::*;
 pub use datetime::*;
 pub use external::*;
 pub use fixed_point::*;
-use std::os::raw::{c_char, c_short};
 pub use text::*;
 pub use types::*;

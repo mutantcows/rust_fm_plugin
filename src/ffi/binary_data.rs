@@ -1,7 +1,6 @@
 use super::*;
 use std::convert::TryFrom;
 use std::mem::ManuallyDrop;
-use std::os::raw::c_char;
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -22,7 +21,7 @@ extern "C" {
     fn FM_BinaryData_Constructor3(
         name: *const fmx_Text,
         amount: u32,
-        buffer: *mut c_char,
+        buffer: *mut i8,
         _x: *mut fmx__fmxcpt,
     ) -> *mut fmx_BinaryData;
 
@@ -77,7 +76,7 @@ extern "C" {
         index: i32,
         offset: u32,
         amount: u32,
-        buffer: *mut c_char,
+        buffer: *mut i8,
         _x: *mut fmx__fmxcpt,
     ) -> FMError;
 
@@ -85,7 +84,7 @@ extern "C" {
         _self: *mut fmx_BinaryData,
         dataType: *const fmx_QuadChar,
         amount: u32,
-        buffer: *mut c_char,
+        buffer: *mut i8,
         _x: *mut fmx__fmxcpt,
     ) -> FMError;
 
@@ -112,15 +111,15 @@ extern "C" {
 
     fn FM_BinaryData_GetSIZEData(
         _self: *const fmx_BinaryData,
-        width: *mut c_short,
-        height: *mut c_short,
+        width: *mut i16,
+        height: *mut i16,
         _x: *mut fmx__fmxcpt,
     ) -> FMError;
 
     fn FM_BinaryData_AddSIZEData(
         _self: *mut fmx_BinaryData,
-        width: c_short,
-        height: c_short,
+        width: i16,
+        height: i16,
         _x: *mut fmx__fmxcpt,
     ) -> FMError;
 
@@ -135,7 +134,7 @@ extern "C" {
         _self: *mut fmx_BinaryData,
         context: u32,
         amount: u32,
-        buffer: *mut c_char,
+        buffer: *mut i8,
         _x: *mut fmx__fmxcpt,
     ) -> FMError;
 

@@ -27,7 +27,7 @@ extern "C" {
 
     fn FM_ExprEnv_RegisterScriptStep(
         pluginId: *const fmx_QuadChar,
-        scriptStepId: c_short,
+        scriptStepId: i16,
         scriptStepName: *const fmx_Text,
         scriptStepDefinition: *const fmx_Text,
         scriptStepDescription: *const fmx_Text,
@@ -38,12 +38,12 @@ extern "C" {
 
     fn FM_ExprEnv_RegisterExternalFunctionEx(
         pluginId: *const fmx_QuadChar,
-        functionId: c_short,
+        functionId: i16,
         functionName: *const fmx_Text,
         functionPrototype: *const fmx_Text,
         functionDescription: *const fmx_Text,
-        minArgs: c_short,
-        maxArgs: c_short,
+        minArgs: i16,
+        maxArgs: i16,
         compatibleOnFlags: u32,
         funcPtr: fmx_ExtPluginType,
         _x: *mut fmx__fmxcpt,
@@ -51,7 +51,7 @@ extern "C" {
 
     fn FM_ExprEnv_UnRegisterExternalFunction(
         pluginId: *const fmx_QuadChar,
-        functionId: c_short,
+        functionId: i16,
         _x: *mut fmx__fmxcpt,
     ) -> FMError;
 
@@ -86,7 +86,7 @@ extern "C" {
 
     fn FM_ExprEnv_EvaluateGetFunction(
         _self: *const fmx_ExprEnv,
-        functionValue: c_short,
+        functionValue: i16,
         result: *mut fmx_Data,
         _x: *mut fmx__fmxcpt,
     ) -> FMError;
@@ -111,11 +111,11 @@ extern "C" {
     #[allow(dead_code)]
     fn FM_ExprEnv_RegisterExternalFunction(
         pluginId: *const fmx_QuadChar,
-        functionId: c_short,
+        functionId: i16,
         functionName: *const fmx_Text,
         functionPrototype: *const fmx_Text,
-        minArgs: c_short,
-        maxArgs: c_short,
+        minArgs: i16,
+        maxArgs: i16,
         compatibleOnFlags: u32,
         funcPtr: fmx_ExtPluginType,
         _x: *mut fmx__fmxcpt,
@@ -127,7 +127,7 @@ extern "C" {
 
     fn FM_ExprEnv_UnRegisterScriptStep(
         pluginId: *const fmx_QuadChar,
-        scriptStepId: c_short,
+        scriptStepId: i16,
         _x: *mut fmx__fmxcpt,
     ) -> FMError;
 
@@ -865,7 +865,7 @@ pub trait FileMakerFunction {
     fn function(id: i16, env: &ExprEnv, args: &DataVect, result: &mut Data) -> FMError;
 
     extern "C" fn extern_func(
-        id: c_short,
+        id: i16,
         env_ptr: *const fmx_ExprEnv,
         args_ptr: *const fmx_DataVect,
         result_ptr: *mut fmx_Data,
