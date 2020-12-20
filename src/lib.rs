@@ -116,17 +116,6 @@ pub trait Plugin {
 
     fn preferences();
 
-    #[doc(hidden)]
-    fn shutdown(version: ExternVersion) {
-        let plugin_id = QuadChar::new(Self::id());
-        for f in Self::register_functions() {
-            if version < f.min_version {
-                continue;
-            }
-            f.unregister(&plugin_id);
-        }
-    }
-
     fn idle(session_id: fmx_ptrtype);
     fn not_idle(session_id: fmx_ptrtype);
     fn script_paused(session_id: fmx_ptrtype);
@@ -159,7 +148,7 @@ macro_rules! register_plugin {
                         Unsafe => $x::un_safe((*pb).parm2),
                     }
                 }
-                Shutdown => $x::shutdown((*pb).extnVersion),
+                Shutdown => shutdown((*pb).extnVersion),
                 AppPrefs => $x::preferences(),
                 GetString => get_string(
                     (*pb).parm1.into(),
@@ -218,6 +207,16 @@ macro_rules! register_plugin {
                 }
             }
             ExternVersion::V190
+        }
+
+        fn shutdown(version: ExternVersion) {
+            let plugin_id = QuadChar::new($x::id());
+            for f in $x::register_functions() {
+                if version < f.min_version {
+                    continue;
+                }
+                f.unregister(&plugin_id);
+            }
         }
     };
 }
