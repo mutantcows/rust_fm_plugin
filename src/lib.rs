@@ -1,3 +1,76 @@
+//! A wrapper around the FileMaker plug-in SDK.
+//!
+//! Replicates much of the functionality found in the C++ library provided by FileMaker, which is mostly wrapping the C ffi, as well as some convenience functions.
+//!
+//! Has only been tested with FileMaker 18 and 19 (windows, macos, and linux); your mileage may vary with older versions.
+//!
+//! # Quick Start
+//!
+//! You'll want to make your project a library with a crate-type of `cdylib`.
+//!
+//! ```toml
+//! [lib]
+//! path = "src/lib.rs"
+//! crate-type = ["cdylib"]
+//! ```
+//!
+//! Each custom function/script step must be configured in a [`FileMakerFunction`] implementation.
+//!
+//! ```rust
+//! pub struct MyFunction;
+//!
+//! impl FileMakerFunction for MyFunction {
+//!     fn function(id: i16, env: &ExprEnv, args: &DataVect, result: &mut Data) -> FMError {
+//!         //log some info to the desktop (plugin.log)
+//!         log("some troubleshooting info");
+//!
+//!         ...
+//!
+//!         FMError::NoError
+//!     }
+//! }
+//! ```
+//!
+//! Next you'll need to implement [`Plugin`] for your plugin's struct, defining all the information about the plug-in, as well as registering all the functions.
+//!
+//! ```rust
+//! use fm_plugin::prelude::*;
+//!
+//! struct MyPlugin;
+//!
+//! impl Plugin for MyPlugin {
+//!     fn id() -> &'static [u8; 4] {
+//!         &b"MyPl"
+//!     }
+//!
+//!     fn name() -> &'static str {
+//!         "MY PLUGIN"
+//!     }
+//!
+//!     fn register_functions() -> Vec<ExternalFunction> {
+//!         vec![ExternalFunction {
+//!             id: 100,
+//!             name: "MyPlugin_MyFunction",
+//!             definition: "MyPlugin_MyFunction( arg1 ; arg2 )",
+//!             description: "Does some really great stuff.",
+//!             min_args: 2,
+//!             max_args: 2,
+//!             compatible_flags: DisplayInAllDialogs | FutureCompatible,
+//!             min_version: ExternVersion::V160,
+//!             function_ptr: Some(MyFunction::extern_func),
+//!             }
+//!         ]
+//!     }
+//!     ...
+//! }
+//! ```
+//! Lastly you'll need to register the plug-in.
+//! ```rust
+//! register_plugin!(MyPlugin);
+//! ```
+//! [`Plugin`]: trait.Plugin.html
+//! [`FileMakerFunction`]: ffi/calc_engine/trait.FileMakerFunction.html
+
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 
