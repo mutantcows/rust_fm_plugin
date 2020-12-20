@@ -9,6 +9,15 @@ pub use config::kill_filemaker;
 pub use ffi::*;
 pub use helpers::{log, write_to_u16_buff};
 
+pub mod prelude {
+    pub use crate::PluginFlag::*;
+    pub use crate::{
+        fmx_ExternCallStruct, fmx_ptrtype, register_plugin, write_to_u16_buff, ExternStringType,
+        ExternVersion, ExternalFunction, FMError, FMExternCallType, FileMakerFunction, IdleType,
+        Plugin, QuadChar,
+    };
+}
+
 pub trait Plugin {
     fn id() -> &'static [u8; 4];
     fn name() -> &'static str;
