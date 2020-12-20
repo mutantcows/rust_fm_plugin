@@ -1,5 +1,4 @@
 use std::ffi::CString;
-use std::os::raw::{c_char, c_uint, c_ushort};
 use widestring::U16CString;
 
 pub(crate) fn write_to_file(content: &str) -> Result<(), String> {
