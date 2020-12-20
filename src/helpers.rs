@@ -28,7 +28,10 @@ pub fn log(content: &str) {
     write_to_file(content).unwrap_or(());
 }
 
-pub(crate) unsafe fn write_to_u16_buff(buffer: *mut c_ushort, buffer_size: c_uint, s: &str) {
+/// # Safety
+/// Uses slice from raw parts to fill the buffer
+/// Asserts that bytes len is <= buffer_size
+pub unsafe fn write_to_u16_buff(buffer: *mut u16, buffer_size: u32, s: &str) {
     let c_string = U16CString::from_str(s).unwrap();
     let bytes = c_string.as_slice();
 
@@ -36,7 +39,7 @@ pub(crate) unsafe fn write_to_u16_buff(buffer: *mut c_ushort, buffer_size: c_uin
 }
 
 #[allow(dead_code)]
-pub(crate) unsafe fn write_to_i8_buff(buffer: *mut c_char, buffer_size: c_uint, s: &str) {
+pub(crate) unsafe fn write_to_i8_buff(buffer: *mut i8, buffer_size: u32, s: &str) {
     let c_string = CString::new(s).unwrap();
     let bytes = c_string.as_bytes_with_nul();
     let bytes = &*(bytes as *const [u8] as *const [i8]);
@@ -44,7 +47,8 @@ pub(crate) unsafe fn write_to_i8_buff(buffer: *mut c_char, buffer_size: c_uint, 
     bytes_to_buff(buffer, buffer_size, bytes);
 }
 
-pub(crate) unsafe fn bytes_to_buff<T: Copy>(buffer: *mut T, buffer_size: c_uint, bytes: &[T]) {
+unsafe fn bytes_to_buff<T: Copy>(buffer: *mut T, buffer_size: u32, bytes: &[T]) {
+    assert!(bytes.len() <= buffer_size as usize);
     let string_bytes = std::slice::from_raw_parts_mut(buffer, buffer_size as usize);
     string_bytes[..bytes.len()].copy_from_slice(bytes);
 }
