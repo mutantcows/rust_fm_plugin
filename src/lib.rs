@@ -105,7 +105,7 @@ pub trait Plugin {
     fn enable_idle() -> bool {
         false
     }
-    fn enable_shutdown() -> bool {
+    fn enable_file_and_session_shutdown() -> bool {
         false
     }
     fn register_functions() -> Vec<ExternalFunction>;
@@ -186,7 +186,11 @@ macro_rules! register_plugin {
                         'n'
                     });
                     options.push(if $x::enable_idle() { 'Y' } else { 'n' });
-                    options.push(if $x::enable_shutdown() { 'Y' } else { 'n' });
+                    options.push(if $x::enable_file_and_session_shutdown() {
+                        'Y'
+                    } else {
+                        'n'
+                    });
                     options.push('n');
                     options
                 }
