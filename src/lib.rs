@@ -96,33 +96,150 @@ pub trait Plugin {
     fn name() -> &'static str;
     fn description() -> &'static str;
     fn url() -> &'static str;
+
+    /// Register all custom functions/script steps
+    fn register_functions() -> Vec<ExternalFunction>;
+
+    /// Defaults to false
     fn enable_configure_button() -> bool {
         false
     }
+    /// Defaults to true
     fn enable_init_and_shutdown() -> bool {
         true
     }
+    /// Defaults to false
     fn enable_idle() -> bool {
         false
     }
+    /// Defaults to false
     fn enable_file_and_session_shutdown() -> bool {
         false
     }
-    fn register_functions() -> Vec<ExternalFunction>;
 
-    fn session_notifications(session_id: fmx_ptrtype);
-
-    fn file_notifications(session_id: fmx_ptrtype, file_id: fmx_ptrtype);
-
-    fn preferences();
-
-    fn idle(session_id: fmx_ptrtype);
-    fn not_idle(session_id: fmx_ptrtype);
-    fn script_paused(session_id: fmx_ptrtype);
-    fn script_running(session_id: fmx_ptrtype);
-    fn un_safe(session_id: fmx_ptrtype);
+    fn session_shutdown(_session_id: fmx_ptrtype) {}
+    fn file_shutdown(_session_id: fmx_ptrtype, _file_id: fmx_ptrtype) {}
+    fn preferences() {}
+    fn idle(_session_id: fmx_ptrtype) {}
+    fn not_idle(_session_id: fmx_ptrtype) {}
+    fn script_paused(_session_id: fmx_ptrtype) {}
+    fn script_running(_session_id: fmx_ptrtype) {}
+    fn un_safe(_session_id: fmx_ptrtype) {}
 }
 
+/// Sets up the entry point for every FileMaker call into the plug-in. The function then dispatches the calls to the various trait functions you can implement.
+/// Impl [`Plugin`][Plugin] for your plugin struct, and then call the macro on it.
+///
+/// # Example
+/// ```rust
+/// use fm_plugin::prelude::*;
+///
+/// struct MyPlugin;
+///
+/// impl Plugin for MyPlugin { ... }
+///
+/// register_plugin!(MyPlugin);
+/// ```
+///
+/// # Macro Contents
+///```rust
+/// #[no_mangle]
+/// pub static mut gfmx_ExternCallPtr: *mut fmx_ExternCallStruct = std::ptr::null_mut();
+///
+/// #[no_mangle]
+/// unsafe extern "C" fn FMExternCallProc(pb: *mut fmx_ExternCallStruct) {
+///     // Setup global defined in fmxExtern.h (this will be obsoleted in a later header file)
+///     gfmx_ExternCallPtr = pb;
+///     use FMExternCallType::*;
+///
+///     // Message dispatcher
+///     match FMExternCallType::from((*pb).whichCall) {
+///         Init => (*pb).result = initialize((*pb).extnVersion) as u64,
+///         Idle => {
+///             use IdleType::*;
+///             match IdleType::from((*pb).parm1) {
+///                 Idle => $x::idle((*pb).parm2),
+///                 NotIdle => $x::not_idle((*pb).parm2),
+///                 ScriptPaused => $x::script_paused((*pb).parm2),
+///                 ScriptRunning => $x::script_running((*pb).parm2),
+///                 Unsafe => $x::un_safe((*pb).parm2),
+///             }
+///         }
+///         Shutdown => shutdown((*pb).extnVersion),
+///         AppPrefs => $x::preferences(),
+///         GetString => get_string(
+///             (*pb).parm1.into(),
+///             (*pb).parm2 as u32,
+///             (*pb).parm3 as u32,
+///             (*pb).result as *mut u16,
+///         ),
+///         SessionShutdown => $x::session_shutdown((*pb).parm2),
+///         FileShutdown => $x::file_shutdown((*pb).parm2, (*pb).parm3),
+///     }
+/// }
+///
+/// fn get_string(
+///     which_string: ExternStringType,
+///     _win_lang_id: u32,
+///     out_buffer_size: u32,
+///     out_buffer: *mut u16,
+/// ) {
+///     use ExternStringType::*;
+///     let string = match which_string {
+///         Name => $x::name().to_string(),
+///         AppConfig => $x::description().to_string(),
+///         Options => {
+///             let mut options: String = ::std::str::from_utf8($x::id()).unwrap().to_string();
+///             options.push('1');
+///             options.push(if $x::enable_configure_button() {
+///                 'Y'
+///             } else {
+///                 'n'
+///             });
+///             options.push('n');
+///             options.push(if $x::enable_init_and_shutdown() {
+///                 'Y'
+///             } else {
+///                 'n'
+///             });
+///             options.push(if $x::enable_idle() { 'Y' } else { 'n' });
+///             options.push(if $x::enable_file_and_session_shutdown() {
+///                 'Y'
+///             } else {
+///                 'n'
+///             });
+///             options.push('n');
+///             options
+///         }
+///         HelpUrl => $x::url().to_string(),
+///         Blank => "".to_string(),
+///     };
+///     unsafe { write_to_u16_buff(out_buffer, out_buffer_size, &string) }
+/// }
+///
+/// fn initialize(version: ExternVersion) -> ExternVersion {
+///     let plugin_id = QuadChar::new($x::id());
+///     for f in $x::register_functions() {
+///         if version < f.min_version {
+///             continue;
+///         }
+///         if f.register(&plugin_id) != FMError::NoError {
+///             return ExternVersion::DoNotEnable;
+///         }
+///     }
+///     ExternVersion::V190
+/// }
+///
+/// fn shutdown(version: ExternVersion) {
+///     let plugin_id = QuadChar::new($x::id());
+///     for f in $x::register_functions() {
+///         if version < f.min_version {
+///             continue;
+///         }
+///         f.unregister(&plugin_id);
+///     }
+/// }
+/// ```
 #[macro_export]
 macro_rules! register_plugin {
     ($x:ident) => {
@@ -156,8 +273,8 @@ macro_rules! register_plugin {
                     (*pb).parm3 as u32,
                     (*pb).result as *mut u16,
                 ),
-                SessionShutdown => $x::session_notifications((*pb).parm2),
-                FileShutdown => $x::file_notifications((*pb).parm2, (*pb).parm3),
+                SessionShutdown => $x::session_shutdown((*pb).parm2),
+                FileShutdown => $x::file_shutdown((*pb).parm2, (*pb).parm3),
             }
         }
 

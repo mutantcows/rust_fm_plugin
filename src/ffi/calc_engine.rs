@@ -699,8 +699,11 @@ impl<'a> Iterator for DataVectIterator<'a> {
     }
 }
 
+/// Used to define a custom function.
+/// Implement [FileMakerFunction] to define the actual functionality. Then when registering the function, use [`MyFunction.extern_func`][FileMakerFunction::extern_func].
 #[derive(Clone)]
 pub struct ExternalFunction {
+    /// Unique identifier for this function within this plug-in.
     pub id: i16,
     pub name: &'static str,
     pub definition: &'static str,
@@ -738,6 +741,7 @@ impl ExternalFunction {
         }
     }
 
+    /// Called automatically by [`register_plugin!`][register_plugin].
     pub fn register(&self, plugin_id: &QuadChar) -> FMError {
         let mut _x = fmx__fmxcpt::new();
 
@@ -769,6 +773,7 @@ impl ExternalFunction {
         error
     }
 
+    /// Called automatically by [`register_plugin!`][register_plugin].
     pub fn unregister(&self, plugin_id: &QuadChar) {
         let mut _x = fmx__fmxcpt::new();
         unsafe { FM_ExprEnv_UnRegisterExternalFunction(plugin_id.ptr, self.id, &mut _x) };
@@ -805,6 +810,7 @@ impl ExternalScriptStep {
         }
     }
 
+    /// Called automatically by [`register_plugin!`][register_plugin].
     pub fn register(&self, plugin_id: &QuadChar) -> FMError {
         let mut _x = fmx__fmxcpt::new();
 
@@ -834,6 +840,7 @@ impl ExternalScriptStep {
         error
     }
 
+    /// Called automatically by [`register_plugin!`][register_plugin].
     pub fn unregister(&self, plugin_id: &QuadChar) {
         let mut _x = fmx__fmxcpt::new();
         unsafe { FM_ExprEnv_UnRegisterScriptStep(plugin_id.ptr, self.id, &mut _x) };
@@ -862,8 +869,10 @@ pub enum FilePathFormat {
 }
 
 pub trait FileMakerFunction {
+    /// Define your custom function here. Set the return value to the result parameter.
     fn function(id: i16, env: &ExprEnv, args: &DataVect, result: &mut Data) -> FMError;
 
+    /// Entry point for FileMaker to call your function.
     extern "C" fn extern_func(
         id: i16,
         env_ptr: *const fmx_ExprEnv,
