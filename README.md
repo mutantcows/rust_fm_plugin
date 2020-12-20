@@ -77,6 +77,7 @@ impl Plugin for MyPlugin {
             min_args: 2,
             max_args: 2,
             compatible_flags: DisplayInAllDialogs | FutureCompatible,
+            min_version: ExternVersion::V160,
             function_ptr: Some(MyFunction::extern_func),
             }
         ]
