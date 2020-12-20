@@ -708,6 +708,7 @@ pub struct ExternalFunction {
     pub min_args: i16,
     pub max_args: i16,
     pub compatible_flags: u32,
+    pub min_version: ExternVersion,
     pub function_ptr: fmx_ExtPluginType,
 }
 
@@ -721,6 +722,7 @@ impl ExternalFunction {
         min_args: i16,
         max_args: i16,
         compatible_flags: u32,
+        min_version: ExternVersion,
         function_ptr: fmx_ExtPluginType,
     ) -> Self {
         Self {
@@ -731,6 +733,7 @@ impl ExternalFunction {
             min_args,
             max_args,
             compatible_flags,
+            min_version,
             function_ptr,
         }
     }
