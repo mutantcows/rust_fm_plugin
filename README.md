@@ -55,8 +55,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 `lib.rs:`
 
 ```rust
-use fm_plugin::{Plugin, register_plugin, log, FMError, ExternalFunction, FileMakerFunction};
-use fm_plugin::PluginFlag::*;
+use fm_plugin::prelude::*;
 
 struct MyPlugin;
 
