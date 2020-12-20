@@ -1,8 +1,6 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 
-use std::str::from_utf8;
-
 pub mod config;
 pub mod ffi;
 pub mod helpers;
@@ -10,7 +8,6 @@ pub mod post_build;
 pub use config::kill_filemaker;
 pub use ffi::*;
 pub use helpers::log;
-use helpers::*;
 
 pub trait Plugin {
     fn id() -> &'static [u8; 4];
@@ -31,58 +28,6 @@ pub trait Plugin {
     }
     fn register_functions() -> Vec<ExternalFunction>;
 
-    #[doc(hidden)]
-    unsafe fn get_string(
-        which_string: ExternStringType,
-        _win_lang_id: u32,
-        out_buffer_size: u32,
-        out_buffer: *mut u16,
-    ) {
-        use ExternStringType::*;
-        let string = match which_string {
-            Name => Self::name().to_string(),
-            AppConfig => Self::description().to_string(),
-            Options => {
-                let mut options: String = from_utf8(Self::id()).unwrap().to_string();
-                options.push('1');
-                options.push(if Self::enable_configure_button() {
-                    'Y'
-                } else {
-                    'n'
-                });
-                options.push('n');
-                options.push(if Self::enable_init_and_shutdown() {
-                    'Y'
-                } else {
-                    'n'
-                });
-                options.push(if Self::enable_idle() { 'Y' } else { 'n' });
-                options.push(if Self::enable_shutdown() { 'Y' } else { 'n' });
-                options.push('n');
-                options
-            }
-            HelpUrl => Self::url().to_string(),
-            Blank => "".to_string(),
-        };
-        write_to_u16_buff(out_buffer, out_buffer_size, &string)
-    }
-
-    #[doc(hidden)]
-    fn initialize(version: ExternVersion) -> u64 {
-        let plugin_id = QuadChar::new(Self::id());
-
-        if version < ExternVersion::V160 {
-            return ExternVersion::DoNotEnable as u64;
-        }
-
-        for f in Self::register_functions() {
-            if f.register(&plugin_id) != FMError::NoError {
-                return ExternVersion::DoNotEnable as u64;
-            }
-        }
-        ExternVersion::V190 as u64
-    }
-
     fn session_notifications(_session_id: fmx_ptrtype);
 
     fn file_notifications(_session_id: fmx_ptrtype, _file_id: fmx_ptrtype);
@@ -92,30 +37,19 @@ pub trait Plugin {
     #[doc(hidden)]
     fn shutdown(version: ExternVersion) {
         let plugin_id = QuadChar::new(Self::id());
-        if version >= ExternVersion::V160 {
-            for f in Self::register_functions() {
-                f.unregister(&plugin_id);
+        for f in Self::register_functions() {
+            if version < f.min_version {
+                continue;
             }
+            f.unregister(&plugin_id);
         }
     }
 
-    #[doc(hidden)]
-    fn idle_callback(idle_level: fmx_IdleLevel, _session_id: fmx_ptrtype) {
-        use IdleType::*;
-        match IdleType::from(idle_level) {
-            Idle => Self::idle(),
-            NotIdle => {}
-            ScriptPaused => {}
-            ScriptRunning => {}
-            Unsafe => {}
-        }
-    }
-
-    fn idle();
-    fn not_idle();
-    fn script_paused();
-    fn script_running();
-    fn un_safe();
+    fn idle(session_id: fmx_ptrtype);
+    fn not_idle(session_id: fmx_ptrtype);
+    fn script_paused(session_id: fmx_ptrtype);
+    fn script_running(session_id: fmx_ptrtype);
+    fn un_safe(session_id: fmx_ptrtype);
 }
 
 #[macro_export]
@@ -132,11 +66,34 @@ macro_rules! register_plugin {
 
             // Message dispatcher
             match FMExternCallType::from((*pb).whichCall) {
-                Init => (*pb).result = $x::initialize((*pb).extnVersion),
-                Idle => $x::idle_callback((*pb).parm1, (*pb).parm2),
+                Init => {
+                    (*pb).result = {
+                        let version = (*pb).extnVersion;
+                        let plugin_id = QuadChar::new(Self::id());
+                        for f in Self::register_functions() {
+                            if version < f.min_version {
+                                continue;
+                            }
+                            if f.register(&plugin_id) != FMError::NoError {
+                                return ExternVersion::DoNotEnable;
+                            }
+                        }
+                        ExternVersion::V190
+                    }
+                }
+                Idle => {
+                    use IdleType::*;
+                    match IdleType::from((*pb).parm1) {
+                        Idle => $x::idle((*pb).parm2),
+                        NotIdle => $x::not_idle((*pb).parm2),
+                        ScriptPaused => $x::script_paused((*pb).parm2),
+                        ScriptRunning => $x::script_running((*pb).parm2),
+                        Unsafe => $x::un_safe((*pb).parm2),
+                    }
+                }
                 Shutdown => $x::shutdown((*pb).extnVersion),
                 AppPrefs => $x::preferences(),
-                GetString => $x::get_string(
+                GetString => get_string(
                     (*pb).parm1.into(),
                     (*pb).parm2 as u32,
                     (*pb).parm3 as u32,
@@ -145,6 +102,41 @@ macro_rules! register_plugin {
                 SessionShutdown => $x::session_notifications((*pb).parm2),
                 FileShutdown => $x::file_notifications((*pb).parm2, (*pb).parm3),
             }
+        }
+
+        fn get_string(
+            which_string: ExternStringType,
+            _win_lang_id: u32,
+            out_buffer_size: u32,
+            out_buffer: *mut u16,
+        ) {
+            use ExternStringType::*;
+            let string = match which_string {
+                Name => $x::name().to_string(),
+                AppConfig => $x::description().to_string(),
+                Options => {
+                    let mut options: String = ::std::str::from_utf8($x::id()).unwrap().to_string();
+                    options.push('1');
+                    options.push(if $x::enable_configure_button() {
+                        'Y'
+                    } else {
+                        'n'
+                    });
+                    options.push('n');
+                    options.push(if $x::enable_init_and_shutdown() {
+                        'Y'
+                    } else {
+                        'n'
+                    });
+                    options.push(if $x::enable_idle() { 'Y' } else { 'n' });
+                    options.push(if $x::enable_shutdown() { 'Y' } else { 'n' });
+                    options.push('n');
+                    options
+                }
+                HelpUrl => $x::url().to_string(),
+                Blank => "".to_string(),
+            };
+            unsafe { write_to_u16_buff(out_buffer, out_buffer_size, &string) }
         }
     };
 }
