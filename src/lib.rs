@@ -7,7 +7,7 @@ pub mod helpers;
 pub mod post_build;
 pub use config::kill_filemaker;
 pub use ffi::*;
-pub use helpers::log;
+pub use helpers::{log, write_to_u16_buff};
 
 pub trait Plugin {
     fn id() -> &'static [u8; 4];
@@ -66,21 +66,7 @@ macro_rules! register_plugin {
 
             // Message dispatcher
             match FMExternCallType::from((*pb).whichCall) {
-                Init => {
-                    (*pb).result = {
-                        let version = (*pb).extnVersion;
-                        let plugin_id = QuadChar::new(Self::id());
-                        for f in Self::register_functions() {
-                            if version < f.min_version {
-                                continue;
-                            }
-                            if f.register(&plugin_id) != FMError::NoError {
-                                return ExternVersion::DoNotEnable;
-                            }
-                        }
-                        ExternVersion::V190
-                    }
-                }
+                Init => (*pb).result = initialize((*pb).extnVersion) as u64,
                 Idle => {
                     use IdleType::*;
                     match IdleType::from((*pb).parm1) {
@@ -137,6 +123,19 @@ macro_rules! register_plugin {
                 Blank => "".to_string(),
             };
             unsafe { write_to_u16_buff(out_buffer, out_buffer_size, &string) }
+        }
+
+        fn initialize(version: ExternVersion) -> ExternVersion {
+            let plugin_id = QuadChar::new($x::id());
+            for f in $x::register_functions() {
+                if version < f.min_version {
+                    continue;
+                }
+                if f.register(&plugin_id) != FMError::NoError {
+                    return ExternVersion::DoNotEnable;
+                }
+            }
+            ExternVersion::V190
         }
     };
 }
