@@ -83,6 +83,7 @@ pub use ffi::*;
 pub use helpers::{log, write_to_u16_buff};
 
 pub mod prelude {
+    //! Re-exports everything necessary for the register_plugin macro.
     pub use crate::PluginFlag::*;
     pub use crate::{
         fmx_ExternCallStruct, fmx_ptrtype, register_plugin, write_to_u16_buff, ExternStringType,

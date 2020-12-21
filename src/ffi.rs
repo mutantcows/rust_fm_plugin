@@ -1,3 +1,5 @@
+//! Contains all the C ffi wrappers.
+
 pub mod binary_data;
 pub mod calc_engine;
 pub mod client;

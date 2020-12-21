@@ -1,3 +1,4 @@
+//! Various helper functions, including a logging function.
 use std::ffi::CString;
 use widestring::U16CString;
 
