@@ -1,3 +1,34 @@
+//! Controls bundling of the plug-in after build. Utilizes the `cargo-post` crate. Requires settings to configured in `config.toml`.
+//!
+//! # Example
+//! `Cargo.toml`
+//! ```toml
+//! [package.metadata.cargo-post.dependencies]
+//! directories = "*"
+//! toml = "*"
+//! serde = { version = "1.0", features = ["derive"] }
+//! fm_plugin = "*"
+//! ```
+//!
+//! `config.toml`
+//! ```toml
+//! [filemaker]
+//! ext_path = "/path/to/Extentions"
+//! bin_path = "/Applications/FileMaker Pro.app"
+//!
+//! [plugin]
+//! name = "plugin name"
+//! ```
+//!
+//! `post_build.rs`
+//! ```rust
+//! #[cfg(any(target_os = "windows", target_os = "macos"))]
+//! fn main() -> Result<(), Box<dyn std::error::Error>> {
+//!     fm_plugin::post_build::bundle_plugin()?;
+//!     Ok(())
+//! }
+//! ```
+
 use directories::UserDirs;
 use std::error::Error;
 #[cfg(target_os = "macos")]
@@ -8,6 +39,13 @@ use std::process;
 
 use crate::config::{read_config, BuildError, Config};
 
+/// Handles bundling, renaming, and moving of the lib after build.
+/// 1. Loads prefs from `config.toml`
+/// 2. Clears `plugin.log` on the desktop.
+/// 3. Bundles the plug-in (on mac).
+/// 4. Renames the plug-in.
+/// 5. Moves plug-in to FileMaker Extensions folder.
+/// 6. Launches FileMaker.
 pub fn bundle_plugin() -> Result<(), Box<dyn Error>> {
     let config_path =
         Path::new(option_env!("CRATE_MANIFEST_DIR").ok_or("CRATE_MANIFEST_DIR not set")?);

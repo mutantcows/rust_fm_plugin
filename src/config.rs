@@ -1,3 +1,32 @@
+//! Handles the force quitting of FileMaker before building the plug-in.
+//! This serves two purposes:
+//! 1. Allowing you to re-load the plug-in in FileMaker.
+//! 2. Sometimes FileMaker locks a `.dll` in the target folder during testing and prevents cargo from building.
+//!
+//! # Example
+//! `Cargo.toml`
+//! ```toml
+//! [build-dependencies]
+//! fm_plugin = "*"
+//! ```
+//! `config.toml`
+//! ```toml
+//! [filemaker]
+//!ext_path = "/path/to/Extentions"
+//!bin_path = "/Applications/FileMaker Pro.app"
+//!
+//![plugin]
+//!name = "plugin name"
+//! ```
+//! `build.rs`
+//! ```rust
+//! #[cfg(any(target_os = "windows", target_os = "macos"))]
+//!fn main() -> Result<(), Box<dyn std::error::Error>> {
+//!    fm_plugin::kill_filemaker(env!("CARGO_MANIFEST_DIR"))?;
+//!    Ok(())
+//!}
+//! ```
+
 use serde::Deserialize;
 use std::env;
 use std::error::Error;
