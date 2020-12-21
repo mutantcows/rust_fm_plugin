@@ -23,6 +23,7 @@ pub(crate) fn write_to_file(content: &str) -> Result<(), String> {
     Ok(())
 }
 
+/// Appends to `plugin.log` on the desktop.
 pub fn log(content: &str) {
     write_to_file(content).unwrap_or(());
 }

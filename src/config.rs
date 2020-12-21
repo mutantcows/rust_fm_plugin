@@ -48,6 +48,7 @@ pub(crate) fn read_config(config_path: &Path) -> Result<Config, Box<dyn Error>> 
     Ok(config)
 }
 
+/// Force quits FileMaker using the path provided in `config.toml`.
 #[cfg(any(target_os = "windows", target_os = "macos"))]
 pub fn kill_filemaker(manifest_dir: &str) -> Result<(), Box<dyn Error>> {
     if env::var("PROFILE").unwrap() == "release" {
@@ -58,6 +59,7 @@ pub fn kill_filemaker(manifest_dir: &str) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
+/// Force quits FileMaker using the path provided in `config.toml`.
 #[cfg(target_os = "linux")]
 pub fn kill_filemaker(manifest_dir: &str) -> Result<(), Box<dyn Error>> {
     Ok(())

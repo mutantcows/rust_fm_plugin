@@ -91,10 +91,46 @@ pub mod prelude {
     };
 }
 
+/// Implement this trait for your plugin struct. The different functions are used to give FileMaker information about the plugin. You also need to register all your functions/script steps in the trait implementation.
+///
+/// # Example
+/// ```rust
+/// struct MyPlugin;
+///
+/// impl Plugin for MyPlugin {
+///     fn id() -> &'static [u8; 4] {
+///         &b"MyPl"
+///     }
+///
+///     fn name() -> &'static str {
+///         "MY PLUGIN"
+///     }
+///
+///     fn register_functions() -> Vec<ExternalFunction> {
+///         vec![ExternalFunction {
+///             id: 100,
+///             name: "MyPlugin_MyFunction",
+///             definition: "MyPlugin_MyFunction( arg1 ; arg2 )",
+///             description: "Does some really great stuff.",
+///             min_args: 2,
+///             max_args: 2,
+///             compatible_flags: DisplayInAllDialogs | FutureCompatible,
+///             min_version: ExternVersion::V160,
+///             function_ptr: Some(MyFunction::extern_func),
+///             }
+///         ]
+///     }
+///     ...
+/// }
+/// ```
 pub trait Plugin {
+    /// Unique 4 letter identifier for the plug-in.
     fn id() -> &'static [u8; 4];
+    /// Plug-in's name.
     fn name() -> &'static str;
+    /// Description of the plug-in.
     fn description() -> &'static str;
+    /// Url to send users to from the help in FileMaker. The function's name that the user  will be appended to the url when clicked.
     fn url() -> &'static str;
 
     /// Register all custom functions/script steps
