@@ -715,34 +715,9 @@ pub struct ExternalFunction {
     pub function_ptr: fmx_ExtPluginType,
 }
 
-impl ExternalFunction {
-    #[allow(clippy::too_many_arguments)]
-    pub fn new(
-        id: i16,
-        name: &'static str,
-        definition: &'static str,
-        description: &'static str,
-        min_args: i16,
-        max_args: i16,
-        compatible_flags: u32,
-        min_version: ExternVersion,
-        function_ptr: fmx_ExtPluginType,
-    ) -> Self {
-        Self {
-            id,
-            name,
-            definition,
-            description,
-            min_args,
-            max_args,
-            compatible_flags,
-            min_version,
-            function_ptr,
-        }
-    }
-
+impl ExternalRegistration for ExternalFunction {
     /// Called automatically by [`register_plugin!`][register_plugin].
-    pub fn register(&self, plugin_id: &QuadChar) -> FMError {
+    fn register(&self, plugin_id: &QuadChar) -> FMError {
         let mut _x = fmx__fmxcpt::new();
 
         let mut name = Text::new();
@@ -774,11 +749,17 @@ impl ExternalFunction {
     }
 
     /// Called automatically by [`register_plugin!`][register_plugin].
-    pub fn unregister(&self, plugin_id: &QuadChar) {
+    fn unregister(&self, plugin_id: &QuadChar) {
         let mut _x = fmx__fmxcpt::new();
         unsafe { FM_ExprEnv_UnRegisterExternalFunction(plugin_id.ptr, self.id, &mut _x) };
         _x.check();
     }
+}
+
+pub trait ExternalRegistration {
+    fn register(&self, plugin_id: &QuadChar) -> FMError;
+
+    fn unregister(&self, plugin_id: &QuadChar);
 }
 
 pub struct ExternalScriptStep {
@@ -790,28 +771,9 @@ pub struct ExternalScriptStep {
     pub function_ptr: fmx_ExtPluginType,
 }
 
-impl ExternalScriptStep {
-    #[allow(clippy::too_many_arguments)]
-    pub fn new(
-        id: i16,
-        name: &'static str,
-        definition: &'static str,
-        description: &'static str,
-        compatible_flags: u32,
-        function_ptr: fmx_ExtPluginType,
-    ) -> Self {
-        Self {
-            id,
-            name,
-            definition,
-            description,
-            compatible_flags,
-            function_ptr,
-        }
-    }
-
+impl ExternalRegistration for ExternalScriptStep {
     /// Called automatically by [`register_plugin!`][register_plugin].
-    pub fn register(&self, plugin_id: &QuadChar) -> FMError {
+    fn register(&self, plugin_id: &QuadChar) -> FMError {
         let mut _x = fmx__fmxcpt::new();
 
         let mut name = Text::new();
@@ -841,7 +803,7 @@ impl ExternalScriptStep {
     }
 
     /// Called automatically by [`register_plugin!`][register_plugin].
-    pub fn unregister(&self, plugin_id: &QuadChar) {
+    fn unregister(&self, plugin_id: &QuadChar) {
         let mut _x = fmx__fmxcpt::new();
         unsafe { FM_ExprEnv_UnRegisterScriptStep(plugin_id.ptr, self.id, &mut _x) };
         _x.check();

@@ -135,7 +135,9 @@ pub trait Plugin {
     fn url() -> &'static str;
 
     /// Register all custom functions/script steps
-    fn register_functions() -> Vec<ExternalFunction>;
+    fn register_functions<T>() -> Vec<T>
+    where
+        T: ExternalRegistration;
 
     /// Defaults to false
     fn enable_configure_button() -> bool {
