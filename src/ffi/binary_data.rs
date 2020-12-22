@@ -350,11 +350,9 @@ impl BinaryData {
 
 impl Drop for BinaryData {
     fn drop(&mut self) {
-        crate::helpers::log("dropping bin data");
         if self.drop {
             let mut _x = fmx__fmxcpt::new();
             unsafe { FM_BinaryData_Delete(self.ptr, &mut _x) };
-            crate::helpers::log("dropped bin data");
             _x.check();
         }
     }
