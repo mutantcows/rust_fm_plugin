@@ -706,6 +706,7 @@ pub struct ExternalFunction {
     /// Unique identifier for this function within this plug-in.
     pub id: i16,
     pub name: &'static str,
+    /// This will be auto entered when the function is selected from the menu
     pub definition: &'static str,
     pub description: &'static str,
     pub min_args: i16,
@@ -761,9 +762,13 @@ pub trait ExternalRegistration {
     fn unregister(&self, plugin_id: &QuadChar);
 }
 
+/// Used to define a script step.
+/// Implement [FileMakerFunction] to define the actual functionality. Then when registering the script step, use [`MyFunction.extern_func`][FileMakerFunction::extern_func].
 pub struct ExternalScriptStep {
+    /// Unique identifier for this function within this plug-in.
     pub id: i16,
     pub name: &'static str,
+    /// Must be xml defining the configuration of the script step
     pub definition: &'static str,
     pub description: &'static str,
     pub compatible_flags: u32,

@@ -267,12 +267,26 @@ pub trait Plugin {
 ///             return ExternVersion::DoNotEnable;
 ///         }
 ///     }
+///     for f in $x::register_script_steps() {
+///         if version < f.min_version {
+///             continue;
+///         }
+///         if f.register(&plugin_id) != FMError::NoError {
+///             return ExternVersion::DoNotEnable;
+///         }
+///     }
 ///     ExternVersion::V190
 /// }
 ///
 /// fn shutdown(version: ExternVersion) {
 ///     let plugin_id = QuadChar::new($x::id());
 ///     for f in $x::register_functions() {
+///         if version < f.min_version {
+///             continue;
+///         }
+///         f.unregister(&plugin_id);
+///     }
+///     for f in $x::register_script_steps() {
 ///         if version < f.min_version {
 ///             continue;
 ///         }
