@@ -87,8 +87,8 @@ pub mod prelude {
     pub use crate::PluginFlag::*;
     pub use crate::{
         fmx_ExternCallStruct, fmx_ptrtype, register_plugin, write_to_u16_buff, ExternStringType,
-        ExternVersion, ExternalFunction, ExternalRegistration, ExternalScriptStep, FMError,
-        FMExternCallType, FileMakerFunction, IdleType, Plugin, QuadChar,
+        ExternVersion, FMError, FMExternCallType, FileMakerFunction, IdleType, Plugin, QuadChar,
+        Registration,
     };
 }
 
@@ -134,11 +134,8 @@ pub trait Plugin {
     /// Url to send users to from the help in FileMaker. The function's name that the user  will be appended to the url when clicked.
     fn url() -> &'static str;
 
-    /// Register all custom functions
-    fn register_functions() -> Vec<ExternalFunction>;
-
-    /// Register all script steps
-    fn register_script_steps() -> Vec<ExternalScriptStep>;
+    /// Register all custom functions/script steps
+    fn register_functions() -> Vec<Registration>;
 
     /// Defaults to false
     fn enable_configure_button() -> bool {
@@ -260,15 +257,7 @@ pub trait Plugin {
 /// fn initialize(version: ExternVersion) -> ExternVersion {
 ///     let plugin_id = QuadChar::new($x::id());
 ///     for f in $x::register_functions() {
-///         if version < f.min_version {
-///             continue;
-///         }
-///         if f.register(&plugin_id) != FMError::NoError {
-///             return ExternVersion::DoNotEnable;
-///         }
-///     }
-///     for f in $x::register_script_steps() {
-///         if version < f.min_version {
+///         if version < f.min_version() {
 ///             continue;
 ///         }
 ///         if f.register(&plugin_id) != FMError::NoError {
@@ -281,13 +270,7 @@ pub trait Plugin {
 /// fn shutdown(version: ExternVersion) {
 ///     let plugin_id = QuadChar::new($x::id());
 ///     for f in $x::register_functions() {
-///         if version < f.min_version {
-///             continue;
-///         }
-///         f.unregister(&plugin_id);
-///     }
-///     for f in $x::register_script_steps() {
-///         if version < f.min_version {
+///         if version < f.min_version() {
 ///             continue;
 ///         }
 ///         f.unregister(&plugin_id);
@@ -374,15 +357,7 @@ macro_rules! register_plugin {
         fn initialize(version: ExternVersion) -> ExternVersion {
             let plugin_id = QuadChar::new($x::id());
             for f in $x::register_functions() {
-                if version < f.min_version {
-                    continue;
-                }
-                if f.register(&plugin_id) != FMError::NoError {
-                    return ExternVersion::DoNotEnable;
-                }
-            }
-            for f in $x::register_script_steps() {
-                if version < f.min_version {
+                if version < f.min_version() {
                     continue;
                 }
                 if f.register(&plugin_id) != FMError::NoError {
@@ -395,13 +370,7 @@ macro_rules! register_plugin {
         fn shutdown(version: ExternVersion) {
             let plugin_id = QuadChar::new($x::id());
             for f in $x::register_functions() {
-                if version < f.min_version {
-                    continue;
-                }
-                f.unregister(&plugin_id);
-            }
-            for f in $x::register_script_steps() {
-                if version < f.min_version {
+                if version < f.min_version() {
                     continue;
                 }
                 f.unregister(&plugin_id);

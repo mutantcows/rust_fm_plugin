@@ -699,118 +699,134 @@ impl<'a> Iterator for DataVectIterator<'a> {
     }
 }
 
-/// Used to define a custom function.
-/// Implement [FileMakerFunction] to define the actual functionality. Then when registering the function, use [`MyFunction.extern_func`][FileMakerFunction::extern_func].
-#[derive(Clone)]
-pub struct ExternalFunction {
-    /// Unique identifier for this function within this plug-in.
-    pub id: i16,
-    pub name: &'static str,
-    /// This will be auto entered when the function is selected from the menu
-    pub definition: &'static str,
-    pub description: &'static str,
-    pub min_args: i16,
-    pub max_args: i16,
-    pub compatible_flags: u32,
-    pub min_version: ExternVersion,
-    pub function_ptr: fmx_ExtPluginType,
+pub enum Registration {
+    Function {
+        id: i16,
+        name: &'static str,
+        /// This will be auto entered when the function is selected from the menu
+        definition: &'static str,
+        description: &'static str,
+        min_args: i16,
+        max_args: i16,
+        compatible_flags: u32,
+        min_version: ExternVersion,
+        function_ptr: fmx_ExtPluginType,
+    },
+    ScriptStep {
+        id: i16,
+        name: &'static str,
+        /// Must be xml defining the configuration of the script step
+        definition: &'static str,
+        description: &'static str,
+        compatible_flags: u32,
+        min_version: ExternVersion,
+        function_ptr: fmx_ExtPluginType,
+    },
 }
 
-impl ExternalRegistration for ExternalFunction {
+impl Registration {
     /// Called automatically by [`register_plugin!`][register_plugin].
-    fn register(&self, plugin_id: &QuadChar) -> FMError {
+    pub fn register(&self, plugin_id: &QuadChar) -> FMError {
         let mut _x = fmx__fmxcpt::new();
 
+        let (id, n, desc, def, flags, func_ptr) = match *self {
+            Registration::Function {
+                id,
+                name,
+                description,
+                definition,
+                compatible_flags,
+                function_ptr,
+                ..
+            } => (
+                id,
+                name,
+                description,
+                definition,
+                compatible_flags,
+                function_ptr,
+            ),
+            Registration::ScriptStep {
+                id,
+                name,
+                description,
+                definition,
+                compatible_flags,
+                function_ptr,
+                ..
+            } => (
+                id,
+                name,
+                description,
+                definition,
+                compatible_flags,
+                function_ptr,
+            ),
+        };
+
         let mut name = Text::new();
-        name.assign(self.name);
+        name.assign(n);
 
         let mut description = Text::new();
-        description.assign(self.description);
+        description.assign(desc);
 
         let mut definition = Text::new();
-        definition.assign(self.definition);
+        definition.assign(def);
 
-        let error = unsafe {
-            FM_ExprEnv_RegisterExternalFunctionEx(
-                plugin_id.ptr,
-                self.id,
-                name.ptr,
-                definition.ptr,
-                description.ptr,
-                self.min_args,
-                self.max_args,
-                self.compatible_flags,
-                self.function_ptr,
-                &mut _x,
-            )
+        let error = match self {
+            Registration::Function {
+                min_args, max_args, ..
+            } => unsafe {
+                FM_ExprEnv_RegisterExternalFunctionEx(
+                    plugin_id.ptr,
+                    id,
+                    name.ptr,
+                    definition.ptr,
+                    description.ptr,
+                    *min_args,
+                    *max_args,
+                    flags,
+                    func_ptr,
+                    &mut _x,
+                )
+            },
+            Registration::ScriptStep { .. } => unsafe {
+                FM_ExprEnv_RegisterScriptStep(
+                    plugin_id.ptr,
+                    id,
+                    name.ptr,
+                    definition.ptr,
+                    description.ptr,
+                    flags,
+                    func_ptr,
+                    &mut _x,
+                )
+            },
         };
 
         _x.check();
         error
     }
 
-    /// Called automatically by [`register_plugin!`][register_plugin].
-    fn unregister(&self, plugin_id: &QuadChar) {
-        let mut _x = fmx__fmxcpt::new();
-        unsafe { FM_ExprEnv_UnRegisterExternalFunction(plugin_id.ptr, self.id, &mut _x) };
-        _x.check();
-    }
-}
-
-pub trait ExternalRegistration {
-    fn register(&self, plugin_id: &QuadChar) -> FMError;
-    fn unregister(&self, plugin_id: &QuadChar);
-}
-
-/// Used to define a script step.
-/// Implement [FileMakerFunction] to define the actual functionality. Then when registering the script step, use [`MyFunction.extern_func`][FileMakerFunction::extern_func].
-pub struct ExternalScriptStep {
-    /// Unique identifier for this function within this plug-in.
-    pub id: i16,
-    pub name: &'static str,
-    /// Must be xml defining the configuration of the script step
-    pub definition: &'static str,
-    pub description: &'static str,
-    pub compatible_flags: u32,
-    pub min_version: ExternVersion,
-    pub function_ptr: fmx_ExtPluginType,
-}
-
-impl ExternalRegistration for ExternalScriptStep {
-    /// Called automatically by [`register_plugin!`][register_plugin].
-    fn register(&self, plugin_id: &QuadChar) -> FMError {
-        let mut _x = fmx__fmxcpt::new();
-
-        let mut name = Text::new();
-        name.assign(self.name);
-
-        let mut description = Text::new();
-        description.assign(self.description);
-
-        let mut definition = Text::new();
-        definition.assign(self.definition);
-
-        let error = unsafe {
-            FM_ExprEnv_RegisterScriptStep(
-                plugin_id.ptr,
-                self.id,
-                name.ptr,
-                definition.ptr,
-                description.ptr,
-                self.compatible_flags,
-                self.function_ptr,
-                &mut _x,
-            )
-        };
-
-        _x.check();
-        error
+    /// Returns minimum allowed version for s function/script step.
+    pub fn min_version(&self) -> ExternVersion {
+        match self {
+            Registration::Function { min_version, .. } => *min_version,
+            Registration::ScriptStep { min_version, .. } => *min_version,
+        }
     }
 
     /// Called automatically by [`register_plugin!`][register_plugin].
-    fn unregister(&self, plugin_id: &QuadChar) {
+    pub fn unregister(&self, plugin_id: &QuadChar) {
         let mut _x = fmx__fmxcpt::new();
-        unsafe { FM_ExprEnv_UnRegisterScriptStep(plugin_id.ptr, self.id, &mut _x) };
+        match self {
+            Registration::Function { id, .. } => unsafe {
+                FM_ExprEnv_UnRegisterExternalFunction(plugin_id.ptr, *id, &mut _x);
+            },
+            Registration::ScriptStep { id, .. } => unsafe {
+                FM_ExprEnv_UnRegisterScriptStep(plugin_id.ptr, *id, &mut _x);
+            },
+        }
         _x.check();
     }
 }
