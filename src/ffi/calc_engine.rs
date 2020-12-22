@@ -758,7 +758,6 @@ impl ExternalRegistration for ExternalFunction {
 
 pub trait ExternalRegistration {
     fn register(&self, plugin_id: &QuadChar) -> FMError;
-
     fn unregister(&self, plugin_id: &QuadChar);
 }
 
@@ -768,6 +767,7 @@ pub struct ExternalScriptStep {
     pub definition: &'static str,
     pub description: &'static str,
     pub compatible_flags: u32,
+    pub min_version: ExternVersion,
     pub function_ptr: fmx_ExtPluginType,
 }
 
