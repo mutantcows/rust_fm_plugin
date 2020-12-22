@@ -17,14 +17,14 @@
 //! Each custom function/script step must be configured in a [`FileMakerFunction`] implementation.
 //!
 //! ```rust
+//! # use fm_plugin::prelude::*;
+//! # use fm_plugin::{ExprEnv, DataVect, Data, log};
 //! pub struct MyFunction;
 //!
 //! impl FileMakerFunction for MyFunction {
 //!     fn function(id: i16, env: &ExprEnv, args: &DataVect, result: &mut Data) -> FMError {
 //!         //log some info to the desktop (plugin.log)
 //!         log("some troubleshooting info");
-//!
-//!         ...
 //!
 //!         FMError::NoError
 //!     }
@@ -35,20 +35,23 @@
 //!
 //! ```rust
 //! use fm_plugin::prelude::*;
-//!
+//! # use fm_plugin::{ExprEnv, DataVect, Data, FMError};
+//! # struct MyFunction;
+//! # impl FileMakerFunction for MyFunction {
+//! # fn function(id: i16, env: &ExprEnv, args: &DataVect, result: &mut Data) -> FMError {
+//! #     FMError::NoError
+//! # }
+//! # }
 //! struct MyPlugin;
 //!
 //! impl Plugin for MyPlugin {
-//!     fn id() -> &'static [u8; 4] {
-//!         &b"MyPl"
-//!     }
+//!     fn id() -> &'static [u8; 4] { &b"MyPl" }
+//!     fn name() -> &'static str { "MY PLUGIN" }
+//!     fn description() -> &'static str { "Does all sorts of great things." }
+//!     fn url() -> &'static str { "http://myplugin.com" }
 //!
-//!     fn name() -> &'static str {
-//!         "MY PLUGIN"
-//!     }
-//!
-//!     fn register_functions() -> Vec<ExternalFunction> {
-//!         vec![ExternalFunction {
+//!     fn register_functions() -> Vec<Registration> {
+//!         vec![Registration::Function {
 //!             id: 100,
 //!             name: "MyPlugin_MyFunction",
 //!             definition: "MyPlugin_MyFunction( arg1 ; arg2 )",
@@ -61,11 +64,19 @@
 //!             }
 //!         ]
 //!     }
-//!     ...
 //! }
 //! ```
 //! Lastly you'll need to register the plug-in.
 //! ```rust
+//! # use fm_plugin::prelude::*;
+//! # struct MyPlugin;
+//! # impl Plugin for MyPlugin {
+//! #    fn id() -> &'static [u8; 4] { &b"MyPl" }
+//! #    fn name() -> &'static str { "MY PLUGIN" }
+//! #    fn description() -> &'static str { "Does all sorts of great things." }
+//! #    fn url() -> &'static str { "http://myplugin.com" }
+//! #    fn register_functions() -> Vec<Registration> { Vec::new() }
+//! # }
 //! register_plugin!(MyPlugin);
 //! ```
 //! [`Plugin`]: trait.Plugin.html
@@ -96,19 +107,24 @@ pub mod prelude {
 ///
 /// # Example
 /// ```rust
+/// # use fm_plugin::prelude::*;
+/// # use fm_plugin::{DataVect, ExprEnv, Data, FMError};
+/// # struct MyFunction;
+/// # impl FileMakerFunction for MyFunction {
+/// # fn function(id: i16, env: &ExprEnv, args: &DataVect, result: &mut Data) -> FMError {
+/// #     FMError::NoError
+/// # }
+/// # }
 /// struct MyPlugin;
 ///
 /// impl Plugin for MyPlugin {
-///     fn id() -> &'static [u8; 4] {
-///         &b"MyPl"
-///     }
+///     fn id() -> &'static [u8; 4] { &b"MyPl" }
+///     fn name() -> &'static str { "MY PLUGIN" }
+///     fn description() -> &'static str { "Does all sorts of great things." }
+///     fn url() -> &'static str { "http://myplugin.com" }
 ///
-///     fn name() -> &'static str {
-///         "MY PLUGIN"
-///     }
-///
-///     fn register_functions() -> Vec<ExternalFunction> {
-///         vec![ExternalFunction {
+///     fn register_functions() -> Vec<Registration> {
+///         vec![Registration::Function {
 ///             id: 100,
 ///             name: "MyPlugin_MyFunction",
 ///             definition: "MyPlugin_MyFunction( arg1 ; arg2 )",
@@ -121,7 +137,6 @@ pub mod prelude {
 ///             }
 ///         ]
 ///     }
-///     ...
 /// }
 /// ```
 pub trait Plugin {
@@ -173,13 +188,22 @@ pub trait Plugin {
 ///
 /// struct MyPlugin;
 ///
-/// impl Plugin for MyPlugin { ... }
+/// impl Plugin for MyPlugin {
+/// # fn id()-> &'static [u8; 4] { b"TEST" }
+/// # fn name()-> &'static str { "TEST" }
+/// # fn description()-> &'static str { "TEST" }
+/// # fn url()-> &'static str { "TEST" }
+/// # fn register_functions()-> Vec<Registration> { Vec::new() }
+/// }
 ///
 /// register_plugin!(MyPlugin);
 /// ```
 ///
 /// # Macro Contents
 ///```rust
+/// # #[macro_export]
+/// # macro_rules! register_plugin {
+/// #     ($x:ident) => {
 /// #[no_mangle]
 /// pub static mut gfmx_ExternCallPtr: *mut fmx_ExternCallStruct = std::ptr::null_mut();
 ///
@@ -276,6 +300,7 @@ pub trait Plugin {
 ///         f.unregister(&plugin_id);
 ///     }
 /// }
+/// # };}
 /// ```
 #[macro_export]
 macro_rules! register_plugin {
