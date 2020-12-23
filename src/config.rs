@@ -56,21 +56,32 @@ impl Error for BuildError {}
 pub(crate) struct Config {
     pub(crate) filemaker: FileMaker,
     pub(crate) plugin: Plugin,
+    pub(crate) log: Log,
 }
 
 #[derive(Deserialize, Debug)]
 pub(crate) struct FileMaker {
-    pub(crate) ext_path: String,
-    pub(crate) bin_path: String,
+    pub(crate) ext_path: Option<String>,
+    pub(crate) bin_path: Option<String>,
+    pub(crate) launch: bool,
+    pub(crate) kill: bool,
 }
 
 #[derive(Deserialize, Debug)]
 pub(crate) struct Plugin {
     pub(crate) name: String,
+    pub(crate) bundle: bool,
+    pub(crate) move_to_ext: bool,
 }
 
-pub(crate) fn read_config(config_path: &Path) -> Result<Config, Box<dyn Error>> {
-    let config_path = config_path.join("config.toml");
+#[derive(Deserialize, Debug)]
+pub(crate) struct Log {
+    pub(crate) path: Option<String>,
+    pub(crate) clear_on_launch: bool,
+}
+
+pub(crate) fn read_config() -> Result<Config, Box<dyn Error>> {
+    let config_path = env::current_dir().unwrap().join("config.toml");
     let contents = read_to_string(&config_path)?;
 
     let config: Config = toml::from_str(&contents)?;
@@ -79,24 +90,26 @@ pub(crate) fn read_config(config_path: &Path) -> Result<Config, Box<dyn Error>> 
 
 /// Force quits FileMaker using the path provided in `config.toml`.
 #[cfg(any(target_os = "windows", target_os = "macos"))]
-pub fn kill_filemaker(manifest_dir: &str) -> Result<(), Box<dyn Error>> {
+pub fn kill_filemaker() -> Result<(), Box<dyn Error>> {
     if env::var("PROFILE").unwrap() == "release" {
-        let config = read_config(Path::new(manifest_dir))?;
+        let config = read_config()?;
         kill_filemaker_command(&config)?;
     }
-
     Ok(())
 }
 
 /// Force quits FileMaker using the path provided in `config.toml`.
 #[cfg(target_os = "linux")]
-pub fn kill_filemaker(manifest_dir: &str) -> Result<(), Box<dyn Error>> {
+pub fn kill_filemaker() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
 #[cfg(target_os = "windows")]
 fn kill_filemaker_command(config: &Config) -> Result<(), Box<dyn Error>> {
-    let app_path = Path::new(&config.filemaker.bin_path);
+    if !config.filemaker.kill {
+        return Ok(());
+    }
+    let app_path = Path::new(config.filemaker.bin_path.as_ref().unwrap());
     let app = app_path.file_name().ok_or(BuildError::FileMaker)?;
     process::Command::new("taskkill")
         .arg("/IM")
@@ -108,6 +121,9 @@ fn kill_filemaker_command(config: &Config) -> Result<(), Box<dyn Error>> {
 
 #[cfg(target_os = "macos")]
 fn kill_filemaker_command(config: &Config) -> Result<(), Box<dyn Error>> {
+    if !config.filemaker.kill {
+        return Ok(());
+    }
     let app_path = Path::new(&config.filemaker.bin_path);
     let app = app_path.file_stem().ok_or(BuildError::FileMaker)?;
     process::Command::new("pkill").arg(app).spawn().ok();

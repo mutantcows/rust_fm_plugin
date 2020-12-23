@@ -1,16 +1,14 @@
 //! Various helper functions, including a logging function.
+use crate::config::read_config;
 use std::ffi::CString;
 use widestring::U16CString;
 
 pub(crate) fn write_to_file(content: &str) -> Result<(), String> {
-    use directories::UserDirs;
     use std::fs::OpenOptions;
     use std::io::prelude::*;
-    use std::path::Path;
 
-    let user_dirs = UserDirs::new().ok_or("No user dirs")?;
-    let dir = user_dirs.desktop_dir().ok_or("No desktop path")?;
-    let path = Path::join(&dir, "plugin.log");
+    let config = read_config().map_err(|e| e.to_string())?;
+    let path = config.log.path.ok_or("No path configured")?;
 
     let mut file = OpenOptions::new()
         .create(true)
@@ -52,13 +50,4 @@ unsafe fn bytes_to_buff<T: Copy>(buffer: *mut T, buffer_size: u32, bytes: &[T]) 
     assert!(bytes.len() <= buffer_size as usize);
     let string_bytes = std::slice::from_raw_parts_mut(buffer, buffer_size as usize);
     string_bytes[..bytes.len()].copy_from_slice(bytes);
-}
-
-#[cfg(test)]
-mod test {
-    use super::*;
-    #[test]
-    fn logging() {
-        write_to_file("").unwrap();
-    }
 }

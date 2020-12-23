@@ -1,6 +1,14 @@
 [filemaker]
 ext_path = "/path/to/Extentions"
 bin_path = "/Applications/FileMaker Pro.app"
+kill = true
+launch = true
 
 [plugin]
 name = "plugin name"
+bundle = true
+move_to_ext = true
+
+[log]
+path = ""
+clear_on_launch = true
