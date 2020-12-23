@@ -38,7 +38,7 @@ pub type fmx_StartScriptCall = Option<
     unsafe extern "C" fn(
         fileName: *const fmx_Text,
         scriptName: *const fmx_Text,
-        control: fmx_ScriptControl,
+        control: ScriptControl,
         parameter: *const fmx_Data,
     ) -> FMError,
 >;

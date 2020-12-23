@@ -123,3 +123,25 @@ impl From<u8> for ExternStringType {
         }
     }
 }
+
+impl fmx_ExternCallStruct {
+    pub fn execute_filemaker_script(
+        &self,
+        file_name: Text,
+        script_name: Text,
+        control: ScriptControl,
+        parameter: Data,
+    ) -> FMError {
+        unsafe {
+            self.cStartScript.unwrap()(file_name.ptr, script_name.ptr, control, parameter.ptr)
+        }
+    }
+}
+
+#[repr(u8)]
+pub enum ScriptControl {
+    Halt = 0,
+    Exit = 1,
+    Resume = 2,
+    Pause = 3,
+}

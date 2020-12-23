@@ -401,5 +401,21 @@ macro_rules! register_plugin {
                 f.unregister(&plugin_id);
             }
         }
+
+        pub fn execute_filemaker_script(
+            file_name: Text,
+            script_name: Text,
+            control: ScriptControl,
+            parameter: Data,
+        ) -> FMError {
+            unsafe {
+                (*gfmx_ExternCallPtr).execute_filemaker_script(
+                    file_name,
+                    script_name,
+                    control,
+                    parameter,
+                )
+            }
+        }
     };
 }
