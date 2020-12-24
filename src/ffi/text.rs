@@ -172,6 +172,14 @@ impl ToText for String {
     }
 }
 
+impl ToText for &str {
+    fn to_text(self) -> Text {
+        let mut txt = Text::new();
+        txt.assign(self);
+        txt
+    }
+}
+
 impl From<Text> for u16 {
     fn from(txt: Text) -> u16 {
         unsafe { *txt.get_unicode(0, txt.size()).as_ptr() }
@@ -180,6 +188,22 @@ impl From<Text> for u16 {
 
 impl From<&String> for Text {
     fn from(txt: &String) -> Text {
+        let mut text = Text::new();
+        text.assign(txt);
+        text
+    }
+}
+
+impl From<String> for Text {
+    fn from(txt: String) -> Text {
+        let mut text = Text::new();
+        text.assign(&txt);
+        text
+    }
+}
+
+impl From<&str> for Text {
+    fn from(txt: &str) -> Text {
         let mut text = Text::new();
         text.assign(txt);
         text
