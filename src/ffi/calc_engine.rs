@@ -831,19 +831,6 @@ impl Registration {
     }
 }
 
-#[repr(i16)]
-pub enum PluginError {
-    NoError = 0,
-    Result1 = 1552,
-    Result2 = 1553,
-    Result3 = 1554,
-    Result4 = 1555,
-    Result5 = 1556,
-    Result6 = 1557,
-    Result7 = 1558,
-    Result8 = 1559,
-}
-
 #[repr(i32)]
 pub enum FilePathFormat {
     PosixPath = 1,
