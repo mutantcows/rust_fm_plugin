@@ -97,9 +97,9 @@ pub mod prelude {
     //! Re-exports everything necessary for the register_plugin macro.
     pub use crate::PluginFlag::*;
     pub use crate::{
-        fmx_ExternCallStruct, fmx_ptrtype, register_plugin, write_to_u16_buff, ExternStringType,
-        ExternVersion, FMError, FMExternCallType, FileMakerFunction, IdleType, Plugin, QuadChar,
-        Registration,
+        fmx_ExternCallStruct, fmx_ptrtype, register_plugin, write_to_u16_buff, Data,
+        ExternStringType, ExternVersion, FMError, FMExternCallType, FileMakerFunction, IdleType,
+        Plugin, QuadChar, Registration, ScriptControl, Text,
     };
 }
 
@@ -194,6 +194,7 @@ pub trait Plugin {
 /// # fn description()-> &'static str { "TEST" }
 /// # fn url()-> &'static str { "TEST" }
 /// # fn register_functions()-> Vec<Registration> { Vec::new() }
+///            // ...
 /// }
 ///
 /// register_plugin!(MyPlugin);
@@ -201,18 +202,18 @@ pub trait Plugin {
 ///
 /// # Macro Contents
 ///```rust
+/// # use fm_plugin::prelude::*;
 /// # #[macro_export]
 /// # macro_rules! register_plugin {
-/// #     ($x:ident) => {
+/// #    ($x:ident) => {
 /// #[no_mangle]
 /// pub static mut gfmx_ExternCallPtr: *mut fmx_ExternCallStruct = std::ptr::null_mut();
 ///
-/// #[no_mangle]
+///  #[no_mangle]
 /// unsafe extern "C" fn FMExternCallProc(pb: *mut fmx_ExternCallStruct) {
 ///     // Setup global defined in fmxExtern.h (this will be obsoleted in a later header file)
 ///     gfmx_ExternCallPtr = pb;
 ///     use FMExternCallType::*;
-///
 ///     // Message dispatcher
 ///     match FMExternCallType::from((*pb).whichCall) {
 ///         Init => (*pb).result = initialize((*pb).extnVersion) as u64,
@@ -239,45 +240,6 @@ pub trait Plugin {
 ///     }
 /// }
 ///
-/// fn get_string(
-///     which_string: ExternStringType,
-///     _win_lang_id: u32,
-///     out_buffer_size: u32,
-///     out_buffer: *mut u16,
-/// ) {
-///     use ExternStringType::*;
-///     let string = match which_string {
-///         Name => $x::name().to_string(),
-///         AppConfig => $x::description().to_string(),
-///         Options => {
-///             let mut options: String = ::std::str::from_utf8($x::id()).unwrap().to_string();
-///             options.push('1');
-///             options.push(if $x::enable_configure_button() {
-///                 'Y'
-///             } else {
-///                 'n'
-///             });
-///             options.push('n');
-///             options.push(if $x::enable_init_and_shutdown() {
-///                 'Y'
-///             } else {
-///                 'n'
-///             });
-///             options.push(if $x::enable_idle() { 'Y' } else { 'n' });
-///             options.push(if $x::enable_file_and_session_shutdown() {
-///                 'Y'
-///             } else {
-///                 'n'
-///             });
-///             options.push('n');
-///             options
-///         }
-///         HelpUrl => $x::url().to_string(),
-///         Blank => "".to_string(),
-///     };
-///     unsafe { write_to_u16_buff(out_buffer, out_buffer_size, &string) }
-/// }
-///
 /// fn initialize(version: ExternVersion) -> ExternVersion {
 ///     let plugin_id = QuadChar::new($x::id());
 ///     for f in $x::register_functions() {
@@ -300,7 +262,25 @@ pub trait Plugin {
 ///         f.unregister(&plugin_id);
 ///     }
 /// }
-/// # };}
+///
+/// // Perform FileMaker script by name.
+/// pub fn execute_filemaker_script(
+///     file_name: Text,
+///     script_name: Text,
+///     control: ScriptControl,
+///     parameter: Data,
+/// ) -> FMError {
+///     unsafe {
+///         (*gfmx_ExternCallPtr).execute_filemaker_script(
+///             file_name,
+///             script_name,
+///             control,
+///             parameter,
+///         )
+///     }
+/// }
+/// #    };
+/// # }
 /// ```
 #[macro_export]
 macro_rules! register_plugin {

@@ -29,7 +29,6 @@
 //! }
 //! ```
 
-use directories::UserDirs;
 use std::error::Error;
 #[cfg(target_os = "macos")]
 use std::fs::{create_dir_all, remove_dir_all};
@@ -55,17 +54,10 @@ pub fn bundle_plugin() -> Result<(), Box<dyn Error>> {
 }
 
 fn clear_log_file(config: &Config) -> Result<(), Box<dyn Error>> {
-    if !config.log.clear_on_launch {
+    if !config.log.clear_on_launch || config.log.path.is_none() {
         return Ok(());
     }
-    let path: PathBuf;
-    if config.log.path.is_none() {
-        let user_dirs = UserDirs::new().ok_or(BuildError::LogFile)?;
-        let dir = user_dirs.desktop_dir().ok_or(BuildError::LogFile)?;
-        path = Path::join(&dir, "plugin.log");
-    } else {
-        path = Path::new(&config.log.path.as_ref().unwrap()).to_path_buf();
-    }
+    let path = Path::new(&config.log.path.as_ref().unwrap()).to_path_buf();
     let _ = File::create(path)?;
     Ok(())
 }
@@ -93,7 +85,12 @@ fn bundle_plugin_command(config: &Config) -> Result<(), Box<dyn Error>> {
     if !config.plugin.bundle {
         return Ok(());
     }
-    let out_dir = option_env!("CRATE_OUT_DIR").ok_or("CRATE_OUT_DIR not set")?;
+    let out_dir = option_env!("CRATE_OUT_DIR");
+    if out_dir.is_none() {
+        return Ok(());
+    }
+    let out_dir = out_dir.unwrap();
+
     let mut package_name = get_package_name()?;
     package_name.push_str(".dll");
     let from = Path::new(out_dir).join(package_name);

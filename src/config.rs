@@ -22,7 +22,7 @@
 //! ```rust
 //! #[cfg(any(target_os = "windows", target_os = "macos"))]
 //!fn main() -> Result<(), Box<dyn std::error::Error>> {
-//!    fm_plugin::kill_filemaker(env!("CARGO_MANIFEST_DIR"))?;
+//!    fm_plugin::kill_filemaker()?;
 //!    Ok(())
 //!}
 //! ```
@@ -39,7 +39,6 @@ use std::process;
 
 #[derive(Debug)]
 pub(crate) enum BuildError {
-    LogFile,
     FileMaker,
     Bundle,
 }
@@ -91,9 +90,11 @@ pub(crate) fn read_config() -> Result<Config, Box<dyn Error>> {
 /// Force quits FileMaker using the path provided in `config.toml`.
 #[cfg(any(target_os = "windows", target_os = "macos"))]
 pub fn kill_filemaker() -> Result<(), Box<dyn Error>> {
-    if env::var("PROFILE").unwrap() == "release" {
-        let config = read_config()?;
-        kill_filemaker_command(&config)?;
+    if let Ok(profile) = env::var("PROFILE") {
+        if profile == "release" {
+            let config = read_config()?;
+            kill_filemaker_command(&config)?;
+        }
     }
     Ok(())
 }
