@@ -264,21 +264,23 @@ impl ExprEnv {
         file_id
     }
 
-    pub fn execute_file_sql_text_result(
+    pub fn execute_file_sql_text_result<T: ToText>(
         &self,
-        expression: Text,
-        file_name: Text,
+        expression: T,
+        file_name: T,
         parameters: DataVect,
         result: &mut Data,
         col_sep: u16,
         row_sep: u16,
     ) -> FMError {
         let mut _x = fmx__fmxcpt::new();
+        let expr = expression.to_text();
+        let fn_text = file_name.to_text();
         let error = unsafe {
             FM_ExprEnv_ExecuteFileSQLTextResult(
                 self.ptr,
-                expression.ptr,
-                file_name.ptr,
+                expr.ptr,
+                fn_text.ptr,
                 parameters.ptr,
                 result.ptr,
                 col_sep,
@@ -290,19 +292,21 @@ impl ExprEnv {
         error
     }
 
-    pub fn execute_file_sql(
+    pub fn execute_file_sql<T: ToText>(
         &self,
-        expression: Text,
-        file_name: Text,
+        expression: T,
+        file_name: T,
         parameters: DataVect,
         result: &mut RowVect,
     ) -> FMError {
         let mut _x = fmx__fmxcpt::new();
+        let expr = expression.to_text();
+        let fn_text = file_name.to_text();
         let error = unsafe {
             FM_ExprEnv_ExecuteFileSQL(
                 self.ptr,
-                expression.ptr,
-                file_name.ptr,
+                expr.ptr,
+                fn_text.ptr,
                 parameters.ptr,
                 result.ptr,
                 &mut _x,
@@ -329,24 +333,26 @@ impl ExprEnv {
         result
     }
 
-    pub fn from_fm_path(&self, path: Text, format: FilePathFormat) -> Text {
+    pub fn from_fm_path<T: ToText>(&self, path: T, format: FilePathFormat) -> Text {
         let mut _x = fmx__fmxcpt::new();
+        let text = path.to_text();
         let result = Text::new();
         unsafe {
             FM_ExprEnv_EvaluateConvertFromFileMakerPath(
-                self.ptr, path.ptr, format, result.ptr, &mut _x,
+                self.ptr, text.ptr, format, result.ptr, &mut _x,
             )
         };
         _x.check();
         result
     }
 
-    pub fn to_fm_path(&self, path: Text, format: FilePathFormat) -> Text {
+    pub fn to_fm_path<T: ToText>(&self, path: T, format: FilePathFormat) -> Text {
         let mut _x = fmx__fmxcpt::new();
+        let text = path.to_text();
         let result = Text::new();
         unsafe {
             FM_ExprEnv_EvaluateConvertToFileMakerPath(
-                self.ptr, path.ptr, format, result.ptr, &mut _x,
+                self.ptr, text.ptr, format, result.ptr, &mut _x,
             )
         };
         _x.check();

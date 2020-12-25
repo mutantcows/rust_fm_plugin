@@ -316,9 +316,10 @@ impl BinaryData {
         file_paths
     }
 
-    pub fn add_file_paths(&self, file_paths: Text) {
+    pub fn add_file_paths<T: ToText>(&self, file_paths: T) {
         let mut _x = fmx__fmxcpt::new();
-        let error = unsafe { FM_BinaryData_AddFNAMData(self.ptr, file_paths.ptr, &mut _x) };
+        let f_paths = file_paths.to_text();
+        let error = unsafe { FM_BinaryData_AddFNAMData(self.ptr, f_paths.ptr, &mut _x) };
         _x.check();
         if error != FMError::NoError {
             panic!();

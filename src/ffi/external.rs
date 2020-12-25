@@ -125,16 +125,16 @@ impl From<u8> for ExternStringType {
 }
 
 impl fmx_ExternCallStruct {
-    pub fn execute_filemaker_script(
+    pub fn execute_filemaker_script<T: ToText>(
         &self,
-        file_name: Text,
-        script_name: Text,
+        file_name: T,
+        script_name: T,
         control: ScriptControl,
         parameter: Data,
     ) -> FMError {
-        unsafe {
-            self.cStartScript.unwrap()(file_name.ptr, script_name.ptr, control, parameter.ptr)
-        }
+        let fn_txt = file_name.to_text();
+        let sn_txt = script_name.to_text();
+        unsafe { self.cStartScript.unwrap()(fn_txt.ptr, sn_txt.ptr, control, parameter.ptr) }
     }
 }
 

@@ -153,9 +153,10 @@ impl Data {
         Locale::from_ptr(ptr)
     }
 
-    pub fn set_as_text(&mut self, text: Text, locale: Locale) {
+    pub fn set_as_text<T: ToText>(&mut self, text: T, locale: Locale) {
         let mut _x = fmx__fmxcpt::new();
-        unsafe { FM_Data_SetAsText(self.ptr, text.ptr, locale.ptr, DataType::Text, &mut _x) };
+        let txt = text.to_text();
+        unsafe { FM_Data_SetAsText(self.ptr, txt.ptr, locale.ptr, DataType::Text, &mut _x) };
         _x.check();
     }
 
