@@ -594,6 +594,13 @@ impl DataVect {
         Text::from_ptr(ptr)
     }
 
+    pub fn at_as_string(&self, position: u32) -> String {
+        let mut _x = fmx__fmxcpt::new();
+        let ptr = unsafe { FM_DataVect_AtAsText(self.ptr, position, &mut _x) };
+        _x.check();
+        Text::from_ptr(ptr).to_string()
+    }
+
     pub fn at_as_number(&self, position: u32) -> FixPt {
         let mut _x = fmx__fmxcpt::new();
         let ptr = unsafe { FM_DataVect_AtAsNumber(self.ptr, position, &mut _x) };
