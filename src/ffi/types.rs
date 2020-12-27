@@ -8,13 +8,12 @@ pub type fmx_int64 = i32;
 pub type fmx_uint64 = u64;
 #[cfg(target_family = "unix")]
 pub type fmx_uint64 = u32;
-#[cfg(target_family = "unix")]
-pub type fmx_unusedid = i32;
 #[cfg(target_family = "windows")]
 pub type fmx_unusedid = i16;
+#[cfg(target_family = "unix")]
+pub type fmx_unusedid = i32;
 
 pub type fmx_ptrtype = u64;
-pub type fmx_boolean = i8;
 pub type fmx_ExternCallSwitch = u8;
 pub type fmx_ScriptControl = u8;
 pub type fmx_IdleLevel = u8;
@@ -42,6 +41,13 @@ pub type fmx_StartScriptCall = Option<
         parameter: *const fmx_Data,
     ) -> FMError,
 >;
+
+#[derive(Debug, Clone, Copy)]
+#[repr(i8)]
+pub enum fmx_boolean {
+    False = 0,
+    True = 1,
+}
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
