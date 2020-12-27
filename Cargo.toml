@@ -1,6 +1,6 @@
 [package]
 name = "fm_plugin"
-version = "0.1.10"
+version = "0.1.11"
 authors = ["mutantcows <mutantcows@gmail.com>"]
 edition = "2018"
 license = "MIT"
@@ -16,4 +16,4 @@ path = "src/lib.rs"
 widestring = "^0.4"
 serde = { version = "^1.0.118", features = ["derive"] }
 toml = "^0.5"
-lazy_static = "*"
+lazy_static = "^1.4"

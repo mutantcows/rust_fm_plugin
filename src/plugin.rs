@@ -83,7 +83,7 @@ pub trait PluginInternal<T>
 where
     T: Plugin,
 {
-    fn get_string(
+    unsafe fn get_string(
         which_string: ExternStringType,
         _win_lang_id: u32,
         out_buffer_size: u32,
@@ -119,7 +119,7 @@ where
             HelpUrl => T::url().to_string(),
             Blank => "".to_string(),
         };
-        unsafe { write_to_u16_buff(out_buffer, out_buffer_size, &string) }
+        write_to_u16_buff(out_buffer, out_buffer_size, &string)
     }
 
     fn initialize(version: ExternVersion) -> ExternVersion {
