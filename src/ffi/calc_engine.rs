@@ -25,7 +25,7 @@ pub struct fmx_RowVect {
 extern "C" {
     fn FM_ExprEnv_Constructor1(_x: *mut fmx__fmxcpt) -> *mut fmx_ExprEnv;
 
-    fn FM_ExprEnv_RegisterScriptStep(
+    pub(crate) fn FM_ExprEnv_RegisterScriptStep(
         pluginId: *const fmx_QuadChar,
         scriptStepId: i16,
         scriptStepName: *const fmx_Text,
@@ -36,7 +36,7 @@ extern "C" {
         _x: *mut fmx__fmxcpt,
     ) -> FMError;
 
-    fn FM_ExprEnv_RegisterExternalFunctionEx(
+    pub(crate) fn FM_ExprEnv_RegisterExternalFunctionEx(
         pluginId: *const fmx_QuadChar,
         functionId: i16,
         functionName: *const fmx_Text,
@@ -49,7 +49,7 @@ extern "C" {
         _x: *mut fmx__fmxcpt,
     ) -> FMError;
 
-    fn FM_ExprEnv_UnRegisterExternalFunction(
+    pub(crate) fn FM_ExprEnv_UnRegisterExternalFunction(
         pluginId: *const fmx_QuadChar,
         functionId: i16,
         _x: *mut fmx__fmxcpt,
@@ -125,7 +125,7 @@ extern "C" {
 
     fn FM_ExprEnv_FileID(_self: *const fmx_ExprEnv, _x: *mut fmx__fmxcpt) -> fmx_ptrtype;
 
-    fn FM_ExprEnv_UnRegisterScriptStep(
+    pub(crate) fn FM_ExprEnv_UnRegisterScriptStep(
         pluginId: *const fmx_QuadChar,
         scriptStepId: i16,
         _x: *mut fmx__fmxcpt,
@@ -210,19 +210,18 @@ extern "C" {
 }
 
 #[repr(u32)]
-pub enum PluginFlag {
-    DisplayInAllDialogs = 0b1111111100000000,
-    MacCompatible = 0b0000000000000010,
-    WinCompatible = 0b0000000000000100,
-    ServerCompatible = 0b0000000000001000,
-    IOSCompatible = 0b0000000000010000,
-    CustomWebCompatible = 0b0000000000100000,
-    WebDirectCompatible = 0b0000000001000000,
-    AllDeviceCompatible = 0b0000000001111110,
-    FutureCompatible = 0b111111110000000000000000,
+pub enum Compatibility {
+    Mac = 0x00000002,
+    Win = 0x00000004,
+    Server = 0x00000008,
+    IOS = 0x00000010,
+    CustomWeb = 0x00000020,
+    WebDirect = 0x00000040,
+    AllDevice = 0x0000007E,
+    Future = 0x00FF0000,
 }
 
-impl BitOr for PluginFlag {
+impl BitOr for Compatibility {
     type Output = u32;
 
     fn bitor(self, rhs: Self) -> Self::Output {
@@ -712,204 +711,11 @@ impl<'a> Iterator for DataVectIterator<'a> {
     }
 }
 
-/// # Script Step XML UI Definition
-///
-/// [`Registration::ScriptStep::definition`][Registration::ScriptStep::definition] must contain XML defining the script step options.  Up to ten script parameters can be specified in addition to the optional target parameter. All the parameters are defined with `<Parameter>` tags in a `<PluginStep>` grouping.
-///
-/// The attributes for a `<Parameter>` tag include:
-///
-///   * `Type` - if not one of the following four types, the parameter is ignored
-///       1. `Calc` - a standard Specify button that brings up the calculation dialog. When the script step is executed, the calculation will be evaluated and its results passed to the plug-in
-///       2. `Bool` - simple check box that returns the value of 0 or 1
-///       3. `List` - a static drop-down or pop-up list in which the id of the item selected is returned. The size limit of this list is limited by the capabilities of the UI widgets used to display it. A `List` type parameter expects to contain `<Value>` tags as specified below
-///       4. `Target` - will include a specify button that uses the new  `Insert From Target` field targeting dialog that allows a developer to put the results of a script step into a field (whether or not it is on a layout), into a variable, or insert into the current active field on a layout. If no `Target` is defined then the result `Data` object is ignored. If there are multiple `Target` definitions, only the first one will be honored.
-///
-///   * `ID` - A value in the range of 0 to 9 which is used as an index into the `DataVect` parms object for the plug-in to retrieve the value of the parameter. Indexes that are not in range or duplicated will cause the parameter to be ignored. A parameter of type `Target` ignores this attribute if specified
-///
-///   * `Label` - The name of parameter or control that is displayed in the UI
-///
-///   * `DataType` - only used by the `Calc` and `Target` parameter types. If not specified or not one of the six data types, the type `Text` will be used
-///       1. `Text`
-///       2. `Number`
-///       3. `Date`
-///       4. `Time`
-///       5. `Timestamp`
-///       6. `Container`
-///
-///   * `ShowInline` - value is either true or false. If defined and true, will cause the parameter to show up inlined with the script step in the Scripting Workspace
-///
-///   * `Default` - either the numeric index of the default list item or the true/false value for a bool item. Ignored for calc and target parameters
-///
-/// Parameters of type `List` are expected to contain `<Value>` tags whose values are used to construct the drop-down or pop-up list. The id of a value starts at zero but specific id can be given to a value by defining an `ID` attribute. If later values do not have an `ID` attributes the id will be set to the previous values id plus one.
-///
-/// Sample XML description:
-///```xml
-///<PluginStep>
-///    <Parameter ID="0" Type="Calc" DataType="text" ShowInline="true" Label="Mood"/>
-///    <Parameter ID="1" Type="List" ShowInline="true" Label="Color">
-///    <Value ID="0">Red</Value>
-///    <Value ID="1">Green</Value>
-///    <Value ID="2">Blue</Value>
-///    </Parameter>
-///    <Parameter ID="2" Type="Bool" Label="Beep when happy"/>
-///</PluginStep>
-///```
-pub enum Registration {
-    Function {
-        id: i16,
-        name: &'static str,
-        /// This will be auto entered when the function is selected from the menu
-        definition: &'static str,
-        description: &'static str,
-        min_args: i16,
-        max_args: i16,
-        compatible_flags: u32,
-        min_version: ExternVersion,
-        function_ptr: fmx_ExtPluginType,
-    },
-    ScriptStep {
-        id: i16,
-        name: &'static str,
-        /// Must be xml defining the configuration of the script step
-        definition: &'static str,
-        description: &'static str,
-        compatible_flags: u32,
-        min_version: ExternVersion,
-        function_ptr: fmx_ExtPluginType,
-    },
-}
-
-impl Registration {
-    /// Called automatically by [`register_plugin!`][register_plugin].
-    pub fn register(&self, plugin_id: &QuadChar) -> FMError {
-        let mut _x = fmx__fmxcpt::new();
-
-        let (id, n, desc, def, flags, func_ptr) = match *self {
-            Registration::Function {
-                id,
-                name,
-                description,
-                definition,
-                compatible_flags,
-                function_ptr,
-                ..
-            } => (
-                id,
-                name,
-                description,
-                definition,
-                compatible_flags,
-                function_ptr,
-            ),
-            Registration::ScriptStep {
-                id,
-                name,
-                description,
-                definition,
-                compatible_flags,
-                function_ptr,
-                ..
-            } => (
-                id,
-                name,
-                description,
-                definition,
-                compatible_flags,
-                function_ptr,
-            ),
-        };
-
-        let mut name = Text::new();
-        name.assign(n);
-
-        let mut description = Text::new();
-        description.assign(desc);
-
-        let mut definition = Text::new();
-        definition.assign(def);
-
-        let error = match self {
-            Registration::Function {
-                min_args, max_args, ..
-            } => unsafe {
-                FM_ExprEnv_RegisterExternalFunctionEx(
-                    plugin_id.ptr,
-                    id,
-                    name.ptr,
-                    definition.ptr,
-                    description.ptr,
-                    *min_args,
-                    *max_args,
-                    flags,
-                    func_ptr,
-                    &mut _x,
-                )
-            },
-            Registration::ScriptStep { .. } => unsafe {
-                FM_ExprEnv_RegisterScriptStep(
-                    plugin_id.ptr,
-                    id,
-                    name.ptr,
-                    definition.ptr,
-                    description.ptr,
-                    flags,
-                    func_ptr,
-                    &mut _x,
-                )
-            },
-        };
-
-        _x.check();
-        error
-    }
-
-    /// Returns minimum allowed version for s function/script step.
-    pub fn min_version(&self) -> ExternVersion {
-        match self {
-            Registration::Function { min_version, .. } => *min_version,
-            Registration::ScriptStep { min_version, .. } => *min_version,
-        }
-    }
-
-    /// Called automatically by [`register_plugin!`][register_plugin].
-    pub fn unregister(&self, plugin_id: &QuadChar) {
-        let mut _x = fmx__fmxcpt::new();
-        match self {
-            Registration::Function { id, .. } => unsafe {
-                FM_ExprEnv_UnRegisterExternalFunction(plugin_id.ptr, *id, &mut _x);
-            },
-            Registration::ScriptStep { id, .. } => unsafe {
-                FM_ExprEnv_UnRegisterScriptStep(plugin_id.ptr, *id, &mut _x);
-            },
-        }
-        _x.check();
-    }
-}
-
 #[repr(i32)]
 pub enum FilePathFormat {
     PosixPath = 1,
     WinPath = 2,
     URLPath = 3,
-}
-
-pub trait FileMakerFunction {
-    /// Define your custom function here. Set the return value to the result parameter.
-    fn function(id: i16, env: &ExprEnv, args: &DataVect, result: &mut Data) -> FMError;
-
-    /// Entry point for FileMaker to call your function.
-    extern "C" fn extern_func(
-        id: i16,
-        env_ptr: *const fmx_ExprEnv,
-        args_ptr: *const fmx_DataVect,
-        result_ptr: *mut fmx_Data,
-    ) -> FMError {
-        let arguments = DataVect::from_ptr(args_ptr);
-        let env = ExprEnv::from_ptr(env_ptr);
-        let mut result = Data::from_ptr(result_ptr);
-
-        Self::function(id, &env, &arguments, &mut result)
-    }
 }
 
 #[derive(PartialEq)]

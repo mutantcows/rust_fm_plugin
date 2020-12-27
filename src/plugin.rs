@@ -1,6 +1,8 @@
 use crate::{
-    fmx_ptrtype, write_to_u16_buff, ExternStringType, ExternVersion, FMError, QuadChar,
-    Registration,
+    fmx_Data, fmx_DataVect, fmx_ExprEnv, fmx_ExtPluginType, fmx__fmxcpt, fmx_ptrtype,
+    write_to_u16_buff, Data, DataVect, ExprEnv, ExternStringType, ExternVersion, FMError,
+    FM_ExprEnv_RegisterExternalFunctionEx, FM_ExprEnv_RegisterScriptStep,
+    FM_ExprEnv_UnRegisterExternalFunction, FM_ExprEnv_UnRegisterScriptStep, QuadChar, Text,
 };
 
 /// Implement this trait for your plugin struct. The different functions are used to give FileMaker information about the plugin. You also need to register all your functions/script steps in the trait implementation.
@@ -31,7 +33,8 @@ use crate::{
 ///             description: "Does some really great stuff.",
 ///             min_args: 2,
 ///             max_args: 2,
-///             compatible_flags: DisplayInAllDialogs | FutureCompatible,
+///             display_in_dialogs: true,
+///             compatibility_flags: Compatibility::Future as u32,
 ///             min_version: ExternVersion::V160,
 ///             function_ptr: Some(MyFunction::extern_func),
 ///             }
@@ -293,4 +296,216 @@ macro_rules! register_plugin {
             static ref GLOBAL_STATE: RwLock<HashMap<String, String>> = RwLock::new(HashMap::new());
         }
     };
+}
+
+/// Register [`ScriptSteps`][Registration::ScriptStep] and [`Functions`][Registration::Function] for your plugin.
+/// # Function Registration
+/// Registration enables the function so that it appears in the calculation dialog in the application.
+///
+/// * `id` is the unique id that you can use to represent which function was called, it will be passed back to the registered function as the first parameter (see the parameter of the same name in [`fmx_ExtPluginType`][fmx_ExtPluginType]).
+/// * `name` is the name of the function as it should appear in the calculation formula.
+/// * `definition` is the suggested syntax that will appear in the list of functions in the calculation dialog.
+/// * `description` is the text that will display when auto-entered into the calculation dialog. The format is "type ahead word list|description text".
+/// * `min_args` is the number of required parameters for the function. `0` is the smallest valid value.
+/// * `max_args` is the maximum number of parameters that they user should be able to specify in the calculation dialog and still have correct syntax usage for the function. Use `-1` to allow a variable number of parameters up to the number supported by calculation formulas in the application.
+/// * `compatible_flags` see bit flags above.
+/// * `function_ptr` is the pointer to the function that must match the signature defined by [`fmx_ExtPluginType`][fmx_ExtPluginType]. If you implement [`FileMakerFunction`][FileMakerFunction] for your function, then you can just reference [`MyFunction.extern_func`][FileMakerFunction::extern_func] here.
+///
+/// # Script Step Registration
+///
+/// [`Registration::ScriptStep::definition`][Registration::ScriptStep::definition] must contain XML defining the script step options.  Up to ten script parameters can be specified in addition to the optional target parameter. All the parameters are defined with `<Parameter>` tags in a `<PluginStep>` grouping.
+///
+/// The attributes for a `<Parameter>` tag include:
+///
+///   * `Type` - if not one of the following four types, the parameter is ignored
+///       1. `Calc` - a standard Specify button that brings up the calculation dialog. When the script step is executed, the calculation will be evaluated and its results passed to the plug-in
+///       2. `Bool` - simple check box that returns the value of `0` or `1`
+///       3. `List` - a static drop-down or pop-up list in which the id of the item selected is returned. The size limit of this list is limited by the capabilities of the UI widgets used to display it. A `List` type parameter expects to contain `<Value>` tags as specified below
+///       4. `Target` - will include a specify button that uses the new  `Insert From Target` field targeting dialog that allows a developer to put the results of a script step into a field (whether or not it is on a layout), into a variable, or insert into the current active field on a layout. If no `Target` is defined then the result `Data` object is ignored. If there are multiple `Target` definitions, only the first one will be honored.
+///
+///   * `ID` - A value in the range of `0` to `9` which is used as an index into the `DataVect` parms object for the plug-in to retrieve the value of the parameter. Indexes that are not in range or duplicated will cause the parameter to be ignored. A parameter of type `Target` ignores this attribute if specified
+///
+///   * `Label` - The name of parameter or control that is displayed in the UI
+///
+///   * `DataType` - only used by the `Calc` and `Target` parameter types. If not specified or not one of the six data types, the type `Text` will be used
+///       1. `Text`
+///       2. `Number`
+///       3. `Date`
+///       4. `Time`
+///       5. `Timestamp`
+///       6. `Container`
+///
+///   * `ShowInline` - value is either true or false. If defined and true, will cause the parameter to show up inlined with the script step in the Scripting Workspace
+///
+///   * `Default` - either the numeric index of the default list item or the true/false value for a bool item. Ignored for calc and target parameters
+///
+/// Parameters of type `List` are expected to contain `<Value>` tags whose values are used to construct the drop-down or pop-up list. The id of a value starts at zero but specific id can be given to a value by defining an `ID` attribute. If later values do not have an `ID` attributes the id will be set to the previous values id plus one.
+///
+/// Sample XML description:
+///```xml
+///<PluginStep>
+///    <Parameter ID="0" Type="Calc" DataType="text" ShowInline="true" Label="Mood"/>
+///    <Parameter ID="1" Type="List" ShowInline="true" Label="Color">
+///    <Value ID="0">Red</Value>
+///    <Value ID="1">Green</Value>
+///    <Value ID="2">Blue</Value>
+///    </Parameter>
+///    <Parameter ID="2" Type="Bool" Label="Beep when happy"/>
+///</PluginStep>
+///```
+pub enum Registration {
+    Function {
+        id: i16,
+        name: &'static str,
+        definition: &'static str,
+        description: &'static str,
+        min_args: i16,
+        max_args: i16,
+        display_in_dialogs: bool,
+        compatibility_flags: u32,
+        min_version: ExternVersion,
+        function_ptr: fmx_ExtPluginType,
+    },
+    ScriptStep {
+        id: i16,
+        name: &'static str,
+        definition: &'static str,
+        description: &'static str,
+        display_in_dialogs: bool,
+        compatibility_flags: u32,
+        min_version: ExternVersion,
+        function_ptr: fmx_ExtPluginType,
+    },
+}
+
+impl Registration {
+    /// Called automatically by [`register_plugin!`][register_plugin].
+    pub fn register(&self, plugin_id: &QuadChar) -> FMError {
+        let mut _x = fmx__fmxcpt::new();
+
+        let (id, n, desc, def, display, flags, func_ptr) = match *self {
+            Registration::Function {
+                id,
+                name,
+                description,
+                definition,
+                display_in_dialogs,
+                compatibility_flags,
+                function_ptr,
+                ..
+            } => (
+                id,
+                name,
+                description,
+                definition,
+                display_in_dialogs,
+                compatibility_flags,
+                function_ptr,
+            ),
+            Registration::ScriptStep {
+                id,
+                name,
+                description,
+                definition,
+                display_in_dialogs,
+                compatibility_flags,
+                function_ptr,
+                ..
+            } => (
+                id,
+                name,
+                description,
+                definition,
+                display_in_dialogs,
+                compatibility_flags,
+                function_ptr,
+            ),
+        };
+
+        let mut name = Text::new();
+        name.assign(n);
+
+        let mut description = Text::new();
+        description.assign(desc);
+
+        let mut definition = Text::new();
+        definition.assign(def);
+
+        let flags = if display { 0x0000FF00 } else { 0 } | flags;
+
+        let error = match self {
+            Registration::Function {
+                min_args, max_args, ..
+            } => unsafe {
+                FM_ExprEnv_RegisterExternalFunctionEx(
+                    plugin_id.ptr,
+                    id,
+                    name.ptr,
+                    definition.ptr,
+                    description.ptr,
+                    *min_args,
+                    *max_args,
+                    flags,
+                    func_ptr,
+                    &mut _x,
+                )
+            },
+            Registration::ScriptStep { .. } => unsafe {
+                FM_ExprEnv_RegisterScriptStep(
+                    plugin_id.ptr,
+                    id,
+                    name.ptr,
+                    definition.ptr,
+                    description.ptr,
+                    flags,
+                    func_ptr,
+                    &mut _x,
+                )
+            },
+        };
+
+        _x.check();
+        error
+    }
+
+    /// Returns minimum allowed version for a function/script step.
+    pub fn min_version(&self) -> ExternVersion {
+        match self {
+            Registration::Function { min_version, .. } => *min_version,
+            Registration::ScriptStep { min_version, .. } => *min_version,
+        }
+    }
+
+    /// Called automatically by [`register_plugin!`][register_plugin].
+    pub fn unregister(&self, plugin_id: &QuadChar) {
+        let mut _x = fmx__fmxcpt::new();
+        match self {
+            Registration::Function { id, .. } => unsafe {
+                FM_ExprEnv_UnRegisterExternalFunction(plugin_id.ptr, *id, &mut _x);
+            },
+            Registration::ScriptStep { id, .. } => unsafe {
+                FM_ExprEnv_UnRegisterScriptStep(plugin_id.ptr, *id, &mut _x);
+            },
+        }
+        _x.check();
+    }
+}
+
+pub trait FileMakerFunction {
+    /// Define your custom function here. Set the return value to the result parameter.
+    fn function(id: i16, env: &ExprEnv, args: &DataVect, result: &mut Data) -> FMError;
+
+    /// Entry point for FileMaker to call your function.
+    extern "C" fn extern_func(
+        id: i16,
+        env_ptr: *const fmx_ExprEnv,
+        args_ptr: *const fmx_DataVect,
+        result_ptr: *mut fmx_Data,
+    ) -> FMError {
+        let arguments = DataVect::from_ptr(args_ptr);
+        let env = ExprEnv::from_ptr(env_ptr);
+        let mut result = Data::from_ptr(result_ptr);
+
+        Self::function(id, &env, &arguments, &mut result)
+    }
 }
