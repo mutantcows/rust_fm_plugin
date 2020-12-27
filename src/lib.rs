@@ -99,8 +99,11 @@ pub mod prelude {
     pub use crate::{
         fmx_ExternCallStruct, fmx_ptrtype, register_plugin, write_to_u16_buff, Data,
         ExternStringType, ExternVersion, FMError, FMExternCallType, FileMakerFunction, IdleType,
-        Plugin, QuadChar, Registration, ScriptControl, Text,
+        Plugin, PluginInternal, QuadChar, Registration, ScriptControl, Text,
     };
+    pub use lazy_static::lazy_static;
+    pub use std::collections::HashMap;
+    pub use std::sync::RwLock;
 }
 
 /// Implement this trait for your plugin struct. The different functions are used to give FileMaker information about the plugin. You also need to register all your functions/script steps in the trait implementation.
@@ -179,6 +182,73 @@ pub trait Plugin {
     fn un_safe(_session_id: fmx_ptrtype) {}
 }
 
+pub trait PluginInternal<T>
+where
+    T: Plugin,
+{
+    fn get_string(
+        which_string: ExternStringType,
+        _win_lang_id: u32,
+        out_buffer_size: u32,
+        out_buffer: *mut u16,
+    ) {
+        use ExternStringType::*;
+        let string = match which_string {
+            Name => T::name().to_string(),
+            AppConfig => T::description().to_string(),
+            Options => {
+                let mut options: String = ::std::str::from_utf8(T::id()).unwrap().to_string();
+                options.push('1');
+                options.push(if T::enable_configure_button() {
+                    'Y'
+                } else {
+                    'n'
+                });
+                options.push('n');
+                options.push(if T::enable_init_and_shutdown() {
+                    'Y'
+                } else {
+                    'n'
+                });
+                options.push(if T::enable_idle() { 'Y' } else { 'n' });
+                options.push(if T::enable_file_and_session_shutdown() {
+                    'Y'
+                } else {
+                    'n'
+                });
+                options.push('n');
+                options
+            }
+            HelpUrl => T::url().to_string(),
+            Blank => "".to_string(),
+        };
+        unsafe { write_to_u16_buff(out_buffer, out_buffer_size, &string) }
+    }
+
+    fn initialize(version: ExternVersion) -> ExternVersion {
+        let plugin_id = QuadChar::new(T::id());
+        for f in T::register_functions() {
+            if version < f.min_version() {
+                continue;
+            }
+            if f.register(&plugin_id) != FMError::NoError {
+                return ExternVersion::DoNotEnable;
+            }
+        }
+        ExternVersion::V190
+    }
+
+    fn shutdown(version: ExternVersion) {
+        let plugin_id = QuadChar::new(T::id());
+        for f in T::register_functions() {
+            if version < f.min_version() {
+                continue;
+            }
+            f.unregister(&plugin_id);
+        }
+    }
+}
+
 /// Sets up the entry point for every FileMaker call into the plug-in. The function then dispatches the calls to the various trait functions you can implement.
 /// Impl [`Plugin`][Plugin] for your plugin struct, and then call the macro on it.
 ///
@@ -204,19 +274,20 @@ pub trait Plugin {
 ///```rust
 /// # use fm_plugin::prelude::*;
 /// # #[macro_export]
-/// # macro_rules! register_plugin {
-/// #    ($x:ident) => {
+/// #    macro_rules! register_plugin {
+/// #        ($x:ident) => {
 /// #[no_mangle]
 /// pub static mut gfmx_ExternCallPtr: *mut fmx_ExternCallStruct = std::ptr::null_mut();
 ///
-///  #[no_mangle]
+/// #[no_mangle]
 /// unsafe extern "C" fn FMExternCallProc(pb: *mut fmx_ExternCallStruct) {
 ///     // Setup global defined in fmxExtern.h (this will be obsoleted in a later header file)
 ///     gfmx_ExternCallPtr = pb;
 ///     use FMExternCallType::*;
+///
 ///     // Message dispatcher
 ///     match FMExternCallType::from((*pb).whichCall) {
-///         Init => (*pb).result = initialize((*pb).extnVersion) as u64,
+///         Init => (*pb).result = $x::initialize((*pb).extnVersion) as u64,
 ///         Idle => {
 ///             use IdleType::*;
 ///             match IdleType::from((*pb).parm1) {
@@ -227,9 +298,9 @@ pub trait Plugin {
 ///                 Unsafe => $x::un_safe((*pb).parm2),
 ///             }
 ///         }
-///         Shutdown => shutdown((*pb).extnVersion),
+///         Shutdown => $x::shutdown((*pb).extnVersion),
 ///         AppPrefs => $x::preferences(),
-///         GetString => get_string(
+///         GetString => $x::get_string(
 ///             (*pb).parm1.into(),
 ///             (*pb).parm2 as u32,
 ///             (*pb).parm3 as u32,
@@ -240,30 +311,8 @@ pub trait Plugin {
 ///     }
 /// }
 ///
-/// fn initialize(version: ExternVersion) -> ExternVersion {
-///     let plugin_id = QuadChar::new($x::id());
-///     for f in $x::register_functions() {
-///         if version < f.min_version() {
-///             continue;
-///         }
-///         if f.register(&plugin_id) != FMError::NoError {
-///             return ExternVersion::DoNotEnable;
-///         }
-///     }
-///     ExternVersion::V190
-/// }
+/// impl PluginInternal<$x> for $x {}
 ///
-/// fn shutdown(version: ExternVersion) {
-///     let plugin_id = QuadChar::new($x::id());
-///     for f in $x::register_functions() {
-///         if version < f.min_version() {
-///             continue;
-///         }
-///         f.unregister(&plugin_id);
-///     }
-/// }
-///
-/// // Perform FileMaker script by name.
 /// pub fn execute_filemaker_script(
 ///     file_name: Text,
 ///     script_name: Text,
@@ -279,8 +328,13 @@ pub trait Plugin {
 ///         )
 ///     }
 /// }
-/// #    };
-/// # }
+///
+/// lazy_static! {
+///     static ref GLOBAL_STATE: RwLock<HashMap<String, String>> = RwLock::new(HashMap::new());
+/// }
+/// #        };
+/// #    }
+///
 /// ```
 #[macro_export]
 macro_rules! register_plugin {
@@ -296,7 +350,7 @@ macro_rules! register_plugin {
 
             // Message dispatcher
             match FMExternCallType::from((*pb).whichCall) {
-                Init => (*pb).result = initialize((*pb).extnVersion) as u64,
+                Init => (*pb).result = $x::initialize((*pb).extnVersion) as u64,
                 Idle => {
                     use IdleType::*;
                     match IdleType::from((*pb).parm1) {
@@ -307,9 +361,9 @@ macro_rules! register_plugin {
                         Unsafe => $x::un_safe((*pb).parm2),
                     }
                 }
-                Shutdown => shutdown((*pb).extnVersion),
+                Shutdown => $x::shutdown((*pb).extnVersion),
                 AppPrefs => $x::preferences(),
-                GetString => get_string(
+                GetString => $x::get_string(
                     (*pb).parm1.into(),
                     (*pb).parm2 as u32,
                     (*pb).parm3 as u32,
@@ -320,67 +374,7 @@ macro_rules! register_plugin {
             }
         }
 
-        fn get_string(
-            which_string: ExternStringType,
-            _win_lang_id: u32,
-            out_buffer_size: u32,
-            out_buffer: *mut u16,
-        ) {
-            use ExternStringType::*;
-            let string = match which_string {
-                Name => $x::name().to_string(),
-                AppConfig => $x::description().to_string(),
-                Options => {
-                    let mut options: String = ::std::str::from_utf8($x::id()).unwrap().to_string();
-                    options.push('1');
-                    options.push(if $x::enable_configure_button() {
-                        'Y'
-                    } else {
-                        'n'
-                    });
-                    options.push('n');
-                    options.push(if $x::enable_init_and_shutdown() {
-                        'Y'
-                    } else {
-                        'n'
-                    });
-                    options.push(if $x::enable_idle() { 'Y' } else { 'n' });
-                    options.push(if $x::enable_file_and_session_shutdown() {
-                        'Y'
-                    } else {
-                        'n'
-                    });
-                    options.push('n');
-                    options
-                }
-                HelpUrl => $x::url().to_string(),
-                Blank => "".to_string(),
-            };
-            unsafe { write_to_u16_buff(out_buffer, out_buffer_size, &string) }
-        }
-
-        fn initialize(version: ExternVersion) -> ExternVersion {
-            let plugin_id = QuadChar::new($x::id());
-            for f in $x::register_functions() {
-                if version < f.min_version() {
-                    continue;
-                }
-                if f.register(&plugin_id) != FMError::NoError {
-                    return ExternVersion::DoNotEnable;
-                }
-            }
-            ExternVersion::V190
-        }
-
-        fn shutdown(version: ExternVersion) {
-            let plugin_id = QuadChar::new($x::id());
-            for f in $x::register_functions() {
-                if version < f.min_version() {
-                    continue;
-                }
-                f.unregister(&plugin_id);
-            }
-        }
+        impl PluginInternal<$x> for $x {}
 
         pub fn execute_filemaker_script(
             file_name: Text,
@@ -396,6 +390,10 @@ macro_rules! register_plugin {
                     parameter,
                 )
             }
+        }
+
+        lazy_static! {
+            static ref GLOBAL_STATE: RwLock<HashMap<String, String>> = RwLock::new(HashMap::new());
         }
     };
 }

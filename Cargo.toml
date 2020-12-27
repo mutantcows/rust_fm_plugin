@@ -16,3 +16,4 @@ path = "src/lib.rs"
 widestring = "^0.4"
 serde = { version = "^1.0.118", features = ["derive"] }
 toml = "^0.5"
+lazy_static = "*"
