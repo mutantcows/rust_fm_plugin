@@ -9,16 +9,15 @@ path = "src/lib.rs"
 crate-type = ["cdylib"]
 
 [dependencies]
-fm_plugin = "0.1.0"
+fm_plugin = "0.1.11"
 
 [build-dependencies]
-fm_plugin = "0.1.0"
+fm_plugin = "0.1.11"
 
 [package.metadata.cargo-post.dependencies]
-directories = "*"
-toml = "*"
+fm_plugin = "0.1.11"
+toml = "0.5"
 serde = { version = "1.0", features = ["derive"] }
-fm_plugin = "0.1.0"
 ```
 
 `config.toml:`
@@ -27,9 +26,17 @@ fm_plugin = "0.1.0"
 [filemaker]
 ext_path = "path/to/filemaker/Extensions"
 bin_path = "path/to/filemaker/executable.exe"
+kill = false
+launch = false
 
 [plugin]
 name = "my_plugin"
+bundle = false
+move_to_ext = false
+
+[log]
+path = "path/to/plugin.log"
+clear_on_launch = false
 ```
 
 `build.rs:`
@@ -37,7 +44,7 @@ name = "my_plugin"
 ```rust
 #[cfg(any(target_os = "windows", target_os = "macos"))]
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    fm_plugin::kill_filemaker(env!("CARGO_MANIFEST_DIR"))?;
+    fm_plugin::kill_filemaker()?;
     Ok(())
 }
 ```
@@ -76,7 +83,8 @@ impl Plugin for MyPlugin {
             description: "Does some really great stuff.",
             min_args: 2,
             max_args: 2,
-            compatible_flags: DisplayInAllDialogs | FutureCompatible,
+            display_in_dialogs: true,
+            compatibility_flags: Compatibility::Future as u32,
             min_version: ExternVersion::V160,
             function_ptr: Some(MyFunction::extern_func),
             }
