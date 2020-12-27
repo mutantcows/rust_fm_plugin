@@ -58,7 +58,8 @@
 //!             description: "Does some really great stuff.",
 //!             min_args: 2,
 //!             max_args: 2,
-//!             compatible_flags: DisplayInAllDialogs | FutureCompatible,
+//!             display_in_dialogs: true,
+//!             compatibility_flags: Compatibility::Future as u32,
 //!             min_version: ExternVersion::V160,
 //!             function_ptr: Some(MyFunction::extern_func),
 //!             }
@@ -101,9 +102,8 @@ pub use plugin::*;
 
 pub mod prelude {
     //! Re-exports everything necessary for the register_plugin macro.
-    pub use crate::PluginFlag::*;
     pub use crate::{
-        fmx_ExternCallStruct, fmx_ptrtype, register_plugin, write_to_u16_buff, Data,
+        fmx_ExternCallStruct, fmx_ptrtype, register_plugin, write_to_u16_buff, Compatibility, Data,
         ExternStringType, ExternVersion, FMError, FMExternCallType, FileMakerFunction, IdleType,
         Plugin, PluginInternal, QuadChar, Registration, ScriptControl, Text,
     };
