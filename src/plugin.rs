@@ -295,6 +295,16 @@ macro_rules! register_plugin {
         lazy_static! {
             static ref GLOBAL_STATE: RwLock<HashMap<String, String>> = RwLock::new(HashMap::new());
         }
+
+        pub fn store_state(key: &str, value: &str) {
+            let mut hmap = GLOBAL_STATE.write().unwrap();
+            (*hmap).insert(String::from(key), String::from(value));
+        }
+
+        pub fn get_state(key: &str) -> Option<String> {
+            let hmap = GLOBAL_STATE.read().unwrap();
+            (*hmap).get(key).cloned()
+        }
     };
 }
 
