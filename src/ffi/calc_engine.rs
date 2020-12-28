@@ -1,6 +1,6 @@
 use super::*;
+use std::fmt::{self, Display, Formatter};
 use std::ops::BitOr;
-
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct fmx_DataVect {
@@ -718,7 +718,7 @@ pub enum FilePathFormat {
     URLPath = 3,
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Debug)]
 #[repr(i16)]
 pub enum FMError {
     Unknown = -1,
@@ -964,4 +964,10 @@ pub enum FMError {
     WrongExcelFormat = 2048,
     ActionCanceled = 3000,
     OnTimerScriptFailed = 8404,
+}
+
+impl Display for FMError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
 }
