@@ -10,5 +10,5 @@ bundle = true
 move_to_ext = true
 
 [log]
-path = ""
+path = "/path/to/plugin.log"
 clear_on_launch = true
