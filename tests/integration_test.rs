@@ -16,7 +16,7 @@ mod test {
         let output = Command::new("cmd")
             .arg("/c")
             .arg("start")
-            .arg("fmp://~/plugin_test?script=test")
+            .arg("fmp://$/plugin_test?script=test")
             .output()
             .expect("failed open fm");
         let status = output.status;

@@ -85,9 +85,9 @@ fn bundle_plugin_command(config: &Config) -> Result<(), Box<dyn Error>> {
     if !config.plugin.bundle {
         return Ok(());
     }
-    let out_dir = option_env!("CRATE_OUT_DIR");
+    let mut out_dir = option_env!("CRATE_OUT_DIR");
     if out_dir.is_none() {
-        return Ok(());
+        out_dir = option_env!("CARGO_MANIFEST_DIR");
     }
     let out_dir = out_dir.unwrap();
 
@@ -145,7 +145,7 @@ fn bundle_plugin_command(config: &Config) -> Result<(), Box<dyn Error>> {
 
 fn get_package_name() -> Result<String, Box<dyn Error>> {
     Ok(
-        Path::new(option_env!("CRATE_MANIFEST_DIR").ok_or("CRATE_MANIFEST_DIR not set")?)
+        Path::new(option_env!("CRATE_MANIFEST_DIR").unwrap_or(env!("CARGO_MANIFEST_DIR")))
             .file_name()
             .ok_or(BuildError::Bundle)?
             .to_string_lossy()
