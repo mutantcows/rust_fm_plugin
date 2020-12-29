@@ -2,3 +2,4 @@
 /.vscode
 !/libraries/**
 config.toml
+/tests/target
