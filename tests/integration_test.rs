@@ -7,16 +7,33 @@ mod test {
 
     pub fn initialize() {
         INIT.call_once(|| {
-            fm_plugin::post_build::bundle_plugin().unwrap();
+            let output = Command::new("cargo")
+                .arg("post")
+                .arg("build")
+                .arg("--release")
+                .current_dir("./tests/test_plugin")
+                .output()
+                .expect("failed to build test");
+
+            let status = output.status;
+            assert_eq!(status.to_string(), "exit code: 0");
         });
     }
     #[test]
     fn test_pluggo() {
         initialize();
+        Command::new("cmd")
+            .arg("/c")
+            .arg("start")
+            .arg("test_plugin.fmp12")
+            .current_dir("./tests")
+            .output()
+            .expect("couldn't open test db");
+
         let output = Command::new("cmd")
             .arg("/c")
             .arg("start")
-            .arg("fmp://$/plugin_test?script=test")
+            .arg("fmp://$/test_plugin?script=test")
             .output()
             .expect("failed open fm");
         let status = output.status;

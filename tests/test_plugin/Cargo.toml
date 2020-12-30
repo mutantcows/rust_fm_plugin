@@ -1,0 +1,22 @@
+[package]
+name = "test_plugin"
+version = "0.1.0"
+authors = ["mutantcows <mutantcows@gmail.com>"]
+edition = "2018"
+license = "MIT"
+description = "Integration test plug-in."
+
+[lib]
+path = "src/lib.rs"
+crate-type = ["cdylib"]
+
+[dependencies]
+fm_plugin = {path="../../../rust_fm_plugin"}
+
+[target.'cfg(any(target_os = "windows", target_os = "macos"))'.build-dependencies]
+fm_plugin = { path = "../../../rust_fm_plugin" }
+
+[package.metadata.cargo-post.dependencies]
+toml = "*"
+serde = { version = "1.0", features = ["derive"] }
+fm_plugin = { path = "../../../rust_fm_plugin" }
