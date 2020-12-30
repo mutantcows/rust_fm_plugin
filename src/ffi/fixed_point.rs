@@ -273,6 +273,34 @@ impl From<i64> for FixPt {
     }
 }
 
+pub trait ToFixPt {
+    fn to_fixed_point(self) -> FixPt;
+}
+
+impl ToFixPt for FixPt {
+    fn to_fixed_point(self) -> Self {
+        self
+    }
+}
+
+impl ToFixPt for i32 {
+    fn to_fixed_point(self) -> FixPt {
+        FixPt::from(self)
+    }
+}
+
+impl ToFixPt for f64 {
+    fn to_fixed_point(self) -> FixPt {
+        FixPt::from(self)
+    }
+}
+
+impl ToFixPt for i64 {
+    fn to_fixed_point(self) -> FixPt {
+        FixPt::from(self)
+    }
+}
+
 impl Add for FixPt {
     type Output = Self;
 

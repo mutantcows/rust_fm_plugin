@@ -160,9 +160,10 @@ impl Data {
         _x.check();
     }
 
-    pub fn set_as_number(&mut self, number: FixPt) {
+    pub fn set_as_number<T: ToFixPt>(&mut self, number: T) {
         let mut _x = fmx__fmxcpt::new();
-        unsafe { FM_Data_SetAsNumber(self.ptr, number.ptr, DataType::Number, &mut _x) };
+        let num = number.to_fixed_point();
+        unsafe { FM_Data_SetAsNumber(self.ptr, num.ptr, DataType::Number, &mut _x) };
         _x.check();
     }
 
