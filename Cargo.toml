@@ -5,9 +5,10 @@ authors = ["mutantcows <mutantcows@gmail.com>"]
 edition = "2018"
 license = "MIT"
 description = "Build plug-ins for use with FileMaker Pro and FileMaker Server."
-keywords = ["filemaker", "plugin", "filemaker-sdk", "sdk"]
+keywords = ["filemaker", "plugin", "plug-in", "filemaker-sdk", "sdk"]
 categories = ["external-ffi-bindings"]
 repository = "https://github.com/mutantcows/rust_fm_plugin/"
+exclude = ["tests/"]
 
 [lib]
 path = "src/lib.rs"
