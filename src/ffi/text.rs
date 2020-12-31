@@ -100,14 +100,16 @@ impl Text {
         _x.check();
     }
 
-    pub fn insert(&mut self, s: &Text, pos: u32) {
+    pub fn insert<T: ToText>(&mut self, s: T, pos: u32) {
         let mut _x = fmx__fmxcpt::new();
+        let s = s.to_text();
         unsafe { FM_Text_InsertText(self.ptr, s.ptr, pos, &mut _x) };
         _x.check();
     }
 
-    pub fn append(&mut self, s: &Text) {
+    pub fn append<T: ToText>(&mut self, s: T) {
         let mut _x = fmx__fmxcpt::new();
+        let s = s.to_text();
         unsafe { FM_Text_AppendText(self.ptr, s.ptr, 0, s.size(), &mut _x) };
         _x.check();
     }
