@@ -1,5 +1,6 @@
 use super::*;
 use std::cmp::{Eq, Ord, Ordering, PartialEq, PartialOrd};
+use std::fmt;
 use std::ops::{Add, AddAssign, Div, Mul, Neg, Rem, Sub, SubAssign};
 
 #[repr(C)]
@@ -144,27 +145,10 @@ impl FixPt {
         Self { ptr, drop: true }
     }
 
-    pub fn assign(&mut self, fixed_point: FixPt) {
+    pub fn assign<T: ToFixPt>(&mut self, number: T) {
         let mut _x = fmx__fmxcpt::new();
+        let fixed_point = number.to_fixed_point();
         unsafe { FM_FixPt_AssignFixPt(self.ptr, fixed_point.ptr, &mut _x) };
-        _x.check();
-    }
-
-    pub fn assign_i32(&mut self, num: i32) {
-        let mut _x = fmx__fmxcpt::new();
-        unsafe { FM_FixPt_AssignInt(self.ptr, num, &mut _x) };
-        _x.check();
-    }
-
-    pub fn assign_i64(&mut self, num: i64) {
-        let mut _x = fmx__fmxcpt::new();
-        unsafe { FM_FixPt_AssignInt64(self.ptr, num, &mut _x) };
-        _x.check();
-    }
-
-    pub fn assign_float(&mut self, num: f64) {
-        let mut _x = fmx__fmxcpt::new();
-        unsafe { FM_FixPt_AssignDouble(self.ptr, num, &mut _x) };
         _x.check();
     }
 
@@ -175,6 +159,7 @@ impl FixPt {
         precision
     }
 
+    ///Valid values between 16 and 400
     pub fn set_precision(&mut self, precision: i32) {
         let mut _x = fmx__fmxcpt::new();
         unsafe { FM_FixPt_SetPrecision(self.ptr, precision, &mut _x) };
@@ -225,6 +210,15 @@ impl From<FixPt> for i64 {
     }
 }
 
+impl From<&FixPt> for i64 {
+    fn from(fix_pt: &FixPt) -> i64 {
+        let mut _x = fmx__fmxcpt::new();
+        let num = unsafe { FM_FixPt_AsLong64(fix_pt.ptr, &mut _x) };
+        _x.check();
+        num
+    }
+}
+
 impl From<FixPt> for bool {
     fn from(fix_pt: FixPt) -> bool {
         let mut _x = fmx__fmxcpt::new();
@@ -234,8 +228,26 @@ impl From<FixPt> for bool {
     }
 }
 
+impl From<&FixPt> for bool {
+    fn from(fix_pt: &FixPt) -> bool {
+        let mut _x = fmx__fmxcpt::new();
+        let b = unsafe { FM_FixPt_AsBool(fix_pt.ptr, &mut _x) };
+        _x.check();
+        b
+    }
+}
+
 impl From<FixPt> for f64 {
     fn from(fix_pt: FixPt) -> f64 {
+        let mut _x = fmx__fmxcpt::new();
+        let num = unsafe { FM_FixPt_AsFloat(fix_pt.ptr, &mut _x) };
+        _x.check();
+        num
+    }
+}
+
+impl From<&FixPt> for f64 {
+    fn from(fix_pt: &FixPt) -> f64 {
         let mut _x = fmx__fmxcpt::new();
         let num = unsafe { FM_FixPt_AsFloat(fix_pt.ptr, &mut _x) };
         _x.check();
@@ -526,5 +538,12 @@ impl Clone for FixPt {
         let ptr = unsafe { FM_FixPt_Constructor2(self.into(), self.ptr, &mut _x) };
         _x.check();
         Self { ptr, drop: true }
+    }
+}
+
+impl fmt::Display for FixPt {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let num = i32::from(self);
+        write!(f, "{}", num)
     }
 }

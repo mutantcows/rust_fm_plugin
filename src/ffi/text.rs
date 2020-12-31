@@ -1,5 +1,6 @@
 use super::*;
 use std::ffi::{CString, OsStr};
+use std::fmt;
 use widestring::U16CString;
 
 #[repr(C)]
@@ -149,10 +150,10 @@ impl Default for Text {
     }
 }
 
-impl ToString for Text {
-    fn to_string(&self) -> String {
+impl fmt::Display for Text {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let str = self.get_unicode(0, self.size());
-        str.to_string().unwrap()
+        write!(f, "{}", str.to_string_lossy())
     }
 }
 
