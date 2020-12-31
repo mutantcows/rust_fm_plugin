@@ -80,8 +80,24 @@ pub(crate) struct Log {
 }
 
 pub(crate) fn read_config() -> Result<Config, Box<dyn Error>> {
-    let config_path = env::current_dir().unwrap().join("config.toml");
-    let contents = read_to_string(&config_path)?;
+    let current_dir = env::current_dir().unwrap();
+    let mut config_path = current_dir.join("config.toml");
+
+    // if the config isn't in the current dir, check all folders in the current dir
+    if !config_path.is_file() {
+        for entry in current_dir.read_dir()? {
+            if let Ok(f) = entry {
+                if f.file_type()?.is_dir() {
+                    config_path = current_dir.join(f.file_name()).join("config.toml");
+                    if config_path.is_file() {
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    let contents = read_to_string(&config_path)
+        .map_err(|e| format!("config read failed. path: {:?}, error: {}", config_path, e))?;
 
     let config: Config = toml::from_str(&contents)?;
     Ok(config)

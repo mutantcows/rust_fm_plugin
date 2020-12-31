@@ -1,5 +1,6 @@
 //! Various helper functions, including a logging function.
 use crate::config::read_config;
+use std::error::Error;
 use std::ffi::CString;
 use widestring::U16CString;
 
@@ -23,8 +24,9 @@ pub(crate) fn write_to_file(content: &str) -> Result<(), String> {
 }
 
 /// Appends to log file specified in `config.toml`.
-pub fn log(content: &str) {
-    write_to_file(content).unwrap_or(());
+pub fn log(content: &str) -> Result<(), Box<dyn Error>> {
+    write_to_file(content)?;
+    Ok(())
 }
 
 /// # Safety
