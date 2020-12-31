@@ -88,8 +88,9 @@ pub(crate) fn read_config() -> Result<Config, Box<dyn Error>> {
         for entry in current_dir.read_dir()? {
             if let Ok(f) = entry {
                 if f.file_type()?.is_dir() {
-                    config_path = current_dir.join(f.file_name()).join("config.toml");
-                    if config_path.is_file() {
+                    let test_path = current_dir.join(f.file_name()).join("config.toml");
+                    if test_path.is_file() {
+                        config_path = test_path;
                         break;
                     }
                 }
