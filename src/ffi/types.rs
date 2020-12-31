@@ -304,9 +304,10 @@ pub enum LocaleType {
 impl ToString for QuadChar {
     fn to_string(&self) -> String {
         let mut _x = fmx__fmxcpt::new();
-        let mut bytes = Vec::with_capacity(4);
+        let mut bytes: Vec<u8> = Vec::with_capacity(4);
         for i in 0..4 {
-            bytes[i as usize] = unsafe { FM_QuadChar_operatorAR(self.ptr, i, &mut _x) };
+            let c = unsafe { FM_QuadChar_operatorAR(self.ptr, i, &mut _x) };
+            bytes.push(c);
             _x.check();
         }
         unsafe { String::from_utf8_unchecked(bytes) }
