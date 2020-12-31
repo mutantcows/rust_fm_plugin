@@ -174,6 +174,14 @@ impl ToText for String {
     }
 }
 
+impl ToText for &String {
+    fn to_text(self) -> Text {
+        let mut txt = Text::new();
+        txt.assign(&self);
+        txt
+    }
+}
+
 impl ToText for &str {
     fn to_text(self) -> Text {
         let mut txt = Text::new();
