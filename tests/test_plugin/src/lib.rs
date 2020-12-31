@@ -97,7 +97,7 @@ impl Plugin for TestPlugin {
         Registration::Function {
             id: 600,
             name: "TEST_Text",
-            definition: "TEST_Text",
+            definition: "TEST_Text ( \"wow\" )",
             description: "Test text",
             min_args: 1,
             max_args: 1,
@@ -137,18 +137,53 @@ struct TextTest;
 
 impl FileMakerFunction for TextTest {
     fn function(_id: i16, _env: &ExprEnv, args: &DataVect, result: &mut Data) -> FMError {
+        let amazing = String::from("amazing");
+        let wow = String::from("wow");
+        let locale = result.get_locale();
+
         let mut text = Text::new();
         let arg = args.at_as_text(0);
-        let _ = arg.size();
-        text.assign("wow");
-        text.assign_unicode_with_length("wow", 3);
-        text.assign_wide("wow");
-        text.insert("wow", 0);
-        text.append("wow");
-        text.get_unicode(0, 3);
-        text.to_string();
 
-        let _ = result.get_locale();
+        if arg.size() != 3 {
+            result.set_as_text("size failed", locale);
+            return FMError::NoError;
+        }
+
+        if arg.to_string() != wow {
+            result.set_as_text("text to string failed", locale);
+            return FMError::NoError;
+        }
+
+        text.assign(&amazing);
+        if text.to_string() != amazing {
+            result.set_as_text("text assign failed", locale);
+            return FMError::NoError;
+        }
+
+        text.assign_unicode_with_length(&wow, 3);
+        if text.to_string() != wow {
+            result.set_as_text("text assign unicode with length failed", locale);
+            return FMError::NoError;
+        }
+
+        text.assign_wide(&amazing);
+        if text.to_string() != amazing {
+            result.set_as_text("text assign wide failed", locale);
+            return FMError::NoError;
+        }
+
+        text.insert(&wow, 0);
+        if text.to_string() != String::from("wowamazing") {
+            result.set_as_text("text insert failed", locale);
+            return FMError::NoError;
+        }
+
+        text.append(&amazing);
+        if text.to_string() != String::from("wowamazingamazing") {
+            result.set_as_text("text append failed", locale);
+            return FMError::NoError;
+        }
+
         result.set_as_number(1);
         FMError::NoError
     }
