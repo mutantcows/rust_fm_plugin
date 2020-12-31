@@ -1,5 +1,5 @@
 use fm_plugin::prelude::*;
-use fm_plugin::{Data, DataVect, ExprEnv, ScriptControl, Text};
+use fm_plugin::{Data, DataVect, ExprEnv, Locale, LocaleType, QuadChar, ScriptControl, Text};
 use std::io::prelude::*;
 use std::net::TcpStream;
 
@@ -33,15 +33,15 @@ impl Plugin for TestPlugin {
     fn register_functions() -> Vec<Registration> {
         vec![Registration::Function {
             id: 100,
-            name: "TEST_Function",
-            definition: "TEST_Function( number ; text )",
-            description: "Test function",
-            min_args: 2,
-            max_args: 2,
+            name: "TEST_Locale",
+            definition: "TEST_Locale",
+            description: "Test locale",
+            min_args: 0,
+            max_args: 0,
             display_in_dialogs: true,
             compatibility_flags: Compatibility::Future as u32,
             min_version: ExternVersion::V160,
-            function_ptr: Some(TestFunction::extern_func),
+            function_ptr: Some(LocaleTest::extern_func),
         },
         Registration::ScriptStep{
             id: 200,
@@ -82,15 +82,74 @@ impl Plugin for TestPlugin {
             min_version: ExternVersion::V160,
             function_ptr: Some(TestSocket::extern_func),
         },
-
-]
+        Registration::Function {
+            id: 500,
+            name: "TEST_QuadChar",
+            definition: "TEST_QuadChar",
+            description: "Test quadchar",
+            min_args: 0,
+            max_args: 0,
+            display_in_dialogs: true,
+            compatibility_flags: Compatibility::Future as u32,
+            min_version: ExternVersion::V160,
+            function_ptr: Some(QuadCharTest::extern_func),
+        },
+        Registration::Function {
+            id: 600,
+            name: "TEST_Text",
+            definition: "TEST_Text",
+            description: "Test text",
+            min_args: 1,
+            max_args: 1,
+            display_in_dialogs: true,
+            compatibility_flags: Compatibility::Future as u32,
+            min_version: ExternVersion::V160,
+            function_ptr: Some(TextTest::extern_func),
+        }]
     }
 }
 
-struct TestFunction;
+struct QuadCharTest;
 
-impl FileMakerFunction for TestFunction {
-    fn function(_id: i16, _env: &ExprEnv, _args: &DataVect, _result: &mut Data) -> FMError {
+impl FileMakerFunction for QuadCharTest {
+    fn function(_id: i16, _env: &ExprEnv, _args: &DataVect, result: &mut Data) -> FMError {
+        let quadchar = QuadChar::new(b"1234");
+        let quad_str = quadchar.to_string();
+        assert_eq!(String::from("1234"), quad_str);
+        let _ = QuadChar::empty();
+        result.set_as_number(1);
+        FMError::NoError
+    }
+}
+
+struct LocaleTest;
+
+impl FileMakerFunction for LocaleTest {
+    fn function(_id: i16, _env: &ExprEnv, _args: &DataVect, result: &mut Data) -> FMError {
+        let locale = Locale::new(LocaleType::JPN);
+        let _ = result.get_locale();
+        result.set_as_text("1", locale);
+        FMError::NoError
+    }
+}
+
+struct TextTest;
+
+impl FileMakerFunction for TextTest {
+    fn function(_id: i16, _env: &ExprEnv, args: &DataVect, result: &mut Data) -> FMError {
+        let mut text = Text::new();
+        let arg = args.at_as_text(0);
+        let _ = arg.size();
+        text.assign("wow");
+        text.assign_unicode_with_length("wow", 3);
+        text.assign_wide("wow");
+        text.insert("wow", 0);
+        text.append("wow");
+        text.get_unicode(0, 3);
+        text.to_string();
+
+        let _ = result.get_locale();
+        result.set_as_number(1);
         FMError::NoError
     }
 }
@@ -118,9 +177,13 @@ impl FileMakerFunction for TestSocket {
     fn function(_id: i16, _env: &ExprEnv, args: &DataVect, _result: &mut Data) -> FMError {
         let address = args.at_as_string(0);
         let msg = args.at_as_string(1);
-        let mut stream = TcpStream::connect(address).unwrap();
-
-        stream.write(msg.as_bytes()).unwrap();
+        if let Ok(mut stream) = TcpStream::connect(address) {
+            if stream.write(msg.as_bytes()).is_err() {
+                return FMError::ConnectionFailed;
+            };
+        } else {
+            return FMError::ConnectionFailed;
+        }
         FMError::NoError
     }
 }
