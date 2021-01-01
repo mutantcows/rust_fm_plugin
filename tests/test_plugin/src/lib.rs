@@ -615,13 +615,13 @@ impl FileMakerFunction for TestTimestamp {
             return FMError::NoError;
         }
 
-        dt.set_date(DateTime::from_str("1/1/2020"));
+        dt.set_date("1/1/2020");
         if &dt.to_string() != "01/01/2020 00:08:20.00" {
             result.set_as_text("set date failed");
             return FMError::NoError;
         }
 
-        dt.set_time(DateTime::from_str("12:30:30"));
+        dt.set_time("12:30:30");
         if &dt.to_string() != "01/01/2020 12:30:30.00" {
             result.set_as_text("set time failed");
             return FMError::NoError;

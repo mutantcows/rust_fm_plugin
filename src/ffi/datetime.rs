@@ -378,15 +378,17 @@ impl DateTime {
         year
     }
 
-    pub fn set_date(&mut self, datetime: DateTime) {
+    pub fn set_date<D: ToDateTime>(&mut self, datetime: D) {
         let mut _x = fmx__fmxcpt::new();
-        unsafe { FM_DateTime_SetDate(self.ptr, datetime.ptr, &mut _x) };
+        let dt = datetime.to_datetime();
+        unsafe { FM_DateTime_SetDate(self.ptr, dt.ptr, &mut _x) };
         _x.check();
     }
 
-    pub fn set_time(&mut self, datetime: DateTime) {
+    pub fn set_time<D: ToDateTime>(&mut self, datetime: D) {
         let mut _x = fmx__fmxcpt::new();
-        unsafe { FM_DateTime_SetTime(self.ptr, datetime.ptr, &mut _x) };
+        let dt = datetime.to_datetime();
+        unsafe { FM_DateTime_SetTime(self.ptr, dt.ptr, &mut _x) };
         _x.check();
     }
 }
@@ -455,5 +457,27 @@ impl fmt::Display for DateTime {
             self.seconds(),
             self.milliseconds()
         )
+    }
+}
+
+pub trait ToDateTime {
+    fn to_datetime(self) -> DateTime;
+}
+
+impl ToDateTime for String {
+    fn to_datetime(self) -> DateTime {
+        DateTime::from_str(&self)
+    }
+}
+
+impl ToDateTime for &str {
+    fn to_datetime(self) -> DateTime {
+        DateTime::from_str(self)
+    }
+}
+
+impl ToDateTime for DateTime {
+    fn to_datetime(self) -> DateTime {
+        self
     }
 }
