@@ -257,7 +257,6 @@ impl FileMakerFunction for FixPtTest {
     fn function(_id: i16, _env: &ExprEnv, args: &DataVect, result: &mut Data) -> FMError {
         let num = FixPt::new(12, 0);
         let mut arg = args.at_as_number(0);
-        let locale = result.get_locale();
 
         if num != arg {
             result.set_as_text("from ptr failed");
