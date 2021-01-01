@@ -1,6 +1,7 @@
+use chrono::{self, Datelike, Timelike};
 use fm_plugin::prelude::*;
 use fm_plugin::{
-    Data, DataVect, ExprEnv, FixPt, Locale, LocaleType, QuadChar, ScriptControl, Text,
+    Data, DataVect, DateTime, ExprEnv, FixPt, Locale, LocaleType, QuadChar, ScriptControl, Text,
 };
 use std::io::prelude::*;
 use std::net::TcpStream;
@@ -131,6 +132,42 @@ impl Plugin for TestPlugin {
             compatibility_flags: Compatibility::Future as u32,
             min_version: ExternVersion::V160,
             function_ptr: Some(TestExecuteScript::extern_func),
+        },
+        Registration::Function {
+            id: 900,
+            name: "TEST_Date",
+            definition: "TEST_Date ( Get ( CurrentHostTimestamp ) )",
+            description: "Test date",
+            min_args: 1,
+            max_args: 1,
+            display_in_dialogs: true,
+            compatibility_flags: Compatibility::Future as u32,
+            min_version: ExternVersion::V160,
+            function_ptr: Some(TestDate::extern_func),
+        },
+        Registration::Function {
+            id: 1000,
+            name: "TEST_Time",
+            definition: "TEST_Time ( Get ( CurrentHostTimestamp ) )",
+            description: "Test time",
+            min_args: 1,
+            max_args: 1,
+            display_in_dialogs: true,
+            compatibility_flags: Compatibility::Future as u32,
+            min_version: ExternVersion::V160,
+            function_ptr: Some(TestTime::extern_func),
+        },
+        Registration::Function {
+            id: 1100,
+            name: "TEST_Timestamp",
+            definition: "TEST_Timestamp ( Get ( CurrentHostTimestamp ) )",
+            description: "Test timestamp",
+            min_args: 1,
+            max_args: 1,
+            display_in_dialogs: true,
+            compatibility_flags: Compatibility::Future as u32,
+            min_version: ExternVersion::V160,
+            function_ptr: Some(TestTimestamp::extern_func),
         }]
     }
 }
@@ -419,6 +456,193 @@ impl FileMakerFunction for TestExecuteScript {
         );
 
         result.set_as_number(1);
+        FMError::NoError
+    }
+}
+
+struct TestDate;
+
+impl FileMakerFunction for TestDate {
+    fn function(_id: i16, _env: &ExprEnv, args: &DataVect, result: &mut Data) -> FMError {
+        let d = args.at_as_date(0);
+
+        result.set_as_date(d);
+        FMError::NoError
+    }
+}
+
+struct TestTime;
+
+impl FileMakerFunction for TestTime {
+    fn function(_id: i16, _env: &ExprEnv, args: &DataVect, result: &mut Data) -> FMError {
+        let t = args.at_as_time(0);
+
+        result.set_as_time(t);
+        FMError::NoError
+    }
+}
+
+struct TestTimestamp;
+
+impl FileMakerFunction for TestTimestamp {
+    fn function(_id: i16, _env: &ExprEnv, args: &DataVect, result: &mut Data) -> FMError {
+        let ts = DateTime::now();
+        let local: chrono::DateTime<chrono::Local> = chrono::Local::now();
+
+        if ts.day() as u32 != local.day() {
+            result.set_as_text("day failed", result.get_locale());
+            return FMError::NoError;
+        }
+
+        if ts.month() as u32 != local.month() {
+            result.set_as_text("month failed", result.get_locale());
+            return FMError::NoError;
+        }
+
+        if ts.year() as i32 != local.year() {
+            result.set_as_text("year failed", result.get_locale());
+            return FMError::NoError;
+        }
+
+        if ts.hours() as u32 != local.hour() {
+            result.set_as_text("hour failed", result.get_locale());
+            return FMError::NoError;
+        }
+
+        if ts.minutes() as u32 != local.minute() {
+            result.set_as_text("minutes failed", result.get_locale());
+            return FMError::NoError;
+        }
+
+        if ts.seconds() as u32 != local.second() {
+            result.set_as_text("seconds failed", result.get_locale());
+            return FMError::NoError;
+        }
+
+        let dt = DateTime::from_str("1/1/2021", Locale::default());
+        if &dt.to_string() != "01/01/2021 00:00:00.00" {
+            result.set_as_text("from string failed", result.get_locale());
+            return FMError::NoError;
+        }
+
+        let mut dt = DateTime::from_text(Text::from("1/1/2021"), Locale::default());
+        if &dt.to_string() != "01/01/2021 00:00:00.00" {
+            result.set_as_text("from text failed", result.get_locale());
+            return FMError::NoError;
+        }
+
+        dt.normalize_date_fixed_point(FixPt::from(2020), FixPt::from(12), FixPt::from(31));
+        if &dt.to_string() != "12/31/2020 00:00:00.00" {
+            result.set_as_text("normalized date fixed point failed", result.get_locale());
+            return FMError::NoError;
+        }
+
+        dt.normalize_date_i16(2019, 6, 15);
+        if &dt.to_string() != "06/15/2019 00:00:00.00" {
+            result.set_as_text(
+                format!("normalized date i16 failed: {}", dt),
+                result.get_locale(),
+            );
+            return FMError::NoError;
+        }
+
+        dt.normalize_time_fixed_point(FixPt::from(12), FixPt::from(30), FixPt::from(30));
+        if &dt.to_string() != "06/15/2019 12:30:30.00" {
+            result.set_as_text("normalized time fixed point failed", result.get_locale());
+            return FMError::NoError;
+        }
+
+        dt.normalize_time_i64(6, 15, 15, 50);
+        if &dt.to_string() != "06/15/2019 06:15:15.50" {
+            result.set_as_text("normalized time i64 failed", result.get_locale());
+            return FMError::NoError;
+        }
+
+        let dse = dt.get_days_since_epoch();
+        if dse != 737225 {
+            result.set_as_text("days since epoch failed", result.get_locale());
+            return FMError::NoError;
+        }
+
+        let sse = dt.get_seconds_since_epoch();
+        if sse != 63696176115i64 {
+            result.set_as_text("seconds since epoch failed: {}", result.get_locale());
+            return FMError::NoError;
+        }
+
+        dt.set_days_since_epoch(5);
+        if &dt.to_string() != "01/05/0001 06:15:15.50" {
+            result.set_as_text("set days since epoch failed", result.get_locale());
+            return FMError::NoError;
+        }
+
+        dt.set_seconds_since_epoch(FixPt::from(5));
+        if &dt.to_string() != "01/01/0001 00:00:05.00" {
+            result.set_as_text("set seconds since epoch failed", result.get_locale());
+            return FMError::NoError;
+        }
+
+        dt.set_seconds_since_midnight(FixPt::from(500));
+        if &dt.to_string() != "01/01/0001 00:08:20.00" {
+            result.set_as_text("set seconds since midnight failed", result.get_locale());
+            return FMError::NoError;
+        }
+
+        let ssm = dt.get_seconds_since_midnight();
+        if ssm != 500 {
+            result.set_as_text("get seconds since midnight failed", result.get_locale());
+            return FMError::NoError;
+        }
+
+        if dt.is_leap_year() != false {
+            result.set_as_text("is leap year failed", result.get_locale());
+            return FMError::NoError;
+        }
+
+        if dt.day_of_week() != 2 {
+            result.set_as_text("day of week failed", result.get_locale());
+            return FMError::NoError;
+        }
+
+        if dt.day_of_year() != 1 {
+            result.set_as_text("day of year failed", result.get_locale());
+            return FMError::NoError;
+        }
+
+        if dt.week_of_year() != 1 {
+            result.set_as_text("week of year failed", result.get_locale());
+            return FMError::NoError;
+        }
+
+        let secs = dt.seconds_fixed_point();
+        if secs != 20 {
+            result.set_as_text("seconds fixed point failed", result.get_locale());
+            return FMError::NoError;
+        }
+
+        dt.set_date(DateTime::from_str("1/1/2020", Locale::default()));
+        if &dt.to_string() != "01/01/2020 00:08:20.00" {
+            result.set_as_text("set date failed", result.get_locale());
+            return FMError::NoError;
+        }
+
+        dt.set_time(DateTime::from_str("12:30:30", Locale::default()));
+        if &dt.to_string() != "01/01/2020 12:30:30.00" {
+            result.set_as_text("set time failed", result.get_locale());
+            return FMError::NoError;
+        }
+
+        if dt != DateTime::from_str("01/01/2020 12:30:30.00", Locale::default()) {
+            result.set_as_text("datetime neq failed", result.get_locale());
+            return FMError::NoError;
+        }
+
+        if dt == DateTime::from_str("02/01/2020 12:30:30.00", Locale::default()) {
+            result.set_as_text("datetime eq failed", result.get_locale());
+            return FMError::NoError;
+        }
+
+        result.set_as_timestamp(args.at_as_timestamp(0));
         FMError::NoError
     }
 }

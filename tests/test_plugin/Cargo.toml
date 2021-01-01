@@ -12,6 +12,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 fm_plugin = {path="../../../rust_fm_plugin"}
+chrono = "*"
 
 [target.'cfg(any(target_os = "windows", target_os = "macos"))'.build-dependencies]
 fm_plugin = { path = "../../../rust_fm_plugin" }
