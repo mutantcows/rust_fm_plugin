@@ -543,6 +543,12 @@ impl PartialEq<i32> for FixPt {
     }
 }
 
+impl PartialEq<i64> for FixPt {
+    fn eq(&self, other: &i64) -> bool {
+        i64::from(self) == *other
+    }
+}
+
 impl PartialOrd for FixPt {
     fn partial_cmp(&self, other: &FixPt) -> Option<Ordering> {
         Some(self.cmp(other))
