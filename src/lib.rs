@@ -105,7 +105,7 @@ pub mod prelude {
     pub use crate::{
         fmx_ExternCallStruct, fmx_ptrtype, register_plugin, write_to_u16_buff, Compatibility, Data,
         ExternStringType, ExternVersion, FMError, FMExternCallType, FileMakerFunction, IdleType,
-        Plugin, PluginInternal, QuadChar, Registration, ScriptControl, Text,
+        Plugin, PluginInternal, QuadChar, Registration, ScriptControl, Text, ToText,
     };
     pub use lazy_static::lazy_static;
     pub use std::collections::HashMap;

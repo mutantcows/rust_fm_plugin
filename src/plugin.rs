@@ -276,12 +276,16 @@ macro_rules! register_plugin {
 
         impl PluginInternal<$x> for $x {}
 
-        pub fn execute_filemaker_script(
-            file_name: Text,
-            script_name: Text,
+        pub fn execute_filemaker_script<F, S>(
+            file_name: F,
+            script_name: S,
             control: ScriptControl,
-            parameter: Data,
-        ) -> FMError {
+            parameter: Option<Data>,
+        ) -> FMError
+        where
+            F: ToText,
+            S: ToText,
+        {
             unsafe {
                 (*gfmx_ExternCallPtr).execute_filemaker_script(
                     file_name,
