@@ -517,13 +517,13 @@ impl FileMakerFunction for TestTimestamp {
             return FMError::NoError;
         }
 
-        let dt = DateTime::from_str("1/1/2021", Locale::default());
+        let dt = DateTime::from_str("1/1/2021");
         if &dt.to_string() != "01/01/2021 00:00:00.00" {
             result.set_as_text("from string failed");
             return FMError::NoError;
         }
 
-        let mut dt = DateTime::from_text(Text::from("1/1/2021"), Locale::default());
+        let mut dt = DateTime::from_text(Text::from("1/1/2021"));
         if &dt.to_string() != "01/01/2021 00:00:00.00" {
             result.set_as_text("from text failed");
             return FMError::NoError;
@@ -615,24 +615,24 @@ impl FileMakerFunction for TestTimestamp {
             return FMError::NoError;
         }
 
-        dt.set_date(DateTime::from_str("1/1/2020", Locale::default()));
+        dt.set_date(DateTime::from_str("1/1/2020"));
         if &dt.to_string() != "01/01/2020 00:08:20.00" {
             result.set_as_text("set date failed");
             return FMError::NoError;
         }
 
-        dt.set_time(DateTime::from_str("12:30:30", Locale::default()));
+        dt.set_time(DateTime::from_str("12:30:30"));
         if &dt.to_string() != "01/01/2020 12:30:30.00" {
             result.set_as_text("set time failed");
             return FMError::NoError;
         }
 
-        if dt != DateTime::from_str("01/01/2020 12:30:30.00", Locale::default()) {
+        if dt != DateTime::from_str("01/01/2020 12:30:30.00") {
             result.set_as_text("datetime neq failed");
             return FMError::NoError;
         }
 
-        if dt == DateTime::from_str("02/01/2020 12:30:30.00", Locale::default()) {
+        if dt == DateTime::from_str("02/01/2020 12:30:30.00") {
             result.set_as_text("datetime eq failed");
             return FMError::NoError;
         }

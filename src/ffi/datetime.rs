@@ -164,7 +164,11 @@ impl DateTime {
         Self { ptr, drop: true }
     }
 
-    pub fn from_str(date: &str, locale: Locale) -> Self {
+    pub fn from_str(date: &str) -> Self {
+        Self::from_str_with_locale(date, Locale::default())
+    }
+
+    pub fn from_str_with_locale(date: &str, locale: Locale) -> Self {
         let mut _x = fmx__fmxcpt::new();
         let date_len = date.len() as u32;
         let date = U16CString::from_str(date).unwrap();
@@ -174,7 +178,11 @@ impl DateTime {
         Self { ptr, drop: true }
     }
 
-    pub fn from_text(text: Text, locale: Locale) -> Self {
+    pub fn from_text(text: Text) -> Self {
+        Self::from_text_with_locale(text, Locale::default())
+    }
+
+    pub fn from_text_with_locale(text: Text, locale: Locale) -> Self {
         let mut _x = fmx__fmxcpt::new();
         let ptr = unsafe { FM_DateTime_Constructor3(text.ptr, locale.ptr, &mut _x) };
         _x.check();
@@ -418,19 +426,19 @@ impl PartialEq for DateTime {
 
 impl From<String> for DateTime {
     fn from(string: String) -> Self {
-        DateTime::from_str(&string, Locale::new(LocaleType::System))
+        DateTime::from_str(&string)
     }
 }
 
 impl From<&str> for DateTime {
     fn from(string: &str) -> Self {
-        DateTime::from_str(string, Locale::new(LocaleType::System))
+        DateTime::from_str(string)
     }
 }
 
 impl From<Text> for DateTime {
     fn from(text: Text) -> Self {
-        DateTime::from_text(text, Locale::new(LocaleType::System))
+        DateTime::from_text(text)
     }
 }
 
