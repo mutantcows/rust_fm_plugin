@@ -330,10 +330,20 @@ impl Add<i32> for FixPt {
 
     fn add(self, other: i32) -> Self {
         let mut _x = fmx__fmxcpt::new();
-        let result = FixPt::default();
         unsafe { FM_FixPt_Increment(self.ptr, other, &mut _x) };
         _x.check();
-        result
+        self
+    }
+}
+
+impl Add<FixPt> for i32 {
+    type Output = FixPt;
+
+    fn add(self, other: FixPt) -> FixPt {
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_FixPt_Increment(other.ptr, self, &mut _x) };
+        _x.check();
+        other
     }
 }
 
@@ -342,10 +352,9 @@ impl Add<i64> for FixPt {
 
     fn add(self, other: i64) -> Self {
         let mut _x = fmx__fmxcpt::new();
-        let result = FixPt::default();
         unsafe { FM_FixPt_Increment64(self.ptr, other, &mut _x) };
         _x.check();
-        result
+        self
     }
 }
 
@@ -409,6 +418,28 @@ impl Sub for FixPt {
     }
 }
 
+impl Sub<i32> for FixPt {
+    type Output = FixPt;
+
+    fn sub(self, other: i32) -> FixPt {
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_FixPt_Decrement(self.ptr, other, &mut _x) };
+        _x.check();
+        self
+    }
+}
+
+impl Sub<i64> for FixPt {
+    type Output = FixPt;
+
+    fn sub(self, other: i64) -> FixPt {
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_FixPt_Decrement64(self.ptr, other, &mut _x) };
+        _x.check();
+        self
+    }
+}
+
 impl Mul for FixPt {
     type Output = Self;
 
@@ -421,10 +452,37 @@ impl Mul for FixPt {
     }
 }
 
+impl Mul<&FixPt> for &FixPt {
+    type Output = FixPt;
+
+    fn mul(self, other: &FixPt) -> FixPt {
+        let mut _x = fmx__fmxcpt::new();
+        let result = FixPt::default();
+        unsafe { FM_FixPt_Multiply(self.ptr, other.ptr, result.ptr, &mut _x) };
+        _x.check();
+        result
+    }
+}
+
 impl Div for FixPt {
     type Output = Self;
 
     fn div(self, other: Self) -> Self {
+        let mut _x = fmx__fmxcpt::new();
+        let result = FixPt::default();
+        let error = unsafe { FM_FixPt_Divide(self.ptr, other.ptr, result.ptr, &mut _x) };
+        _x.check();
+        if error != FMError::NoError {
+            panic!();
+        }
+        result
+    }
+}
+
+impl Div<&FixPt> for &FixPt {
+    type Output = FixPt;
+
+    fn div(self, other: &FixPt) -> FixPt {
         let mut _x = fmx__fmxcpt::new();
         let result = FixPt::default();
         let error = unsafe { FM_FixPt_Divide(self.ptr, other.ptr, result.ptr, &mut _x) };
