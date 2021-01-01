@@ -250,14 +250,14 @@ impl FileMakerFunction for FixPtTest {
         arg.set_precision(20);
         let prec = arg.get_precision();
         if prec != 20 {
-            result.set_as_text(format!("get/set precision failed: {}", prec), locale);
+            result.set_as_text("get/set precision failed", locale);
             return FMError::NoError;
         }
 
         let num = FixPt::new(12, 0);
         let add: FixPt = num + 12;
         if add != 24 {
-            result.set_as_text(format!("fixpt add failed: {}", add), locale);
+            result.set_as_text("fixpt add failed", locale);
             return FMError::NoError;
         }
 
@@ -265,7 +265,7 @@ impl FileMakerFunction for FixPtTest {
         let add = num + 12;
 
         if add != 24 {
-            result.set_as_text(format!("i32 add failed: {}", add), locale);
+            result.set_as_text("i32 add failed", locale);
             return FMError::NoError;
         }
 
@@ -273,7 +273,7 @@ impl FileMakerFunction for FixPtTest {
         let add = num + 12i64;
 
         if add != 24 {
-            result.set_as_text(format!("i64 add failed: {}", add), locale);
+            result.set_as_text("i64 add failed", locale);
             return FMError::NoError;
         }
 
@@ -281,7 +281,7 @@ impl FileMakerFunction for FixPtTest {
         let sub = num - 6;
 
         if sub != 6 {
-            result.set_as_text(format!("i32 sub failed: {}", sub), locale);
+            result.set_as_text("i32 sub failed", locale);
             return FMError::NoError;
         }
 
@@ -289,7 +289,7 @@ impl FileMakerFunction for FixPtTest {
         let sub = num - 6i64;
 
         if sub != 6 {
-            result.set_as_text(format!("i64 sub failed: {}", sub), locale);
+            result.set_as_text("i64 sub failed", locale);
             return FMError::NoError;
         }
 
@@ -297,7 +297,7 @@ impl FileMakerFunction for FixPtTest {
         num += 12;
 
         if num != 24 {
-            result.set_as_text(format!("i32 add assign failed: {}", sub), locale);
+            result.set_as_text("i32 add assign failed", locale);
             return FMError::NoError;
         }
 
@@ -305,7 +305,7 @@ impl FileMakerFunction for FixPtTest {
         num += 12i64;
 
         if num != 24 {
-            result.set_as_text(format!("i64 add assign failed: {}", sub), locale);
+            result.set_as_text("i64 add assign failed", locale);
             return FMError::NoError;
         }
 
@@ -313,7 +313,7 @@ impl FileMakerFunction for FixPtTest {
         num -= 6;
 
         if num != 6 {
-            result.set_as_text(format!("i32 sub assign failed: {}", sub), locale);
+            result.set_as_text("i32 sub assign failed", locale);
             return FMError::NoError;
         }
 
@@ -321,8 +321,8 @@ impl FileMakerFunction for FixPtTest {
         let num2 = FixPt::new(6, 0);
         let num3 = num * num2;
 
-        if num3 != 6 {
-            result.set_as_text(format!("multiply failed: {}", num3), locale);
+        if num3 != 36 {
+            result.set_as_text("multiply failed", locale);
             return FMError::NoError;
         }
 
@@ -331,18 +331,59 @@ impl FileMakerFunction for FixPtTest {
         let num3 = &num / &num2;
 
         if num3 != 1 {
-            result.set_as_text(format!("divide failed: {}", num3), locale);
+            result.set_as_text("divide failed", locale);
             return FMError::NoError;
         }
 
         if -num != -6 {
-            result.set_as_text(format!("negate failed: {}", num3), locale);
+            result.set_as_text("negate failed", locale);
             return FMError::NoError;
         }
 
+        let num = FixPt::new(6, 0);
         let rem = num % num2;
         if rem != 0 {
-            result.set_as_text(format!("negate failed: {}", num3), locale);
+            result.set_as_text("modulo failed", locale);
+            return FMError::NoError;
+        }
+
+        let num = FixPt::new(6, 0);
+        if num > num {
+            result.set_as_text("greater than failed", locale);
+            return FMError::NoError;
+        }
+
+        let num = FixPt::new(6, 0);
+        if num < num {
+            result.set_as_text("less than failed", locale);
+            return FMError::NoError;
+        }
+
+        let num = FixPt::new(6, 0);
+        let num2 = FixPt::new(7, 0);
+        if num >= num2 {
+            result.set_as_text("greater than or equal to failed", locale);
+            return FMError::NoError;
+        }
+
+        let num = FixPt::new(6, 0);
+        let num2 = FixPt::new(7, 0);
+        if num2 <= num {
+            result.set_as_text("less than or equal to failed", locale);
+            return FMError::NoError;
+        }
+
+        let num = FixPt::new(6, 0);
+        let num2 = FixPt::new(7, 0);
+        if num2 == num {
+            result.set_as_text("equal to failed", locale);
+            return FMError::NoError;
+        }
+
+        let num = FixPt::new(6, 0);
+        let num2 = num.clone();
+        if num2 != num {
+            result.set_as_text("clone failed", locale);
             return FMError::NoError;
         }
 
