@@ -189,6 +189,12 @@ impl Drop for Locale {
     }
 }
 
+impl Default for Locale {
+    fn default() -> Self {
+        Locale::new(LocaleType::System)
+    }
+}
+
 pub struct QuadChar {
     pub(crate) ptr: *mut fmx_QuadChar,
     drop: bool,
