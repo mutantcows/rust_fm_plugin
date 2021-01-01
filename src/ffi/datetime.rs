@@ -1,4 +1,5 @@
 use super::*;
+use std::fmt;
 use widestring::U16CString;
 
 #[repr(C)]
@@ -303,10 +304,12 @@ impl DateTime {
         day
     }
 
-    pub fn now(&mut self) {
+    pub fn now() -> Self {
         let mut _x = fmx__fmxcpt::new();
-        unsafe { FM_DateTime_Now(self.ptr, &mut _x) };
+        let ts = Self::new();
+        unsafe { FM_DateTime_Now(ts.ptr, &mut _x) };
         _x.check();
+        ts
     }
 
     pub fn hours(&self) -> i32 {
@@ -409,5 +412,39 @@ impl PartialEq for DateTime {
         let result = unsafe { FM_DateTime_operatorNE(self.ptr, other.ptr, &mut _x) };
         _x.check();
         result
+    }
+}
+
+impl From<String> for DateTime {
+    fn from(string: String) -> Self {
+        DateTime::from_str(&string, Locale::new(LocaleType::System))
+    }
+}
+
+impl From<&str> for DateTime {
+    fn from(string: &str) -> Self {
+        DateTime::from_str(string, Locale::new(LocaleType::System))
+    }
+}
+
+impl From<Text> for DateTime {
+    fn from(text: Text) -> Self {
+        DateTime::from_text(text, Locale::new(LocaleType::System))
+    }
+}
+
+impl fmt::Display for DateTime {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let string = format!(
+            "{}/{}/{} {}:{}:{}.{}",
+            self.month(),
+            self.day(),
+            self.year(),
+            self.hours(),
+            self.minutes(),
+            self.seconds(),
+            self.milliseconds()
+        );
+        write!(f, "{}", string)
     }
 }
