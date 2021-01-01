@@ -119,6 +119,18 @@ impl Plugin for TestPlugin {
             compatibility_flags: Compatibility::Future as u32,
             min_version: ExternVersion::V160,
             function_ptr: Some(FixPtTest::extern_func),
+        },
+        Registration::Function {
+            id: 800,
+            name: "TEST_ExecuteScript",
+            definition: "TEST_ExecuteScript ( fileName ; scriptName ; parameter )",
+            description: "Test execute script",
+            min_args: 3,
+            max_args: 3,
+            display_in_dialogs: true,
+            compatibility_flags: Compatibility::Future as u32,
+            min_version: ExternVersion::V160,
+            function_ptr: Some(TestExecuteScript::extern_func),
         }]
     }
 }
@@ -386,6 +398,25 @@ impl FileMakerFunction for FixPtTest {
             result.set_as_text("clone failed", locale);
             return FMError::NoError;
         }
+
+        result.set_as_number(1);
+        FMError::NoError
+    }
+}
+
+struct TestExecuteScript;
+
+impl FileMakerFunction for TestExecuteScript {
+    fn function(_id: i16, _env: &ExprEnv, args: &DataVect, result: &mut Data) -> FMError {
+        let file_name = args.at_as_text(0);
+        let script_name = args.at_as_text(1);
+        let parameter = args.at(2);
+        execute_filemaker_script(
+            file_name,
+            script_name,
+            ScriptControl::Pause,
+            Some(parameter),
+        );
 
         result.set_as_number(1);
         FMError::NoError
