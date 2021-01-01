@@ -1,5 +1,7 @@
 use fm_plugin::prelude::*;
-use fm_plugin::{Data, DataVect, ExprEnv, Locale, LocaleType, QuadChar, ScriptControl, Text};
+use fm_plugin::{
+    Data, DataVect, ExprEnv, FixPt, Locale, LocaleType, QuadChar, ScriptControl, Text,
+};
 use std::io::prelude::*;
 use std::net::TcpStream;
 
@@ -105,6 +107,18 @@ impl Plugin for TestPlugin {
             compatibility_flags: Compatibility::Future as u32,
             min_version: ExternVersion::V160,
             function_ptr: Some(TextTest::extern_func),
+        },
+        Registration::Function {
+            id: 700,
+            name: "TEST_FixedPoint",
+            definition: "TEST_FixedPoint ( 12 )",
+            description: "Test fixed point",
+            min_args: 1,
+            max_args: 1,
+            display_in_dialogs: true,
+            compatibility_flags: Compatibility::Future as u32,
+            min_version: ExternVersion::V160,
+            function_ptr: Some(FixPtTest::extern_func),
         }]
     }
 }
@@ -181,6 +195,154 @@ impl FileMakerFunction for TextTest {
         text.append(&amazing);
         if text.to_string() != String::from("wowamazingamazing") {
             result.set_as_text("text append failed", locale);
+            return FMError::NoError;
+        }
+
+        result.set_as_number(1);
+        FMError::NoError
+    }
+}
+
+struct FixPtTest;
+
+impl FileMakerFunction for FixPtTest {
+    fn function(_id: i16, _env: &ExprEnv, args: &DataVect, result: &mut Data) -> FMError {
+        let num = FixPt::new(12, 0);
+        let mut arg = args.at_as_number(0);
+        let locale = result.get_locale();
+
+        if num != arg {
+            result.set_as_text("from ptr failed", locale);
+            return FMError::NoError;
+        }
+
+        let clone = arg.clone_precision(12);
+        if clone != arg {
+            result.set_as_text("clone precision failed", locale);
+            return FMError::NoError;
+        }
+
+        let new = FixPt::new(13, 0);
+        arg.assign(new);
+        if i32::from(&arg) != 13 {
+            result.set_as_text("fixed pt assign failed", locale);
+            return FMError::NoError;
+        }
+
+        arg.assign(14);
+        if i32::from(&arg) != 14 {
+            result.set_as_text("i32 assign failed", locale);
+            return FMError::NoError;
+        }
+
+        arg.assign(15.001);
+        if f64::from(&arg) != 15.001 {
+            result.set_as_text("f64 assign failed", locale);
+            return FMError::NoError;
+        }
+
+        arg.assign(1);
+        if bool::from(&arg) != true {
+            result.set_as_text("bool assign failed", locale);
+            return FMError::NoError;
+        }
+
+        arg.set_precision(20);
+        let prec = arg.get_precision();
+        if prec != 20 {
+            result.set_as_text(format!("get/set precision failed: {}", prec), locale);
+            return FMError::NoError;
+        }
+
+        let num = FixPt::new(12, 0);
+        let add: FixPt = num + 12;
+        if add != 24 {
+            result.set_as_text(format!("fixpt add failed: {}", add), locale);
+            return FMError::NoError;
+        }
+
+        let num = FixPt::new(12, 0);
+        let add = num + 12;
+
+        if add != 24 {
+            result.set_as_text(format!("i32 add failed: {}", add), locale);
+            return FMError::NoError;
+        }
+
+        let num = FixPt::new(12, 0);
+        let add = num + 12i64;
+
+        if add != 24 {
+            result.set_as_text(format!("i64 add failed: {}", add), locale);
+            return FMError::NoError;
+        }
+
+        let num = FixPt::new(12, 0);
+        let sub = num - 6;
+
+        if sub != 6 {
+            result.set_as_text(format!("i32 sub failed: {}", sub), locale);
+            return FMError::NoError;
+        }
+
+        let num = FixPt::new(12, 0);
+        let sub = num - 6i64;
+
+        if sub != 6 {
+            result.set_as_text(format!("i64 sub failed: {}", sub), locale);
+            return FMError::NoError;
+        }
+
+        let mut num = FixPt::new(12, 0);
+        num += 12;
+
+        if num != 24 {
+            result.set_as_text(format!("i32 add assign failed: {}", sub), locale);
+            return FMError::NoError;
+        }
+
+        let mut num = FixPt::new(12, 0);
+        num += 12i64;
+
+        if num != 24 {
+            result.set_as_text(format!("i64 add assign failed: {}", sub), locale);
+            return FMError::NoError;
+        }
+
+        let mut num = FixPt::new(12, 0);
+        num -= 6;
+
+        if num != 6 {
+            result.set_as_text(format!("i32 sub assign failed: {}", sub), locale);
+            return FMError::NoError;
+        }
+
+        let num = FixPt::new(6, 0);
+        let num2 = FixPt::new(6, 0);
+        let num3 = num * num2;
+
+        if num3 != 6 {
+            result.set_as_text(format!("multiply failed: {}", num3), locale);
+            return FMError::NoError;
+        }
+
+        let num = FixPt::new(6, 0);
+        let num2 = FixPt::new(6, 0);
+        let num3 = &num / &num2;
+
+        if num3 != 1 {
+            result.set_as_text(format!("divide failed: {}", num3), locale);
+            return FMError::NoError;
+        }
+
+        if -num != -6 {
+            result.set_as_text(format!("negate failed: {}", num3), locale);
+            return FMError::NoError;
+        }
+
+        let rem = num % num2;
+        if rem != 0 {
+            result.set_as_text(format!("negate failed: {}", num3), locale);
             return FMError::NoError;
         }
 
