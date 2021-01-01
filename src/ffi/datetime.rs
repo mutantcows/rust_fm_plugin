@@ -150,6 +150,7 @@ extern "C" {
     fn FM_DateTime_Delete(_self: *mut fmx_DateTime, _x: *mut fmx__fmxcpt);
 }
 
+#[derive(Debug)]
 pub struct DateTime {
     pub(crate) ptr: *mut fmx_DateTime,
     drop: bool,
@@ -193,7 +194,7 @@ impl DateTime {
 
     pub fn normalize_date_i16(&mut self, year: i16, month: i16, day: i16) {
         let mut _x = fmx__fmxcpt::new();
-        let error = unsafe { FM_DateTime_SetNormalizedDate1(self.ptr, year, month, day, &mut _x) };
+        let error = unsafe { FM_DateTime_SetNormalizedDate1(self.ptr, month, day, year, &mut _x) };
         _x.check();
         if error != FMError::NoError {
             panic!();
@@ -435,8 +436,9 @@ impl From<Text> for DateTime {
 
 impl fmt::Display for DateTime {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let string = format!(
-            "{}/{}/{} {}:{}:{}.{}",
+        write!(
+            f,
+            "{:02}/{:02}/{} {:02}:{:02}:{:02}.{:02}",
             self.month(),
             self.day(),
             self.year(),
@@ -444,7 +446,6 @@ impl fmt::Display for DateTime {
             self.minutes(),
             self.seconds(),
             self.milliseconds()
-        );
-        write!(f, "{}", string)
+        )
     }
 }
