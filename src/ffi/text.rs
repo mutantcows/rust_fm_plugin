@@ -1,4 +1,5 @@
 use super::*;
+use std::cmp::{Eq, Ord, Ordering, PartialEq, PartialOrd};
 use std::ffi::{CString, OsStr};
 use std::fmt;
 use widestring::U16CString;
@@ -51,8 +52,45 @@ extern "C" {
     );
     fn FM_Text_Delete(_self: *mut fmx_Text, _x: *mut fmx__fmxcpt);
 
+    fn FM_Text_operatorEQ(
+        _self: *const fmx_Text,
+        that: *const fmx_Text,
+        _x: *mut fmx__fmxcpt,
+    ) -> bool;
+
+    fn FM_Text_operatorNE(
+        _self: *const fmx_Text,
+        that: *const fmx_Text,
+        _x: *mut fmx__fmxcpt,
+    ) -> bool;
+
+    fn FM_Text_operatorLT(
+        _self: *const fmx_Text,
+        that: *const fmx_Text,
+        _x: *mut fmx__fmxcpt,
+    ) -> bool;
+
+    fn FM_Text_operatorLE(
+        _self: *const fmx_Text,
+        that: *const fmx_Text,
+        _x: *mut fmx__fmxcpt,
+    ) -> bool;
+
+    fn FM_Text_operatorGT(
+        _self: *const fmx_Text,
+        that: *const fmx_Text,
+        _x: *mut fmx__fmxcpt,
+    ) -> bool;
+
+    fn FM_Text_operatorGE(
+        _self: *const fmx_Text,
+        that: *const fmx_Text,
+        _x: *mut fmx__fmxcpt,
+    ) -> bool;
+
 }
 
+#[derive(Eq)]
 pub struct Text {
     pub(crate) ptr: *mut fmx_Text,
     drop: bool,
@@ -234,5 +272,69 @@ impl ToText for &OsStr {
         let mut txt = Text::new();
         txt.assign(&*self.to_string_lossy());
         txt
+    }
+}
+
+impl PartialEq for Text {
+    fn eq(&self, other: &Text) -> bool {
+        let mut _x = fmx__fmxcpt::new();
+        let result = unsafe { FM_Text_operatorEQ(self.ptr, other.ptr, &mut _x) };
+        _x.check();
+        result
+    }
+
+    #[allow(clippy::partialeq_ne_impl)]
+    fn ne(&self, other: &Text) -> bool {
+        let mut _x = fmx__fmxcpt::new();
+        let result = unsafe { FM_Text_operatorNE(self.ptr, other.ptr, &mut _x) };
+        _x.check();
+        result
+    }
+}
+
+impl PartialOrd for Text {
+    fn partial_cmp(&self, other: &Text) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+
+    fn lt(&self, other: &Self) -> bool {
+        let mut _x = fmx__fmxcpt::new();
+        let lt = unsafe { FM_Text_operatorLT(self.ptr, other.ptr, &mut _x) };
+        _x.check();
+        lt
+    }
+
+    fn le(&self, other: &Self) -> bool {
+        let mut _x = fmx__fmxcpt::new();
+        let le = unsafe { FM_Text_operatorLE(self.ptr, other.ptr, &mut _x) };
+        _x.check();
+        le
+    }
+
+    fn gt(&self, other: &Self) -> bool {
+        let mut _x = fmx__fmxcpt::new();
+        let gt = unsafe { FM_Text_operatorGT(self.ptr, other.ptr, &mut _x) };
+        _x.check();
+        gt
+    }
+
+    fn ge(&self, other: &Self) -> bool {
+        let mut _x = fmx__fmxcpt::new();
+        let ge = unsafe { FM_Text_operatorGE(self.ptr, other.ptr, &mut _x) };
+        _x.check();
+        ge
+    }
+}
+
+impl Ord for Text {
+    fn cmp(&self, other: &Self) -> Ordering {
+        if self == other {
+            return Ordering::Equal;
+        }
+
+        match self > other {
+            true => Ordering::Greater,
+            false => Ordering::Less,
+        }
     }
 }
