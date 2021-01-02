@@ -1,4 +1,5 @@
 use super::*;
+use std::fmt;
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -294,7 +295,7 @@ impl Data {
         data_type
     }
 
-    pub fn get_font_id<T: ToText>(&self, font_name: T, env: ExprEnv) -> fmx_fontid {
+    pub fn get_font_id<T: ToText>(&self, font_name: T, env: &ExprEnv) -> fmx_fontid {
         let name = font_name.to_text();
         let mut _x = fmx__fmxcpt::new();
         let font_id = unsafe { FM_Data_GetPostscriptFontID(self.ptr, name.ptr, env.ptr, &mut _x) };
@@ -305,7 +306,7 @@ impl Data {
         font_id
     }
 
-    pub fn font_exists<T: ToText>(&self, font_id: fmx_fontid, font_name: T, env: ExprEnv) -> bool {
+    pub fn font_exists<T: ToText>(&self, font_id: fmx_fontid, font_name: T, env: &ExprEnv) -> bool {
         let name = font_name.to_text();
         let mut _x = fmx__fmxcpt::new();
         let font_exists =
@@ -367,6 +368,7 @@ impl From<Data> for String {
     }
 }
 
+#[derive(PartialEq)]
 #[repr(i32)]
 pub enum DataType {
     Invalid = 0,
@@ -377,4 +379,11 @@ pub enum DataType {
     TimeStamp = 5,
     Binary = 6,
     Boolean = 7,
+}
+
+impl fmt::Display for Data {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let str = self.get_as_text().to_string();
+        write!(f, "{}", str)
+    }
 }
