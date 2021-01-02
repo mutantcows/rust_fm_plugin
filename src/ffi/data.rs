@@ -18,6 +18,17 @@ extern "C" {
 
     fn FM_Data_GetAsText(_self: *const fmx_Data, _x: *mut fmx__fmxcpt) -> *const fmx_Text;
 
+    fn FM_Data_GetAsDate(_self: *const fmx_Data, _x: *mut fmx__fmxcpt) -> *const fmx_DateTime;
+
+    fn FM_Data_GetAsTime(_self: *const fmx_Data, _x: *mut fmx__fmxcpt) -> *const fmx_DateTime;
+
+    fn FM_Data_GetAsTimeStamp(_self: *const fmx_Data, _x: *mut fmx__fmxcpt) -> *const fmx_DateTime;
+
+    fn FM_Data_GetAsBoolean(_self: *const fmx_Data, _x: *mut fmx__fmxcpt) -> bool;
+
+    fn FM_Data_GetBinaryData(_self: *const fmx_Data, _x: *mut fmx__fmxcpt)
+        -> *const fmx_BinaryData;
+
     fn FM_Data_Delete(_self: *mut fmx_Data, _x: *mut fmx__fmxcpt);
 
     fn FM_Data_SetAsText(
@@ -144,6 +155,41 @@ impl Data {
         let ptr = unsafe { FM_Data_GetAsText(self.ptr, &mut _x) };
         _x.check();
         Text::from_ptr(ptr)
+    }
+
+    pub fn get_as_date(&self) -> DateTime {
+        let mut _x = fmx__fmxcpt::new();
+        let ptr = unsafe { FM_Data_GetAsDate(self.ptr, &mut _x) };
+        _x.check();
+        DateTime::from_ptr(ptr)
+    }
+
+    pub fn get_as_time(&self) -> DateTime {
+        let mut _x = fmx__fmxcpt::new();
+        let ptr = unsafe { FM_Data_GetAsTime(self.ptr, &mut _x) };
+        _x.check();
+        DateTime::from_ptr(ptr)
+    }
+
+    pub fn get_as_timestamp(&self) -> DateTime {
+        let mut _x = fmx__fmxcpt::new();
+        let ptr = unsafe { FM_Data_GetAsTimeStamp(self.ptr, &mut _x) };
+        _x.check();
+        DateTime::from_ptr(ptr)
+    }
+
+    pub fn get_as_boolean(&self) -> bool {
+        let mut _x = fmx__fmxcpt::new();
+        let boolean = unsafe { FM_Data_GetAsBoolean(self.ptr, &mut _x) };
+        _x.check();
+        boolean
+    }
+
+    pub fn get_as_binary(&self) -> BinaryData {
+        let mut _x = fmx__fmxcpt::new();
+        let ptr = unsafe { FM_Data_GetBinaryData(self.ptr, &mut _x) };
+        _x.check();
+        BinaryData::from_ptr(ptr)
     }
 
     pub fn get_locale(&self) -> Locale {
