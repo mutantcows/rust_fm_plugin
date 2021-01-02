@@ -274,7 +274,7 @@ impl From<Data> for String {
     }
 }
 
-#[repr(C)]
+#[repr(i32)]
 pub enum DataType {
     Invalid = 0,
     Text = 1,

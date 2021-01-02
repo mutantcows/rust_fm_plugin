@@ -1,7 +1,8 @@
 use chrono::{self, Datelike, Timelike};
 use fm_plugin::prelude::*;
 use fm_plugin::{
-    Data, DataVect, DateTime, ExprEnv, FixPt, Locale, LocaleType, QuadChar, ScriptControl, Text,
+    Data, DataType, DataVect, DateTime, ExprEnv, FixPt, Locale, LocaleType, QuadChar,
+    ScriptControl, Text,
 };
 use std::io::prelude::*;
 use std::net::TcpStream;
@@ -168,6 +169,18 @@ impl Plugin for TestPlugin {
             compatibility_flags: Compatibility::Future as u32,
             min_version: ExternVersion::V160,
             function_ptr: Some(TestTimestamp::extern_func),
+        },
+        Registration::Function {
+            id: 1200,
+            name: "TEST_Data",
+            definition: "TEST_Data ( 1234567 )",
+            description: "Test data",
+            min_args: 1,
+            max_args: 1,
+            display_in_dialogs: true,
+            compatibility_flags: Compatibility::Future as u32,
+            min_version: ExternVersion::V160,
+            function_ptr: Some(TestData::extern_func),
         }]
     }
 }
@@ -638,6 +651,24 @@ impl FileMakerFunction for TestTimestamp {
         }
 
         result.set_as_timestamp(args.at_as_timestamp(0));
+        FMError::NoError
+    }
+}
+
+struct TestData;
+
+impl FileMakerFunction for TestData {
+    fn function(_id: i16, _env: &ExprEnv, args: &DataVect, result: &mut Data) -> FMError {
+        let mut data = args.at(0);
+        data.convert(DataType::Date);
+        let text = data.get_as_text();
+
+        if text.to_string() != "2/16/3381" {
+            result.set_as_text(text);
+            return FMError::NoError;
+        }
+
+        result.set_as_number(1);
         FMError::NoError
     }
 }
