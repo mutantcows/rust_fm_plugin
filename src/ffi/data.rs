@@ -349,6 +349,18 @@ impl From<&Data> for i32 {
     }
 }
 
+impl ToText for Data {
+    fn to_text(self) -> Text {
+        self.get_as_text()
+    }
+}
+
+impl ToFixPt for Data {
+    fn to_fixed_point(self) -> FixPt {
+        self.get_as_number()
+    }
+}
+
 impl From<Data> for String {
     fn from(data: Data) -> String {
         data.get_as_text().to_string()
