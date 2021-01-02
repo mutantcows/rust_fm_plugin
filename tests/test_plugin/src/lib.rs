@@ -658,13 +658,116 @@ impl FileMakerFunction for TestTimestamp {
 struct TestData;
 
 impl FileMakerFunction for TestData {
-    fn function(_id: i16, _env: &ExprEnv, args: &DataVect, result: &mut Data) -> FMError {
+    fn function(_id: i16, env: &ExprEnv, args: &DataVect, result: &mut Data) -> FMError {
         let mut data = args.at(0);
+
         data.convert(DataType::Date);
         let text = data.get_as_text();
-
         if text.to_string() != "2/16/3381" {
-            result.set_as_text(text);
+            result.set_as_text("date convert failed");
+            return FMError::NoError;
+        }
+
+        data.convert(DataType::Number);
+        let text = data.get_as_text();
+        if text.to_string() != "1234567" {
+            result.set_as_text("number convert failed");
+            return FMError::NoError;
+        }
+
+        data.convert(DataType::Time);
+        let text = data.get_as_text();
+        if text.to_string() != "342:56:07" {
+            result.set_as_text("time convert failed");
+            return FMError::NoError;
+        }
+
+        data.convert(DataType::TimeStamp);
+        let text = data.get_as_text();
+        if text.to_string() != "1/15/0001 6:56:07" {
+            result.set_as_text("timestamp convert failed");
+            return FMError::NoError;
+        }
+
+        data.convert(DataType::Binary);
+        let _ = data.get_as_binary();
+        if !data.is_valid() {
+            result.set_as_text("binary convert failed");
+            return FMError::NoError;
+        }
+
+        if data.is_find_reqeust() {
+            result.set_as_text("find request check failed");
+            return FMError::NoError;
+        }
+
+        data.clear(DataType::Boolean);
+        if !data.is_empty() {
+            result.set_as_text("clear/empty check failed");
+            return FMError::NoError;
+        }
+
+        if data.get_data_type() != DataType::Boolean {
+            result.set_as_text("get data type failed");
+            return FMError::NoError;
+        }
+
+        let font_id = data.get_font_id("ArialRegularMonotype", env);
+        if font_id != 7 {
+            result.set_as_text("get font id failed");
+            return FMError::NoError;
+        }
+
+        if !data.font_exists(7, "ArialRegularMonotype", env) {
+            result.set_as_text("font exists failed");
+            return FMError::NoError;
+        }
+
+        if data.get_as_boolean() {
+            result.set_as_text("get as boolean failed");
+            return FMError::NoError;
+        }
+
+        if data.get_as_date().to_string() != "00/00/0000 00:00:00.00" {
+            result.set_as_text("get as date failed");
+            return FMError::NoError;
+        }
+
+        if data.get_as_number() != 0 {
+            result.set_as_text("get as number failed");
+            return FMError::NoError;
+        }
+
+        let mut data = Data::new();
+        data.set_as_text("2:00");
+        if data.get_as_time().to_string() != "00/00/0000 02:00:00.00" {
+            result.set_as_text("get as time failed");
+            return FMError::NoError;
+        }
+
+        if data.get_as_timestamp().to_string() != "01/01/0001 02:00:00.00" {
+            result.set_as_text("get as timestamp failed");
+            return FMError::NoError;
+        }
+
+        let dt = DateTime::from_str("1/1/2020");
+        data.set_as_date(dt);
+        if data.to_string() != "1/1/2020" {
+            result.set_as_text(data);
+            return FMError::NoError;
+        }
+
+        let dt = DateTime::from_str("2:00");
+        data.set_as_time(dt);
+        if data.to_string() != "2:00:00" {
+            result.set_as_text(data);
+            return FMError::NoError;
+        }
+
+        let dt = DateTime::from_str("1/1/2020 2:00");
+        data.set_as_timestamp(dt);
+        if data.to_string() != "1/1/2020 2:00 AM" {
+            result.set_as_text(data);
             return FMError::NoError;
         }
 
