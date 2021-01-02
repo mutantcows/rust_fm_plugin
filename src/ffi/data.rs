@@ -14,6 +14,14 @@ extern "C" {
 
     fn FM_Data_GetLocale(_self: *const fmx_Data, _x: *mut fmx__fmxcpt) -> *const fmx_Locale;
 
+    fn FM_Data_IsEmpty(_self: *const fmx_Data, _x: *mut fmx__fmxcpt) -> bool;
+
+    fn FM_Data_IsValid(_self: *const fmx_Data, _x: *mut fmx__fmxcpt) -> bool;
+
+    fn FM_Data_IsFindRequest(_self: *const fmx_Data, _x: *mut fmx__fmxcpt) -> bool;
+
+    fn FM_Data_Clear(_self: *mut fmx_Data, newNativeType: DataType, _x: *mut fmx__fmxcpt);
+
     fn FM_Data_GetAsNumber(_self: *const fmx_Data, _x: *mut fmx__fmxcpt) -> *const fmx_FixPt;
 
     fn FM_Data_GetAsText(_self: *const fmx_Data, _x: *mut fmx__fmxcpt) -> *const fmx_Text;
@@ -141,6 +149,33 @@ impl Data {
             ptr: ptr as *mut fmx_Data,
             drop: false,
         }
+    }
+
+    pub fn is_empty(&self) -> bool {
+        let mut _x = fmx__fmxcpt::new();
+        let boolean = unsafe { FM_Data_IsEmpty(self.ptr, &mut _x) };
+        _x.check();
+        boolean
+    }
+
+    pub fn is_valid(&self) -> bool {
+        let mut _x = fmx__fmxcpt::new();
+        let boolean = unsafe { FM_Data_IsValid(self.ptr, &mut _x) };
+        _x.check();
+        boolean
+    }
+
+    pub fn clear(&mut self, new_type: DataType) {
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_Data_Clear(self.ptr, new_type, &mut _x) };
+        _x.check();
+    }
+
+    pub fn is_find_reqeust(&self) -> bool {
+        let mut _x = fmx__fmxcpt::new();
+        let boolean = unsafe { FM_Data_IsFindRequest(self.ptr, &mut _x) };
+        _x.check();
+        boolean
     }
 
     pub fn get_as_number(&self) -> FixPt {
