@@ -338,3 +338,15 @@ impl Ord for Text {
         }
     }
 }
+
+impl PartialEq<&str> for Text {
+    fn eq(&self, other: &&str) -> bool {
+        self.to_string() == *other
+    }
+}
+
+impl PartialEq<String> for Text {
+    fn eq(&self, other: &String) -> bool {
+        self.to_string() == *other
+    }
+}
