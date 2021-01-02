@@ -753,21 +753,21 @@ impl FileMakerFunction for TestData {
         let dt = DateTime::from_str("1/1/2020");
         data.set_as_date(dt);
         if data.to_string() != "1/1/2020" {
-            result.set_as_text(data);
+            result.set_as_text("set as date failed");
             return FMError::NoError;
         }
 
         let dt = DateTime::from_str("2:00");
         data.set_as_time(dt);
         if data.to_string() != "2:00:00" {
-            result.set_as_text(data);
+            result.set_as_text("set as time failed");
             return FMError::NoError;
         }
 
         let dt = DateTime::from_str("1/1/2020 2:00");
         data.set_as_timestamp(dt);
         if data.to_string() != "1/1/2020 2:00 AM" {
-            result.set_as_text(data);
+            result.set_as_text("set as timestamp failed");
             return FMError::NoError;
         }
 
