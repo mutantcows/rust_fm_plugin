@@ -218,28 +218,28 @@ impl Text {
         _x.check();
     }
 
-    pub fn find<T: ToText>(&mut self, other: T, position: u32) {
+    pub fn find<T: ToText>(&self, other: T, position: u32) {
         let mut _x = fmx__fmxcpt::new();
         let text = other.to_text();
         unsafe { FM_Text_Find(self.ptr, text.ptr, position, &mut _x) };
         _x.check();
     }
 
-    pub fn find_previous<T: ToText>(&mut self, other: T, position: u32) {
+    pub fn find_previous<T: ToText>(&self, other: T, position: u32) {
         let mut _x = fmx__fmxcpt::new();
         let text = other.to_text();
         unsafe { FM_Text_FindPrev(self.ptr, text.ptr, position, &mut _x) };
         _x.check();
     }
 
-    pub fn find_case_insensitive<T: ToText>(&mut self, other: T, position: u32) {
+    pub fn find_case_insensitive<T: ToText>(&self, other: T, position: u32) {
         let mut _x = fmx__fmxcpt::new();
         let text = other.to_text();
         unsafe { FM_Text_FindIgnoringCase(self.ptr, text.ptr, position, &mut _x) };
         _x.check();
     }
 
-    pub fn find_previous_case_insensitive<T: ToText>(&mut self, other: T, position: u32) {
+    pub fn find_previous_case_insensitive<T: ToText>(&self, other: T, position: u32) {
         let mut _x = fmx__fmxcpt::new();
         let text = other.to_text();
         unsafe { FM_Text_FindPrevIgnoringCase(self.ptr, text.ptr, position, &mut _x) };
@@ -258,12 +258,38 @@ impl Text {
         _x.check();
     }
 
-    pub fn get_style(&mut self, position: u32) -> TextStyle {
+    pub fn get_style(&self, position: u32) -> TextStyle {
         let mut _x = fmx__fmxcpt::new();
         let style = TextStyle::empty();
         unsafe { FM_Text_GetStyle(self.ptr, style.ptr, position, &mut _x) };
         _x.check();
         style
+    }
+
+    pub fn get_default_style(&self) -> TextStyle {
+        let mut _x = fmx__fmxcpt::new();
+        let style = TextStyle::empty();
+        unsafe { FM_Text_GetDefaultStyle(self.ptr, style.ptr, &mut _x) };
+        _x.check();
+        style
+    }
+
+    pub fn set_style(&mut self, style: TextStyle, position: u32, size: u32) {
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_Text_SetStyle(self.ptr, style.ptr, position, size, &mut _x) };
+        _x.check();
+    }
+
+    pub fn remove_style(&mut self, style: TextStyle) {
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_Text_RemoveStyle(self.ptr, style.ptr, &mut _x) };
+        _x.check();
+    }
+
+    pub fn remove_all_styles(&mut self) {
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_Text_ResetAllStyleBuffers(self.ptr, &mut _x) };
+        _x.check();
     }
 
     pub fn assign(&mut self, s: &str) {

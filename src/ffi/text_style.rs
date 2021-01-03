@@ -285,6 +285,134 @@ impl TextStyle {
         font_face
     }
 
+    pub fn get_font_info(&self) -> FontInfo {
+        let mut _x = fmx__fmxcpt::new();
+        let mut id = 0;
+        let mut face = FontFace::Plain;
+        let mut size = 0;
+        unsafe {
+            FM_CharacterStyle_GetFontInformation(self.ptr, &mut id, &mut face, &mut size, &mut _x)
+        };
+        _x.check();
+        FontInfo { id, face, size }
+    }
+
+    pub fn set_font_info(&mut self, font_info: FontInfo) {
+        let mut _x = fmx__fmxcpt::new();
+        unsafe {
+            FM_CharacterStyle_SetFontInformation(
+                self.ptr,
+                font_info.id,
+                font_info.face,
+                font_info.size,
+                &mut _x,
+            )
+        };
+        _x.check();
+    }
+
+    pub fn is_color_enabled(&self) -> bool {
+        let mut _x = fmx__fmxcpt::new();
+        let result = unsafe { FM_CharacterStyle_IsColorEnabled(self.ptr, &mut _x) };
+        _x.check();
+        result
+    }
+
+    pub fn is_face_enabled(&self, font_face: FontFace) -> bool {
+        let mut _x = fmx__fmxcpt::new();
+        let result = unsafe { FM_CharacterStyle_IsFaceEnabled(self.ptr, font_face, &mut _x) };
+        _x.check();
+        result
+    }
+
+    pub fn is_font_enabled(&self) -> bool {
+        let mut _x = fmx__fmxcpt::new();
+        let result = unsafe { FM_CharacterStyle_IsFontEnabled(self.ptr, &mut _x) };
+        _x.check();
+        result
+    }
+
+    pub fn is_size_enabled(&self) -> bool {
+        let mut _x = fmx__fmxcpt::new();
+        let result = unsafe { FM_CharacterStyle_IsSizeEnabled(self.ptr, &mut _x) };
+        _x.check();
+        result
+    }
+
+    pub fn is_any_face_enabled(&self) -> bool {
+        let mut _x = fmx__fmxcpt::new();
+        let result = unsafe { FM_CharacterStyle_IsAnyFaceEnabled(self.ptr, &mut _x) };
+        _x.check();
+        result
+    }
+
+    pub fn is_all_disabled(&self) -> bool {
+        let mut _x = fmx__fmxcpt::new();
+        let result = unsafe { FM_CharacterStyle_IsAllDisabled(self.ptr, &mut _x) };
+        _x.check();
+        result
+    }
+
+    pub fn disable_all(&mut self) {
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_CharacterStyle_DisableAll(self.ptr, &mut _x) };
+        _x.check();
+    }
+
+    pub fn disable_all_faces(&mut self) {
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_CharacterStyle_DisableAllFaces(self.ptr, &mut _x) };
+        _x.check();
+    }
+
+    pub fn disable_color(&mut self) {
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_CharacterStyle_DisableColor(self.ptr, &mut _x) };
+        _x.check();
+    }
+
+    pub fn disable_face(&mut self, font_face: FontFace) {
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_CharacterStyle_DisableFace(self.ptr, font_face, &mut _x) };
+        _x.check();
+    }
+
+    pub fn disable_font(&mut self) {
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_CharacterStyle_DisableFont(self.ptr, &mut _x) };
+        _x.check();
+    }
+
+    pub fn disable_size(&mut self) {
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_CharacterStyle_DisableSize(self.ptr, &mut _x) };
+        _x.check();
+    }
+
+    pub fn enable_color(&mut self) {
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_CharacterStyle_EnableColor(self.ptr, &mut _x) };
+        _x.check();
+    }
+
+    pub fn enable_face(&mut self, font_face: FontFace) {
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_CharacterStyle_EnableFace(self.ptr, font_face, &mut _x) };
+        _x.check();
+    }
+
+    pub fn enable_font(&mut self) {
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_CharacterStyle_EnableFont(self.ptr, &mut _x) };
+        _x.check();
+    }
+
+    pub fn enable_size(&mut self) {
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_CharacterStyle_EnableSize(self.ptr, &mut _x) };
+        _x.check();
+    }
+
     pub fn set_color(&mut self, color: TextColor) {
         let mut _x = fmx__fmxcpt::new();
         unsafe { FM_CharacterStyle_SetColor(self.ptr, color.ptr, &mut _x) };
@@ -327,6 +455,12 @@ impl Clone for TextStyle {
         _x.check();
         Self { ptr, drop: true }
     }
+}
+
+pub struct FontInfo {
+    pub id: u16,
+    pub face: FontFace,
+    pub size: u16,
 }
 
 pub struct TextColor {
@@ -373,56 +507,56 @@ impl TextColor {
         _x.check();
     }
 
-    pub fn get_red(&mut self) -> u8 {
+    pub fn get_red(&self) -> u8 {
         let mut _x = fmx__fmxcpt::new();
         let color = unsafe { FM_Color_GetRed(self.ptr, &mut _x) };
         _x.check();
         color
     }
 
-    pub fn get_green(&mut self) -> u8 {
+    pub fn get_green(&self) -> u8 {
         let mut _x = fmx__fmxcpt::new();
         let color = unsafe { FM_Color_GetGreen(self.ptr, &mut _x) };
         _x.check();
         color
     }
 
-    pub fn get_blue(&mut self) -> u8 {
+    pub fn get_blue(&self) -> u8 {
         let mut _x = fmx__fmxcpt::new();
         let color = unsafe { FM_Color_GetBlue(self.ptr, &mut _x) };
         _x.check();
         color
     }
 
-    pub fn get_alpha(&mut self) -> u8 {
+    pub fn get_alpha(&self) -> u8 {
         let mut _x = fmx__fmxcpt::new();
         let color = unsafe { FM_Color_GetAlpha(self.ptr, &mut _x) };
         _x.check();
         color
     }
 
-    pub fn get_red_upsample(&mut self) -> u16 {
+    pub fn get_red_upsample(&self) -> u16 {
         let mut _x = fmx__fmxcpt::new();
         let color = unsafe { FM_Color_GetRedUpsample(self.ptr, &mut _x) };
         _x.check();
         color
     }
 
-    pub fn get_green_upsample(&mut self) -> u16 {
+    pub fn get_green_upsample(&self) -> u16 {
         let mut _x = fmx__fmxcpt::new();
         let color = unsafe { FM_Color_GetGreenUpsample(self.ptr, &mut _x) };
         _x.check();
         color
     }
 
-    pub fn get_blue_upsample(&mut self) -> u16 {
+    pub fn get_blue_upsample(&self) -> u16 {
         let mut _x = fmx__fmxcpt::new();
         let color = unsafe { FM_Color_GetBlueUpsample(self.ptr, &mut _x) };
         _x.check();
         color
     }
 
-    pub fn get_alpha_upsample(&mut self) -> u16 {
+    pub fn get_alpha_upsample(&self) -> u16 {
         let mut _x = fmx__fmxcpt::new();
         let color = unsafe { FM_Color_GetAlphaUpsample(self.ptr, &mut _x) };
         _x.check();
