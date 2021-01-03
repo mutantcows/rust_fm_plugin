@@ -181,6 +181,18 @@ impl Plugin for TestPlugin {
             compatibility_flags: Compatibility::Future as u32,
             min_version: ExternVersion::V160,
             function_ptr: Some(TestData::extern_func),
+        },
+        Registration::Function {
+            id: 1300,
+            name: "TEST_BinaryData",
+            definition: "TEST_BinaryData ( container )",
+            description: "Test binary data",
+            min_args: 1,
+            max_args: 1,
+            display_in_dialogs: true,
+            compatibility_flags: Compatibility::Future as u32,
+            min_version: ExternVersion::V160,
+            function_ptr: Some(TestBinaryData::extern_func),
         }]
     }
 }
@@ -256,6 +268,13 @@ impl FileMakerFunction for TextTest {
         text.append(&amazing);
         if text.to_string() != String::from("wowamazingamazing") {
             result.set_as_text("text append failed");
+            return FMError::NoError;
+        }
+
+        let bytes = text.get_bytes(0, text.size());
+        let string = std::str::from_utf8(&bytes).unwrap();
+        if string != "wowamazingamazing" {
+            result.set_as_text(string);
             return FMError::NoError;
         }
 
@@ -770,6 +789,37 @@ impl FileMakerFunction for TestData {
             result.set_as_text("set as timestamp failed");
             return FMError::NoError;
         }
+
+        result.set_as_number(1);
+        FMError::NoError
+    }
+}
+
+struct TestBinaryData;
+
+impl FileMakerFunction for TestBinaryData {
+    fn function(_id: i16, _env: &ExprEnv, args: &DataVect, result: &mut Data) -> FMError {
+        let file = args.at_as_binary(0);
+        let size = file.get_size(0);
+        let vec = file.get_data(0, 0, size as usize);
+        let string = std::str::from_utf8(&vec).unwrap();
+
+        if string != "wow\r\nwow\r\ngreat" {
+            result.set_as_text("get data failed");
+            return FMError::NoError;
+        }
+
+        if file.get_file_names() != "file:test.log" {
+            result.set_as_text("get file names failed");
+            return FMError::NoError;
+        }
+        file.add_file_paths("wow");
+        if file.get_file_names() != "file:wow" {
+            result.set_as_text("add file names failed");
+            return FMError::NoError;
+        }
+
+        // file.add_footer(context)
 
         result.set_as_number(1);
         FMError::NoError
