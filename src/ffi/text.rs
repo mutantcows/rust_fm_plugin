@@ -2,6 +2,7 @@ use super::*;
 use std::cmp::{Eq, Ord, Ordering, PartialEq, PartialOrd};
 use std::ffi::{CString, OsStr};
 use std::fmt;
+use std::mem::ManuallyDrop;
 use widestring::U16CString;
 
 #[repr(C)]
@@ -88,6 +89,16 @@ extern "C" {
         _x: *mut fmx__fmxcpt,
     ) -> bool;
 
+    fn FM_Text_GetBytesEx(
+        _self: *const fmx_Text,
+        buffer: *mut i8,
+        buffersize: u32,
+        position: u32,
+        size: u32,
+        encoding: i32,
+        _x: *mut fmx__fmxcpt,
+    ) -> u32;
+
 }
 
 #[derive(Eq)]
@@ -169,6 +180,38 @@ impl Text {
         };
         _x.check();
         out_buffer
+    }
+
+    pub fn get_bytes(&self, position: u32, size: u32) -> Vec<u8> {
+        self.get_bytes_with_encoding(position, size, TextEncoding::UTF8)
+    }
+
+    pub fn get_bytes_with_encoding(
+        &self,
+        position: u32,
+        size: u32,
+        encoding: TextEncoding,
+    ) -> Vec<u8> {
+        let mut _x = fmx__fmxcpt::new();
+        let buffer: Vec<i8> = Vec::with_capacity(size as usize);
+
+        let mut buffer = ManuallyDrop::new(buffer);
+        let buffer_ptr = buffer.as_mut_ptr();
+
+        let bytes_written = unsafe {
+            FM_Text_GetBytesEx(
+                self.ptr,
+                buffer_ptr,
+                size as u32,
+                position,
+                size as u32,
+                encoding as i32,
+                &mut _x,
+            )
+        };
+        _x.check();
+
+        unsafe { Vec::from_raw_parts(buffer_ptr as *mut u8, bytes_written as usize, size as usize) }
     }
 }
 
@@ -340,13 +383,56 @@ impl Ord for Text {
 }
 
 impl PartialEq<&str> for Text {
+    #[allow(clippy::clippy::cmp_owned)]
     fn eq(&self, other: &&str) -> bool {
         self.to_string() == *other
     }
 }
 
 impl PartialEq<String> for Text {
+    #[allow(clippy::clippy::cmp_owned)]
     fn eq(&self, other: &String) -> bool {
         self.to_string() == *other
     }
+}
+
+#[repr(i32)]
+pub enum TextEncoding {
+    Native = 0,
+    UTF8 = 1,
+    ASCIIDOS = 2,
+    ASCIIWindows = 3,
+    ASCIIMac = 4,
+    ISO8859_1 = 5,
+    ShiftJISMac = 6,
+    ShiftJISWin = 7,
+    KoreanMac = 8,
+    KoreanWin = 9,
+    KoreanJohab = 10,
+    ChineseTradMac = 11,
+    ChineseTradWin = 12,
+    ChineseSimpMac = 13,
+    ChineseSimpWin = 14,
+    CyrillicMac = 15,
+    CyrillicWin = 16,
+    ISO8859_5 = 17,
+    CentralEuropeMac = 18,
+    EasternEuropeWin = 19,
+    ISO8859_2 = 20,
+    TurkishMac = 21,
+    TurkishWin = 22,
+    ISO8859_3 = 23,
+    ISO8859_9 = 24,
+    BalticWin = 25,
+    ISO8859_4 = 26,
+    ArabicMac = 27,
+    ArabicWin = 28,
+    ISO8859_6 = 29,
+    GreekMac = 30,
+    GreekWin = 31,
+    ISO88597 = 32,
+    HebrewMac = 33,
+    HebrewWin = 34,
+    ISO8859_8 = 35,
+    ISO8859_15 = 36,
 }
