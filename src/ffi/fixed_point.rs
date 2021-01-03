@@ -192,6 +192,15 @@ impl From<FixPt> for i32 {
     }
 }
 
+impl From<FixPt> for u32 {
+    fn from(fix_pt: FixPt) -> u32 {
+        let mut _x = fmx__fmxcpt::new();
+        let num = unsafe { FM_FixPt_AsLong(fix_pt.ptr, &mut _x) };
+        _x.check();
+        num as u32
+    }
+}
+
 impl From<&FixPt> for i32 {
     fn from(fix_pt: &FixPt) -> i32 {
         let mut _x = fmx__fmxcpt::new();
@@ -275,6 +284,16 @@ impl From<i32> for FixPt {
     }
 }
 
+impl From<u32> for FixPt {
+    fn from(num: u32) -> FixPt {
+        let fixed_pt = FixPt::default();
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_FixPt_AssignInt(fixed_pt.ptr, num as i32, &mut _x) };
+        _x.check();
+        fixed_pt
+    }
+}
+
 impl From<i64> for FixPt {
     fn from(num: i64) -> FixPt {
         let fixed_pt = FixPt::default();
@@ -296,6 +315,12 @@ impl ToFixPt for FixPt {
 }
 
 impl ToFixPt for i32 {
+    fn to_fixed_point(self) -> FixPt {
+        FixPt::from(self)
+    }
+}
+
+impl ToFixPt for u32 {
     fn to_fixed_point(self) -> FixPt {
         FixPt::from(self)
     }
