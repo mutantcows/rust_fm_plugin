@@ -1,5 +1,6 @@
 use super::*;
 use std::convert::TryFrom;
+use std::fmt;
 use std::mem::ManuallyDrop;
 
 #[repr(C)]
@@ -270,23 +271,26 @@ impl BinaryData {
         _x.check();
     }
 
-    pub fn add_header(&self, stream_type: BinaryStreamType, context: &mut u32) {
+    pub fn start_stream(&self, stream_type: BinaryStreamType) -> u32 {
         let mut _x = fmx__fmxcpt::new();
         let quad = QuadChar::from(stream_type);
-        let error = unsafe { FM_BinaryData_AddBegin(self.ptr, quad.ptr, context, &mut _x) };
+        let mut context = 0;
+        let error = unsafe { FM_BinaryData_AddBegin(self.ptr, quad.ptr, &mut context, &mut _x) };
         _x.check();
         if error != FMError::NoError {
             panic!();
         }
+        context
     }
 
-    pub fn append_stream(&self, context: u32, buffer: Vec<i8>) {
+    pub fn append_stream(&self, stream_id: u32, buffer: Vec<u8>) {
         let mut _x = fmx__fmxcpt::new();
         let size = buffer.len() as u32;
         let mut buffer = ManuallyDrop::new(buffer);
         let buffer_ptr = buffer.as_mut_ptr();
-        let error =
-            unsafe { FM_BinaryData_AddAppend(self.ptr, context, size, buffer_ptr, &mut _x) };
+        let error = unsafe {
+            FM_BinaryData_AddAppend(self.ptr, stream_id, size, buffer_ptr as *mut i8, &mut _x)
+        };
         unsafe { ManuallyDrop::drop(&mut buffer) };
         _x.check();
         if error != FMError::NoError {
@@ -294,9 +298,9 @@ impl BinaryData {
         }
     }
 
-    pub fn add_footer(&self, context: u32) {
+    pub fn end_stream(&self, stream_id: u32) {
         let mut _x = fmx__fmxcpt::new();
-        let error = unsafe { FM_BinaryData_AddFinish(self.ptr, context, &mut _x) };
+        let error = unsafe { FM_BinaryData_AddFinish(self.ptr, stream_id, &mut _x) };
         _x.check();
         if error != FMError::NoError {
             panic!();
@@ -363,7 +367,7 @@ impl Default for BinaryData {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum BinaryStreamType {
     FNAM,
     JPEG,
@@ -447,5 +451,17 @@ impl PartialEq for BinaryData {
         let result = unsafe { FM_BinaryData_operatorNE(self.ptr, other.ptr, &mut _x) };
         _x.check();
         result
+    }
+}
+
+impl fmt::Display for BinaryStreamType {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
+impl ToText for BinaryStreamType {
+    fn to_text(self) -> Text {
+        self.to_string().to_text()
     }
 }
