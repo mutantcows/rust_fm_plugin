@@ -258,9 +258,9 @@ impl Text {
         _x.check();
     }
 
-    pub fn get_style(&mut self, position: u32) -> CharacterStyle {
+    pub fn get_style(&mut self, position: u32) -> TextStyle {
         let mut _x = fmx__fmxcpt::new();
-        let style = CharacterStyle::new();
+        let style = TextStyle::empty();
         unsafe { FM_Text_GetStyle(self.ptr, style.ptr, position, &mut _x) };
         _x.check();
         style
