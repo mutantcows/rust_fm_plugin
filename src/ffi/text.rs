@@ -37,6 +37,14 @@ extern "C" {
         _x: *mut fmx__fmxcpt,
     );
 
+    fn FM_Text_SetText(
+        _self: *mut fmx_Text,
+        other: *const fmx_Text,
+        position: u32,
+        size: u32,
+        _x: *mut fmx__fmxcpt,
+    );
+
     fn FM_Text_AssignWide(_self: *mut fmx_Text, s: *const u16, _x: *mut fmx__fmxcpt);
 
     fn FM_Text_Assign(_self: *mut fmx_Text, s: *const i8, encoding: i32, _x: *mut fmx__fmxcpt);
@@ -52,6 +60,74 @@ extern "C" {
         _x: *mut fmx__fmxcpt,
     );
     fn FM_Text_Delete(_self: *mut fmx_Text, _x: *mut fmx__fmxcpt);
+
+    fn FM_Text_DeleteText(
+        _self: *mut fmx_Text,
+        positionToDelete: u32,
+        sizeToDelete: u32,
+        _x: *mut fmx__fmxcpt,
+    );
+
+    fn FM_Text_Find(
+        _self: *const fmx_Text,
+        other: *const fmx_Text,
+        position: u32,
+        _x: *mut fmx__fmxcpt,
+    ) -> u32;
+
+    fn FM_Text_FindPrev(
+        _self: *const fmx_Text,
+        other: *const fmx_Text,
+        position: u32,
+        _x: *mut fmx__fmxcpt,
+    ) -> u32;
+
+    fn FM_Text_FindIgnoringCase(
+        _self: *const fmx_Text,
+        other: *const fmx_Text,
+        position: u32,
+        _x: *mut fmx__fmxcpt,
+    ) -> u32;
+
+    fn FM_Text_FindPrevIgnoringCase(
+        _self: *const fmx_Text,
+        other: *const fmx_Text,
+        position: u32,
+        _x: *mut fmx__fmxcpt,
+    ) -> u32;
+
+    fn FM_Text_Uppercase(_self: *const fmx_Text, _x: *mut fmx__fmxcpt);
+
+    fn FM_Text_Lowercase(_self: *const fmx_Text, _x: *mut fmx__fmxcpt);
+
+    fn FM_Text_GetStyle(
+        _self: *const fmx_Text,
+        style: *mut fmx_CharacterStyle,
+        position: u32,
+        _x: *mut fmx__fmxcpt,
+    );
+
+    fn FM_Text_GetDefaultStyle(
+        _self: *const fmx_Text,
+        style: *mut fmx_CharacterStyle,
+        _x: *mut fmx__fmxcpt,
+    );
+
+    fn FM_Text_SetStyle(
+        _self: *mut fmx_Text,
+        style: *const fmx_CharacterStyle,
+        position: u32,
+        size: u32,
+        _x: *mut fmx__fmxcpt,
+    );
+
+    fn FM_Text_RemoveStyle(
+        _self: *mut fmx_Text,
+        style: *const fmx_CharacterStyle,
+        _x: *mut fmx__fmxcpt,
+    );
+
+    fn FM_Text_ResetAllStyleBuffers(_self: *mut fmx_Text, _x: *mut fmx__fmxcpt);
 
     fn FM_Text_operatorEQ(
         _self: *const fmx_Text,
@@ -127,6 +203,67 @@ impl Text {
         let size = unsafe { FM_Text_GetSize(self.ptr, &mut _x) };
         _x.check();
         size
+    }
+
+    pub fn set_text<T: ToText>(&mut self, other: T, position: u32, size: u32) {
+        let mut _x = fmx__fmxcpt::new();
+        let text = other.to_text();
+        unsafe { FM_Text_SetText(self.ptr, text.ptr, position, size, &mut _x) };
+        _x.check();
+    }
+
+    pub fn delete_text(&mut self, position: u32, size: u32) {
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_Text_DeleteText(self.ptr, position, size, &mut _x) };
+        _x.check();
+    }
+
+    pub fn find<T: ToText>(&mut self, other: T, position: u32) {
+        let mut _x = fmx__fmxcpt::new();
+        let text = other.to_text();
+        unsafe { FM_Text_Find(self.ptr, text.ptr, position, &mut _x) };
+        _x.check();
+    }
+
+    pub fn find_previous<T: ToText>(&mut self, other: T, position: u32) {
+        let mut _x = fmx__fmxcpt::new();
+        let text = other.to_text();
+        unsafe { FM_Text_FindPrev(self.ptr, text.ptr, position, &mut _x) };
+        _x.check();
+    }
+
+    pub fn find_case_insensitive<T: ToText>(&mut self, other: T, position: u32) {
+        let mut _x = fmx__fmxcpt::new();
+        let text = other.to_text();
+        unsafe { FM_Text_FindIgnoringCase(self.ptr, text.ptr, position, &mut _x) };
+        _x.check();
+    }
+
+    pub fn find_previous_case_insensitive<T: ToText>(&mut self, other: T, position: u32) {
+        let mut _x = fmx__fmxcpt::new();
+        let text = other.to_text();
+        unsafe { FM_Text_FindPrevIgnoringCase(self.ptr, text.ptr, position, &mut _x) };
+        _x.check();
+    }
+
+    pub fn uppercase<T: ToText>(&mut self) {
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_Text_Uppercase(self.ptr, &mut _x) };
+        _x.check();
+    }
+
+    pub fn lowercase<T: ToText>(&mut self) {
+        let mut _x = fmx__fmxcpt::new();
+        unsafe { FM_Text_Lowercase(self.ptr, &mut _x) };
+        _x.check();
+    }
+
+    pub fn get_style(&mut self, position: u32) -> CharacterStyle {
+        let mut _x = fmx__fmxcpt::new();
+        let style = CharacterStyle::new();
+        unsafe { FM_Text_GetStyle(self.ptr, style.ptr, position, &mut _x) };
+        _x.check();
+        style
     }
 
     pub fn assign(&mut self, s: &str) {

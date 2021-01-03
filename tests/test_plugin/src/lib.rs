@@ -274,7 +274,7 @@ impl FileMakerFunction for TextTest {
         let bytes = text.get_bytes(0, text.size());
         let string = std::str::from_utf8(&bytes).unwrap();
         if string != "wowamazingamazing" {
-            result.set_as_text(string);
+            result.set_as_text("get bytes failed");
             return FMError::NoError;
         }
 
