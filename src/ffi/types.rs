@@ -1,4 +1,5 @@
 use super::*;
+use std::fmt;
 
 #[cfg(target_family = "windows")]
 pub type fmx_int64 = i64;
@@ -307,8 +308,8 @@ pub enum LocaleType {
     Invalid = 0xFFFF,
 }
 
-impl ToString for QuadChar {
-    fn to_string(&self) -> String {
+impl fmt::Display for QuadChar {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut _x = fmx__fmxcpt::new();
         let mut bytes: Vec<u8> = Vec::with_capacity(4);
         for i in 0..4 {
@@ -316,6 +317,7 @@ impl ToString for QuadChar {
             bytes.push(c);
             _x.check();
         }
-        unsafe { String::from_utf8_unchecked(bytes) }
+        let str = unsafe { String::from_utf8_unchecked(bytes) };
+        write!(f, "{}", str)
     }
 }
