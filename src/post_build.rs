@@ -15,9 +15,24 @@
 //! [filemaker]
 //! ext_path = "/path/to/Extentions"
 //! bin_path = "/Applications/FileMaker Pro.app"
+//! kill = true
+//! launch = true
 //!
 //! [plugin]
 //! name = "plugin name"
+//! bundle = true
+//! move_to_ext = true
+//!
+//! [code_signing]
+//! sign = false
+//! signtool_path = "/path/to/signtool.exe"
+//! cert_path = "/path/to/cert.p12"
+//! cert_pass = "password"
+//! timestamp_url = "http://cert.timestamp.server.com"
+//!
+//! [log]
+//! path = "/path/to/plugin.log"
+//! clear_on_launch = true
 //! ```
 //!
 //! `post_build.rs`
@@ -40,11 +55,12 @@ use crate::config::{read_config, BuildError, Config};
 
 /// Handles bundling, renaming, and moving of the lib after build.
 /// 1. Loads prefs from `config.toml`
-/// 2. Clears `plugin.log` on the desktop.
+/// 2. Clears the log file.
 /// 3. Bundles the plug-in (on mac).
 /// 4. Renames the plug-in.
 /// 5. Moves plug-in to FileMaker Extensions folder.
-/// 6. Launches FileMaker.
+/// 6. Signs the plug-in.
+/// 7. Launches FileMaker.
 pub fn bundle_plugin() -> Result<(), Box<dyn Error>> {
     let config = read_config()?;
     clear_log_file(&config)?;

@@ -23,7 +23,7 @@
 //!
 //! impl FileMakerFunction for MyFunction {
 //!     fn function(id: i16, env: &ExprEnv, args: &DataVect, result: &mut Data) -> FMError {
-//!         //log some info to the desktop (plugin.log)
+//!         //log some info to the file set in config.toml
 //!         log("some troubleshooting info");
 //!
 //!         FMError::NoError
