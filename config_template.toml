@@ -8,6 +8,8 @@ launch = true
 name = "plugin name"
 bundle = true
 move_to_ext = true
+sign_code = false
+cert_path = ""
 
 [log]
 path = "/path/to/plugin.log"

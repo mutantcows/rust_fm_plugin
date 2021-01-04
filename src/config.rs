@@ -71,6 +71,8 @@ pub(crate) struct Plugin {
     pub(crate) name: String,
     pub(crate) bundle: bool,
     pub(crate) move_to_ext: bool,
+    pub(crate) sign_code: bool,
+    pub(crate) cert_path: String,
 }
 
 #[derive(Deserialize, Debug)]
