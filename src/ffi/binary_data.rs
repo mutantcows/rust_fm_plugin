@@ -167,7 +167,7 @@ impl BinaryData {
         Self { ptr, drop: true }
     }
 
-    pub fn from_buffer<T: ToText>(name: T, buffer: Vec<i8>) -> Self {
+    pub fn from_buffer<T: ToText>(name: T, buffer: Vec<u8>) -> Self {
         let mut _x = fmx__fmxcpt::new();
         let name = name.to_text();
         let buffer_size = buffer.len() as u32;
@@ -175,7 +175,7 @@ impl BinaryData {
         let buffer_ptr = buffer.as_mut_ptr();
 
         let ptr = unsafe {
-            FM_BinaryData_Constructor3(name.ptr, buffer_size as u32, buffer_ptr, &mut _x)
+            FM_BinaryData_Constructor3(name.ptr, buffer_size as u32, buffer_ptr as *mut i8, &mut _x)
         };
         unsafe { ManuallyDrop::drop(&mut buffer) };
         _x.check();
@@ -241,13 +241,14 @@ impl BinaryData {
         BinaryStreamType::from(quad)
     }
 
-    pub fn add_stream(&self, stream_type: BinaryStreamType, buffer: Vec<i8>) {
+    pub fn add_stream(&self, stream_type: BinaryStreamType, buffer: &mut Vec<u8>) {
         let mut _x = fmx__fmxcpt::new();
         let quad = QuadChar::from(stream_type);
         let size = buffer.len() as u32;
         let mut buffer = ManuallyDrop::new(buffer);
         let buffer_ptr = buffer.as_mut_ptr();
-        let error = unsafe { FM_BinaryData_Add(self.ptr, quad.ptr, size, buffer_ptr, &mut _x) };
+        let error =
+            unsafe { FM_BinaryData_Add(self.ptr, quad.ptr, size, buffer_ptr as *mut i8, &mut _x) };
         unsafe { ManuallyDrop::drop(&mut buffer) };
         _x.check();
         if error != FMError::NoError {
@@ -283,7 +284,7 @@ impl BinaryData {
         context
     }
 
-    pub fn append_stream(&self, stream_id: u32, buffer: Vec<u8>) {
+    pub fn append_stream(&self, stream_id: u32, buffer: &mut Vec<u8>) {
         let mut _x = fmx__fmxcpt::new();
         let size = buffer.len() as u32;
         let mut buffer = ManuallyDrop::new(buffer);
