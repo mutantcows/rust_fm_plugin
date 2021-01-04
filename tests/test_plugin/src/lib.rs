@@ -1,8 +1,9 @@
+#[allow(clippy::float_cmp)]
 use chrono::{self, Datelike, Timelike};
-use fm_plugin::prelude::*;
+use fm_plugin::{prelude::*, BinaryData};
 use fm_plugin::{
-    Data, DataType, DataVect, DateTime, ExprEnv, FixPt, Locale, LocaleType, QuadChar,
-    ScriptControl, Text,
+    BinaryStreamType, Data, DataType, DataVect, DateTime, ExprEnv, FixPt, Locale, LocaleType,
+    QuadChar, ScriptControl, Text,
 };
 use std::io::prelude::*;
 use std::net::TcpStream;
@@ -185,10 +186,10 @@ impl Plugin for TestPlugin {
         Registration::Function {
             id: 1300,
             name: "TEST_BinaryData",
-            definition: "TEST_BinaryData ( container )",
+            definition: "TEST_BinaryData ( container ; container2 )",
             description: "Test binary data",
-            min_args: 1,
-            max_args: 1,
+            min_args: 2,
+            max_args: 2,
             display_in_dialogs: true,
             compatibility_flags: Compatibility::Future as u32,
             min_version: ExternVersion::V160,
@@ -800,8 +801,9 @@ struct TestBinaryData;
 impl FileMakerFunction for TestBinaryData {
     fn function(_id: i16, _env: &ExprEnv, args: &DataVect, result: &mut Data) -> FMError {
         let file = args.at_as_binary(0);
+        let picture = args.at_as_binary(1);
         let size = file.get_size(0);
-        let vec = file.get_data(0, 0, size as usize);
+        let mut vec = file.get_data(0, 0, size as usize);
         let string = std::str::from_utf8(&vec).unwrap();
 
         if string != "wow\r\nwow\r\ngreat" {
@@ -813,15 +815,49 @@ impl FileMakerFunction for TestBinaryData {
             result.set_as_text("get file names failed");
             return FMError::NoError;
         }
+
         file.add_file_paths("wow");
         if file.get_file_names() != "file:wow" {
             result.set_as_text("add file names failed");
             return FMError::NoError;
         }
 
-        // file.add_footer(context)
+        let stream_type = file.get_type(0);
+        if stream_type != BinaryStreamType::FILE {
+            result.set_as_text("get stream type failed");
+            return FMError::NoError;
+        }
 
-        result.set_as_number(1);
+        let stream_count = file.get_stream_count();
+        if stream_count != 3 {
+            result.set_as_text("get stream count failed");
+            return FMError::NoError;
+        }
+
+        let new_file = BinaryData::new();
+        new_file.add_file_paths("test.log");
+        let stream_id = new_file.start_stream(BinaryStreamType::FILE);
+        new_file.append_stream(stream_id, &mut vec);
+        new_file.end_stream(stream_id);
+
+        let (width, height) = picture.get_dimensions();
+        if width != 2560 || height != 1600 {
+            result.set_as_text("get dimensions failed");
+            return FMError::NoError;
+        }
+
+        if picture.total_size() != 1699866 {
+            result.set_as_text("total size failed");
+            return FMError::NoError;
+        }
+
+        picture.set_dimensions(200, 200);
+        picture.remove_stream(BinaryStreamType::SIZE);
+        picture.remove_all();
+        picture.add_stream(BinaryStreamType::FILE, &mut vec);
+
+        result.set_binarydata(new_file, false);
+
         FMError::NoError
     }
 }
