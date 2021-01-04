@@ -3,3 +3,4 @@
 !/libraries/**
 config.toml
 /tests/test_plugin/target
+/tests/Import.log

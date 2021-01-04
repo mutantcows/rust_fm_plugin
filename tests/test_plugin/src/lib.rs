@@ -194,6 +194,18 @@ impl Plugin for TestPlugin {
             compatibility_flags: Compatibility::Future as u32,
             min_version: ExternVersion::V160,
             function_ptr: Some(TestBinaryData::extern_func),
+        },
+        Registration::Function {
+            id: 1400,
+            name: "TEST_CalcEngine",
+            definition: "TEST_CalcEngine",
+            description: "Test calc engine",
+            min_args: 0,
+            max_args: 0,
+            display_in_dialogs: true,
+            compatibility_flags: Compatibility::Future as u32,
+            min_version: ExternVersion::V160,
+            function_ptr: Some(TestCalcEngine::extern_func),
         }]
     }
 }
@@ -858,6 +870,15 @@ impl FileMakerFunction for TestBinaryData {
 
         result.set_binarydata(new_file, false);
 
+        FMError::NoError
+    }
+}
+
+struct TestCalcEngine;
+
+impl FileMakerFunction for TestCalcEngine {
+    fn function(_id: i16, _env: &ExprEnv, _args: &DataVect, result: &mut Data) -> FMError {
+        result.set_as_number(1);
         FMError::NoError
     }
 }
