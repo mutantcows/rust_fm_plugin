@@ -263,10 +263,10 @@ impl ExprEnv {
         file_id
     }
 
-    pub fn execute_file_sql_text_result<T: ToText>(
+    pub fn execute_file_sql_text_result<E: ToText, F: ToText>(
         &self,
-        expression: T,
-        file_name: T,
+        expression: E,
+        file_name: F,
         parameters: DataVect,
         result: &mut Data,
         col_sep: u16,
@@ -291,10 +291,10 @@ impl ExprEnv {
         error
     }
 
-    pub fn execute_file_sql<T: ToText>(
+    pub fn execute_file_sql<E: ToText, F: ToText>(
         &self,
-        expression: T,
-        file_name: T,
+        expression: E,
+        file_name: F,
         parameters: DataVect,
         result: &mut RowVect,
     ) -> FMError {
