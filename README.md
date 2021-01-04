@@ -9,13 +9,13 @@ path = "src/lib.rs"
 crate-type = ["cdylib"]
 
 [dependencies]
-fm_plugin = "0.1.11"
+fm_plugin = "0.1.13"
 
 [build-dependencies]
-fm_plugin = "0.1.11"
+fm_plugin = "0.1.13"
 
 [package.metadata.cargo-post.dependencies]
-fm_plugin = "0.1.11"
+fm_plugin = "0.1.13"
 toml = "0.5"
 serde = { version = "1.0", features = ["derive"] }
 ```
@@ -24,19 +24,26 @@ serde = { version = "1.0", features = ["derive"] }
 
 ```toml
 [filemaker]
-ext_path = "path/to/filemaker/Extensions"
-bin_path = "path/to/filemaker/executable.exe"
-kill = false
-launch = false
+ext_path = "/path/to/Extentions"
+bin_path = "/Applications/FileMaker Pro.app"
+kill = true
+launch = true
 
 [plugin]
-name = "my_plugin"
-bundle = false
-move_to_ext = false
+name = "plugin name"
+bundle = true
+move_to_ext = true
+
+[code_signing]
+sign = true
+signtool_path = "/path/to/signtool.exe"
+cert_path = "/path/to/cert.p12"
+cert_pass = "password"
+timestamp_url = "http://cert.timestamp.server.com"
 
 [log]
-path = "path/to/plugin.log"
-clear_on_launch = false
+path = "/path/to/plugin.log"
+clear_on_launch = true
 ```
 
 `build.rs:`
@@ -75,8 +82,8 @@ impl Plugin for MyPlugin {
         "MY PLUGIN"
     }
 
-    fn register_functions() -> Vec<ExternalFunction> {
-        vec![ExternalFunction {
+    fn register_functions() -> Vec<Registration> {
+        vec![Registration::Function {
             id: 100,
             name: "MyPlugin_MyFunction",
             definition: "MyPlugin_MyFunction( arg1 ; arg2 )",
@@ -98,8 +105,8 @@ pub struct MyFunction;
 
 impl FileMakerFunction for MyFunction {
     fn function(id: i16, env: &ExprEnv, args: &DataVect, result: &mut Data) -> FMError {
-        //log some info to the desktop (plugin.log)
-        log("some troubleshooting info");
+        //log some info to the file set in config.toml
+        log("some troubleshooting info")?;
 
         ...
 
@@ -116,7 +123,8 @@ If you set up the build/post_build scripts as shown above, running `cargo post b
 
 1. Quit FileMaker
 2. Compile the library
-3. Bundle the plug-in
-4. Clear the log file
+3. Clear the log file
+4. Bundle the plug-in
 5. Move the plug-in to the FileMaker extensions folder
-6. Launch FileMaker
+6. Sign the plug-in
+7. Launch FileMaker
