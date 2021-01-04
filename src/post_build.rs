@@ -104,7 +104,11 @@ fn bundle_plugin_command(config: &Config) -> Result<(), Box<dyn Error>> {
     } else {
         to = Path::new(&out_dir).join(plugin_name);
     }
-    rename(from, to)?;
+    rename(from, &to)?;
+
+    if config.code_signing.sign {
+        sign_code_command(&to, &config)?;
+    }
 
     Ok(())
 }
@@ -151,4 +155,28 @@ fn get_package_name() -> Result<String, Box<dyn Error>> {
             .to_string_lossy()
             .replace("-", "_"),
     )
+}
+
+#[cfg(target_os = "windows")]
+fn sign_code_command(plugin_path: &Path, config: &Config) -> Result<(), Box<dyn Error>> {
+    if !config.code_signing.sign {
+        return Ok(());
+    }
+    let signtool_path = Path::new(&config.code_signing.signtool_path);
+    process::Command::new(signtool_path)
+        .arg("sign")
+        .arg("/tr")
+        .arg(&config.code_signing.timestamp_url)
+        .arg("/f")
+        .arg(&config.code_signing.cert_path)
+        .arg("/p")
+        .arg(&config.code_signing.cert_pass)
+        .arg(plugin_path)
+        .output()?;
+    Ok(())
+}
+
+#[cfg(target_family = "unix")]
+fn sign_code_command(plugin_path: &Path, config: &Config) -> Result<(), Box<dyn Error>> {
+    Ok(())
 }

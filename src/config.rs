@@ -56,6 +56,7 @@ pub(crate) struct Config {
     pub(crate) filemaker: FileMaker,
     pub(crate) plugin: Plugin,
     pub(crate) log: Log,
+    pub(crate) code_signing: CodeSigning,
 }
 
 #[derive(Deserialize, Debug)]
@@ -71,8 +72,15 @@ pub(crate) struct Plugin {
     pub(crate) name: String,
     pub(crate) bundle: bool,
     pub(crate) move_to_ext: bool,
-    pub(crate) sign_code: bool,
+}
+
+#[derive(Deserialize, Debug)]
+pub(crate) struct CodeSigning {
+    pub(crate) sign: bool,
+    pub(crate) signtool_path: String,
     pub(crate) cert_path: String,
+    pub(crate) cert_pass: String,
+    pub(crate) timestamp_url: String,
 }
 
 #[derive(Deserialize, Debug)]
