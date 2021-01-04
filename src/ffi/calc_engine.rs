@@ -86,7 +86,7 @@ extern "C" {
 
     fn FM_ExprEnv_EvaluateGetFunction(
         _self: *const fmx_ExprEnv,
-        functionValue: i16,
+        functionValue: GetFunction,
         result: *mut fmx_Data,
         _x: *mut fmx__fmxcpt,
     ) -> FMError;
@@ -318,7 +318,7 @@ impl ExprEnv {
     pub fn eval_get(&self, func: GetFunction) -> Data {
         let mut _x = fmx__fmxcpt::new();
         let result = Data::new();
-        unsafe { FM_ExprEnv_EvaluateGetFunction(self.ptr, func as i16, result.ptr, &mut _x) };
+        unsafe { FM_ExprEnv_EvaluateGetFunction(self.ptr, func, result.ptr, &mut _x) };
         _x.check();
         result
     }
@@ -375,6 +375,7 @@ impl Default for ExprEnv {
     }
 }
 
+#[repr(i16)]
 pub enum GetFunction {
     ApplicationVersion = 1001,
     CurrentDate = 1002,
