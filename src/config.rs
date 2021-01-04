@@ -11,12 +11,27 @@
 //! ```
 //! `config.toml`
 //! ```toml
-//! [filemaker]
+//![filemaker]
 //!ext_path = "/path/to/Extentions"
 //!bin_path = "/Applications/FileMaker Pro.app"
+//!kill = true
+//!launch = true
 //!
 //![plugin]
 //!name = "plugin name"
+//!bundle = true
+//!move_to_ext = true
+//!
+//![code_signing]
+//!sign = true
+//!signtool_path = "/path/to/signtool.exe"
+//!cert_path = "/path/to/cert.p12"
+//!cert_pass = "password"
+//!timestamp_url = "http://cert.timestamp.server.com"
+//!
+//![log]
+//!path = "/path/to/plugin.log"
+//!clear_on_launch = true
 //! ```
 //! `build.rs`
 //! ```rust
