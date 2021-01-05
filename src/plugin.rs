@@ -1,7 +1,7 @@
 use crate::{
     fmx_Data, fmx_DataVect, fmx_ExprEnv, fmx_ExtPluginType, fmx__fmxcpt, fmx_ptrtype,
-    write_to_u16_buff, Data, DataVect, ExprEnv, ExternStringType, ExternVersion, FMError,
-    FM_ExprEnv_RegisterExternalFunctionEx, FM_ExprEnv_RegisterScriptStep,
+    write_to_u16_buff, ApplicationName, Data, DataVect, ExprEnv, ExternStringType, ExternVersion,
+    FMError, FM_ExprEnv_RegisterExternalFunctionEx, FM_ExprEnv_RegisterScriptStep,
     FM_ExprEnv_UnRegisterExternalFunction, FM_ExprEnv_UnRegisterScriptStep, QuadChar, Text,
 };
 
@@ -125,10 +125,14 @@ where
         write_to_u16_buff(out_buffer, out_buffer_size, &string)
     }
 
-    fn initialize(version: ExternVersion) -> ExternVersion {
+    fn initialize(
+        ext_version: ExternVersion,
+        _app_name: ApplicationName,
+        _app_version: fmx_ptrtype,
+    ) -> ExternVersion {
         let plugin_id = QuadChar::new(T::id());
         for f in T::register_functions() {
-            if version < f.min_version() {
+            if ext_version < f.min_version() {
                 continue;
             }
             if f.register(&plugin_id) != FMError::NoError {
@@ -186,8 +190,14 @@ where
 ///     use FMExternCallType::*;
 ///
 ///     // Message dispatcher
-///     match FMExternCallType::from((*pb).whichCall) {
-///         Init => (*pb).result = $x::initialize((*pb).extnVersion) as u64,
+///     match (*pb).whichCall {
+///         Init => {
+///             (*pb).result = $x::initialize(
+///                 (*pb).extnVersion,
+///                 ApplicationName::from((*pb).parm1),
+///                 (*pb).parm2,
+///             ) as u64
+///         }
 ///         Idle => {
 ///             use IdleType::*;
 ///             match IdleType::from((*pb).parm1) {
@@ -213,12 +223,16 @@ where
 ///
 /// impl PluginInternal<$x> for $x {}
 ///
-/// pub fn execute_filemaker_script(
-///     file_name: Text,
-///     script_name: Text,
+/// pub fn execute_filemaker_script<F, S>(
+///     file_name: F,
+///     script_name: S,
 ///     control: ScriptControl,
-///     parameter: Data,
-/// ) -> FMError {
+///     parameter: Option<Data>,
+/// ) -> FMError
+/// where
+///     F: ToText,
+///     S: ToText,
+/// {
 ///     unsafe {
 ///         (*gfmx_ExternCallPtr).execute_filemaker_script(
 ///             file_name,
@@ -232,8 +246,18 @@ where
 /// lazy_static! {
 ///     static ref GLOBAL_STATE: RwLock<HashMap<String, String>> = RwLock::new(HashMap::new());
 /// }
-/// #        };
-/// #    }
+///
+/// pub fn store_state(key: &str, value: &str) {
+///     let mut hmap = GLOBAL_STATE.write().unwrap();
+///     (*hmap).insert(String::from(key), String::from(value));
+/// }
+///
+/// pub fn get_state(key: &str) -> Option<String> {
+///     let hmap = GLOBAL_STATE.read().unwrap();
+///     (*hmap).get(key).cloned()
+/// }
+/// #    };
+/// # }
 ///
 /// ```
 #[macro_export]
@@ -249,8 +273,14 @@ macro_rules! register_plugin {
             use FMExternCallType::*;
 
             // Message dispatcher
-            match FMExternCallType::from((*pb).whichCall) {
-                Init => (*pb).result = $x::initialize((*pb).extnVersion) as u64,
+            match (*pb).whichCall {
+                Init => {
+                    (*pb).result = $x::initialize(
+                        (*pb).extnVersion,
+                        ApplicationName::from((*pb).parm1),
+                        (*pb).parm2,
+                    ) as u64
+                }
                 Idle => {
                     use IdleType::*;
                     match IdleType::from((*pb).parm1) {

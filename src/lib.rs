@@ -103,9 +103,10 @@ pub use plugin::*;
 pub mod prelude {
     //! Re-exports everything necessary for the register_plugin macro.
     pub use crate::{
-        fmx_ExternCallStruct, fmx_ptrtype, register_plugin, write_to_u16_buff, Compatibility, Data,
-        ExternStringType, ExternVersion, FMError, FMExternCallType, FileMakerFunction, IdleType,
-        Plugin, PluginInternal, QuadChar, Registration, ScriptControl, Text, ToText,
+        fmx_ExternCallStruct, fmx_ptrtype, register_plugin, write_to_u16_buff, ApplicationName,
+        Compatibility, Data, ExternStringType, ExternVersion, FMError, FMExternCallType,
+        FileMakerFunction, IdleType, Plugin, PluginInternal, QuadChar, Registration, ScriptControl,
+        Text, ToText,
     };
     pub use lazy_static::lazy_static;
     pub use std::collections::HashMap;

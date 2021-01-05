@@ -14,7 +14,7 @@ sign = false
 signtool_path = "/path/to/signtool.exe"
 cert_path = "/path/to/cert.p12"
 cert_pass = "password"
-timestamp_url = "http://timestamp.com"
+timestamp_url = "http://cert.timestamp.server.com"
 
 [log]
 path = "/path/to/plugin.log"

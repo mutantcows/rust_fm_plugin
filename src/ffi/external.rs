@@ -8,7 +8,7 @@ pub struct fmx_ExternCallStruct {
     pub unusedID: fmx_unusedid,
     pub entryPoint: fmx_ExternCallProc,
     pub cfmCalls: fmx_boolean,
-    pub whichCall: fmx_ExternCallSwitch,
+    pub whichCall: FMExternCallType,
     pub unsafeCalls: fmx_boolean,
     pub parm1: u8,
     pub parm2: fmx_ptrtype,
@@ -44,38 +44,25 @@ pub enum ExternVersion {
     Max = 255,
 }
 
-impl From<u8> for FMExternCallType {
-    fn from(num: u8) -> Self {
-        match num {
-            0 => Self::Init,
-            1 => Self::Idle,
-            4 => Self::Shutdown,
-            5 => Self::AppPrefs,
-            7 => Self::GetString,
-            8 => Self::SessionShutdown,
-            9 => Self::FileShutdown,
-            _ => unreachable!(),
-        }
-    }
-}
-
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
+#[repr(u8)]
 pub enum FMExternCallType {
-    Init,
-    Idle,
-    Shutdown,
-    AppPrefs,
-    GetString,
-    SessionShutdown,
-    FileShutdown,
+    Init = 0,
+    Idle = 1,
+    Shutdown = 4,
+    AppPrefs = 5,
+    GetString = 7,
+    SessionShutdown = 8,
+    FileShutdown = 9,
 }
 
+#[repr(u8)]
 pub enum IdleType {
-    Idle,
-    NotIdle,
-    ScriptPaused,
-    ScriptRunning,
-    Unsafe,
+    Idle = 0,
+    NotIdle = 1,
+    ScriptPaused = 2,
+    ScriptRunning = 3,
+    Unsafe = 4,
 }
 
 impl From<u8> for IdleType {
@@ -91,7 +78,7 @@ impl From<u8> for IdleType {
     }
 }
 
-#[repr(i32)]
+#[repr(u8)]
 pub enum ExternStringType {
     Name = 128,
     AppConfig = 129,
@@ -145,4 +132,34 @@ pub enum ScriptControl {
     Exit = 1,
     Resume = 2,
     Pause = 3,
+}
+
+#[repr(u8)]
+pub enum ApplicationName {
+    Developer = 0, // FileMaker Pro Advanced
+    Pro = 1,       // FileMaker Pro
+    Runtime = 2,   // FileMaker Runtime
+    Server = 3,    // This process no longer loads plug-ins
+    Web = 4,       // Web Publishing process
+    Mobile = 5,    // This iOS process is not allowed to load plug-ins
+    XDBC = 6,      // This process does not currently load plug-ins
+    SASE = 7,      // Server scripting process
+    IWP = 8,       // This process no longer exists
+}
+
+impl From<u8> for ApplicationName {
+    fn from(num: u8) -> Self {
+        match num {
+            0 => Self::Developer,
+            1 => Self::Pro,
+            2 => Self::Runtime,
+            3 => Self::Server,
+            4 => Self::Web,
+            5 => Self::Mobile,
+            6 => Self::XDBC,
+            7 => Self::SASE,
+            8 => Self::IWP,
+            _ => unreachable!(),
+        }
+    }
 }
