@@ -1,9 +1,9 @@
 #[allow(clippy::float_cmp)]
 use chrono::{self, Datelike, Timelike};
-use fm_plugin::{prelude::*, BinaryData};
+use fm_plugin::prelude::*;
 use fm_plugin::{
-    BinaryStreamType, Data, DataType, DataVect, DateTime, ExprEnv, FixPt, Locale, LocaleType,
-    QuadChar, ScriptControl, Text,
+    BinaryData, BinaryStreamType, Data, DataType, DataVect, DateTime, ExprEnv, FixPt, Locale,
+    LocaleType, QuadChar, ScriptControl, Text,
 };
 use std::io::prelude::*;
 use std::net::TcpStream;
@@ -45,7 +45,9 @@ impl Plugin for TestPlugin {
             max_args: 0,
             display_in_dialogs: true,
             compatibility_flags: Compatibility::Future as u32,
-            min_version: ExternVersion::V160,
+            min_ext_version: ExternVersion::V160,
+            min_fm_version: "18.0.2",
+            allowed_versions: AllowedVersions {developer: true, pro: true, web: true, sase: true, runtime: true},
             function_ptr: Some(LocaleTest::extern_func),
         },
         Registration::ScriptStep{
@@ -60,7 +62,9 @@ impl Plugin for TestPlugin {
             description: "Test script step.",
             display_in_dialogs: true,
             compatibility_flags: Compatibility::Future as u32,
-            min_version: ExternVersion::V160,
+            min_ext_version: ExternVersion::V160,
+            min_fm_version: "18.0.2",
+            allowed_versions: AllowedVersions {developer: true, pro: true, web: true, sase: true, runtime: true},
             function_ptr: Some(TestScriptStep::extern_func),
         },
         Registration::Function {
@@ -72,7 +76,9 @@ impl Plugin for TestPlugin {
             max_args: 0,
             display_in_dialogs: true,
             compatibility_flags: Compatibility::Future as u32,
-            min_version: ExternVersion::V160,
+            min_ext_version: ExternVersion::V160,
+            min_fm_version: "18.0.2",
+            allowed_versions: AllowedVersions {developer: true, pro: true, web: true, sase: true, runtime: true},
             function_ptr: Some(TestVersion::extern_func),
         },
         Registration::Function {
@@ -84,7 +90,9 @@ impl Plugin for TestPlugin {
             max_args: 2,
             display_in_dialogs: true,
             compatibility_flags: Compatibility::Future as u32,
-            min_version: ExternVersion::V160,
+            min_ext_version: ExternVersion::V160,
+            min_fm_version: "18.0.2",
+            allowed_versions: AllowedVersions {developer: true, pro: true, web: true, sase: true, runtime: true},
             function_ptr: Some(TestSocket::extern_func),
         },
         Registration::Function {
@@ -96,7 +104,9 @@ impl Plugin for TestPlugin {
             max_args: 0,
             display_in_dialogs: true,
             compatibility_flags: Compatibility::Future as u32,
-            min_version: ExternVersion::V160,
+            min_ext_version: ExternVersion::V160,
+            min_fm_version: "18.0.2",
+            allowed_versions: AllowedVersions {developer: true, pro: true, web: true, sase: true, runtime: true},
             function_ptr: Some(QuadCharTest::extern_func),
         },
         Registration::Function {
@@ -108,7 +118,9 @@ impl Plugin for TestPlugin {
             max_args: 1,
             display_in_dialogs: true,
             compatibility_flags: Compatibility::Future as u32,
-            min_version: ExternVersion::V160,
+            min_ext_version: ExternVersion::V160,
+            min_fm_version: "18.0.2",
+            allowed_versions: AllowedVersions {developer: true, pro: true, web: true, sase: true, runtime: true},
             function_ptr: Some(TextTest::extern_func),
         },
         Registration::Function {
@@ -120,7 +132,9 @@ impl Plugin for TestPlugin {
             max_args: 1,
             display_in_dialogs: true,
             compatibility_flags: Compatibility::Future as u32,
-            min_version: ExternVersion::V160,
+            min_ext_version: ExternVersion::V160,
+            min_fm_version: "18.0.2",
+            allowed_versions: AllowedVersions {developer: true, pro: true, web: true, sase: true, runtime: true},
             function_ptr: Some(FixPtTest::extern_func),
         },
         Registration::Function {
@@ -132,7 +146,9 @@ impl Plugin for TestPlugin {
             max_args: 3,
             display_in_dialogs: true,
             compatibility_flags: Compatibility::Future as u32,
-            min_version: ExternVersion::V160,
+            min_ext_version: ExternVersion::V160,
+            min_fm_version: "18.0.2",
+            allowed_versions: AllowedVersions {developer: true, pro: true, web: true, sase: true, runtime: true},
             function_ptr: Some(TestExecuteScript::extern_func),
         },
         Registration::Function {
@@ -144,7 +160,9 @@ impl Plugin for TestPlugin {
             max_args: 1,
             display_in_dialogs: true,
             compatibility_flags: Compatibility::Future as u32,
-            min_version: ExternVersion::V160,
+            min_ext_version: ExternVersion::V160,
+            min_fm_version: "18.0.2",
+            allowed_versions: AllowedVersions {developer: true, pro: true, web: true, sase: true, runtime: true},
             function_ptr: Some(TestDate::extern_func),
         },
         Registration::Function {
@@ -156,7 +174,9 @@ impl Plugin for TestPlugin {
             max_args: 1,
             display_in_dialogs: true,
             compatibility_flags: Compatibility::Future as u32,
-            min_version: ExternVersion::V160,
+            min_ext_version: ExternVersion::V160,
+            min_fm_version: "18.0.2",
+            allowed_versions: AllowedVersions {developer: true, pro: true, web: true, sase: true, runtime: true},
             function_ptr: Some(TestTime::extern_func),
         },
         Registration::Function {
@@ -168,7 +188,9 @@ impl Plugin for TestPlugin {
             max_args: 1,
             display_in_dialogs: true,
             compatibility_flags: Compatibility::Future as u32,
-            min_version: ExternVersion::V160,
+            min_ext_version: ExternVersion::V160,
+            min_fm_version: "18.0.2",
+            allowed_versions: AllowedVersions {developer: true, pro: true, web: true, sase: true, runtime: true},
             function_ptr: Some(TestTimestamp::extern_func),
         },
         Registration::Function {
@@ -180,7 +202,9 @@ impl Plugin for TestPlugin {
             max_args: 1,
             display_in_dialogs: true,
             compatibility_flags: Compatibility::Future as u32,
-            min_version: ExternVersion::V160,
+            min_ext_version: ExternVersion::V160,
+            min_fm_version: "18.0.2",
+            allowed_versions: AllowedVersions {developer: true, pro: true, web: true, sase: true, runtime: true},
             function_ptr: Some(TestData::extern_func),
         },
         Registration::Function {
@@ -192,7 +216,9 @@ impl Plugin for TestPlugin {
             max_args: 2,
             display_in_dialogs: true,
             compatibility_flags: Compatibility::Future as u32,
-            min_version: ExternVersion::V160,
+            min_ext_version: ExternVersion::V160,
+            min_fm_version: "18.0.2",
+            allowed_versions: AllowedVersions {developer: true, pro: true, web: true, sase: true, runtime: true},
             function_ptr: Some(TestBinaryData::extern_func),
         },
         Registration::Function {
@@ -204,7 +230,9 @@ impl Plugin for TestPlugin {
             max_args: 0,
             display_in_dialogs: true,
             compatibility_flags: Compatibility::Future as u32,
-            min_version: ExternVersion::V160,
+            min_ext_version: ExternVersion::V160,
+            min_fm_version: "18.0.2",
+            allowed_versions: AllowedVersions {developer: true, pro: true, web: true, sase: true, runtime: true},
             function_ptr: Some(TestCalcEngine::extern_func),
         }]
     }
@@ -491,14 +519,18 @@ impl FileMakerFunction for TestExecuteScript {
         let file_name = args.at_as_text(0);
         let script_name = args.at_as_text(1);
         let parameter = args.at(2);
-        execute_filemaker_script(
+        let error = execute_filemaker_script(
             file_name,
             script_name,
             ScriptControl::Pause,
             Some(parameter),
         );
 
-        result.set_as_number(1);
+        match error {
+            FMError::NoError => result.set_as_number(1),
+            e => result.set_as_text(e.to_string()),
+        };
+
         FMError::NoError
     }
 }

@@ -135,30 +135,30 @@ pub enum ScriptControl {
 }
 
 #[repr(u8)]
-pub enum ApplicationName {
+pub enum ApplicationVersion {
     Developer = 0, // FileMaker Pro Advanced
     Pro = 1,       // FileMaker Pro
     Runtime = 2,   // FileMaker Runtime
-    Server = 3,    // This process no longer loads plug-ins
     Web = 4,       // Web Publishing process
-    Mobile = 5,    // This iOS process is not allowed to load plug-ins
-    XDBC = 6,      // This process does not currently load plug-ins
     SASE = 7,      // Server scripting process
-    IWP = 8,       // This process no longer exists
 }
 
-impl From<u8> for ApplicationName {
+pub struct AllowedVersions {
+    pub developer: bool,
+    pub pro: bool,
+    pub runtime: bool,
+    pub web: bool,
+    pub sase: bool,
+}
+
+impl From<u8> for ApplicationVersion {
     fn from(num: u8) -> Self {
         match num {
             0 => Self::Developer,
             1 => Self::Pro,
             2 => Self::Runtime,
-            3 => Self::Server,
             4 => Self::Web,
-            5 => Self::Mobile,
-            6 => Self::XDBC,
             7 => Self::SASE,
-            8 => Self::IWP,
             _ => unreachable!(),
         }
     }

@@ -1,9 +1,11 @@
 use crate::{
     fmx_Data, fmx_DataVect, fmx_ExprEnv, fmx_ExtPluginType, fmx__fmxcpt, fmx_ptrtype,
-    write_to_u16_buff, ApplicationName, Data, DataVect, ExprEnv, ExternStringType, ExternVersion,
-    FMError, FM_ExprEnv_RegisterExternalFunctionEx, FM_ExprEnv_RegisterScriptStep,
-    FM_ExprEnv_UnRegisterExternalFunction, FM_ExprEnv_UnRegisterScriptStep, QuadChar, Text,
+    write_to_u16_buff, AllowedVersions, ApplicationVersion, Data, DataVect, ExprEnv,
+    ExternStringType, ExternVersion, FMError, FM_ExprEnv_RegisterExternalFunctionEx,
+    FM_ExprEnv_RegisterScriptStep, FM_ExprEnv_UnRegisterExternalFunction,
+    FM_ExprEnv_UnRegisterScriptStep, QuadChar, Text,
 };
+use widestring::U16CStr;
 
 /// Implement this trait for your plugin struct. The different functions are used to give FileMaker information about the plugin. You also need to register all your functions/script steps in the trait implementation.
 ///
@@ -35,7 +37,9 @@ use crate::{
 ///             max_args: 2,
 ///             display_in_dialogs: true,
 ///             compatibility_flags: Compatibility::Future as u32,
-///             min_version: ExternVersion::V160,
+///             min_ext_version: ExternVersion::V160,
+///             min_fm_version: "18.0.2",
+///             allowed_versions: AllowedVersions {developer: true, pro: true, web: true, sase: true, runtime: true},
 ///             function_ptr: Some(MyFunction::extern_func),
 ///             }
 ///         ]
@@ -127,14 +131,18 @@ where
 
     fn initialize(
         ext_version: ExternVersion,
-        _app_name: ApplicationName,
-        _app_version: fmx_ptrtype,
+        app_version: ApplicationVersion,
+        app_version_number: fmx_ptrtype,
     ) -> ExternVersion {
         let plugin_id = QuadChar::new(T::id());
         for f in T::register_functions() {
-            if ext_version < f.min_version() {
+            if ext_version < f.min_ext_version()
+                || !f.is_fm_version_allowed(&app_version)
+                || !is_version_high_enough(app_version_number, f.min_fm_version())
+            {
                 continue;
             }
+
             if f.register(&plugin_id) != FMError::NoError {
                 return ExternVersion::DoNotEnable;
             }
@@ -145,12 +153,57 @@ where
     fn shutdown(version: ExternVersion) {
         let plugin_id = QuadChar::new(T::id());
         for f in T::register_functions() {
-            if version < f.min_version() {
+            if version < f.min_ext_version() {
                 continue;
             }
             f.unregister(&plugin_id);
         }
     }
+}
+
+fn is_version_high_enough(app_version_number: fmx_ptrtype, min_version: &str) -> bool {
+    let string = unsafe { U16CStr::from_ptr_str(app_version_number as *const u16) };
+    let string = string.to_string_lossy();
+    let version_number = string.split(' ').last().unwrap();
+
+    let (major, minor, patch) = semantic_version(version_number);
+    let (min_major, min_minor, min_patch) = semantic_version(min_version);
+
+    match ((major, minor, patch), (min_major, min_minor, min_patch)) {
+        ((None, ..), (None, ..)) => false,
+        ((Some(major), ..), (Some(min_major), ..)) if major < min_major => false,
+        ((Some(major), ..), (Some(min_major), ..)) if major > min_major => true,
+        ((Some(major), ..), (Some(min_major), None, ..)) if major == min_major => true,
+
+        ((_, Some(minor), ..), (_, Some(min_minor), ..)) if minor < min_minor => false,
+        ((_, Some(minor), ..), (_, Some(min_minor), ..)) if minor > min_minor => true,
+        ((_, Some(minor), ..), (_, Some(min_minor), None)) if minor == min_minor => true,
+
+        ((.., Some(patch)), (.., Some(min_patch))) if patch < min_patch => false,
+        ((.., Some(patch)), (.., Some(min_patch))) if patch > min_patch => true,
+        _ => true,
+    }
+}
+
+fn semantic_version(version: &str) -> (Option<u8>, Option<u8>, Option<u8>) {
+    let mut str_vec = version.split('.');
+    let major = str_vec.next();
+    let minor = str_vec.next();
+    let patch = str_vec.next();
+    (
+        match major {
+            Some(n) => n.parse::<u8>().ok(),
+            None => None,
+        },
+        match minor {
+            Some(n) => n.parse::<u8>().ok(),
+            None => None,
+        },
+        match patch {
+            Some(n) => n.parse::<u8>().ok(),
+            None => None,
+        },
+    )
 }
 
 /// Sets up the entry point for every FileMaker call into the plug-in. The function then dispatches the calls to the various trait functions you can implement.
@@ -194,7 +247,7 @@ where
 ///         Init => {
 ///             (*pb).result = $x::initialize(
 ///                 (*pb).extnVersion,
-///                 ApplicationName::from((*pb).parm1),
+///                 ApplicationVersion::from((*pb).parm1),
 ///                 (*pb).parm2,
 ///             ) as u64
 ///         }
@@ -277,7 +330,7 @@ macro_rules! register_plugin {
                 Init => {
                     (*pb).result = $x::initialize(
                         (*pb).extnVersion,
-                        ApplicationName::from((*pb).parm1),
+                        ApplicationVersion::from((*pb).parm1),
                         (*pb).parm2,
                     ) as u64
                 }
@@ -407,7 +460,9 @@ pub enum Registration {
         max_args: i16,
         display_in_dialogs: bool,
         compatibility_flags: u32,
-        min_version: ExternVersion,
+        min_ext_version: ExternVersion,
+        min_fm_version: &'static str,
+        allowed_versions: AllowedVersions,
         function_ptr: fmx_ExtPluginType,
     },
     ScriptStep {
@@ -417,7 +472,9 @@ pub enum Registration {
         description: &'static str,
         display_in_dialogs: bool,
         compatibility_flags: u32,
-        min_version: ExternVersion,
+        min_ext_version: ExternVersion,
+        min_fm_version: &'static str,
+        allowed_versions: AllowedVersions,
         function_ptr: fmx_ExtPluginType,
     },
 }
@@ -512,11 +569,42 @@ impl Registration {
         error
     }
 
-    /// Returns minimum allowed version for a function/script step.
-    pub fn min_version(&self) -> ExternVersion {
+    /// Returns minimum allowed sdk version for a function/script step.
+    pub fn min_ext_version(&self) -> ExternVersion {
         match self {
-            Registration::Function { min_version, .. } => *min_version,
-            Registration::ScriptStep { min_version, .. } => *min_version,
+            Registration::Function {
+                min_ext_version, ..
+            } => *min_ext_version,
+            Registration::ScriptStep {
+                min_ext_version, ..
+            } => *min_ext_version,
+        }
+    }
+
+    /// Returns minimum allowed FileMaker version for a function/script step.
+    pub fn min_fm_version(&self) -> &str {
+        match self {
+            Registration::Function { min_fm_version, .. } => *min_fm_version,
+            Registration::ScriptStep { min_fm_version, .. } => *min_fm_version,
+        }
+    }
+
+    pub fn is_fm_version_allowed(&self, version: &ApplicationVersion) -> bool {
+        let allowed_versions = match self {
+            Registration::Function {
+                allowed_versions, ..
+            } => allowed_versions,
+            Registration::ScriptStep {
+                allowed_versions, ..
+            } => allowed_versions,
+        };
+        use ApplicationVersion::*;
+        match version {
+            Developer => allowed_versions.developer,
+            Pro => allowed_versions.pro,
+            Runtime => allowed_versions.runtime,
+            SASE => allowed_versions.sase,
+            Web => allowed_versions.web,
         }
     }
 
