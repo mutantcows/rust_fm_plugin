@@ -92,7 +92,9 @@ impl Plugin for MyPlugin {
             max_args: 2,
             display_in_dialogs: true,
             compatibility_flags: Compatibility::Future as u32,
-            min_version: ExternVersion::V160,
+            min_ext_version: ExternVersion::V160,
+            min_fm_version: "18.0.2",
+            allowed_versions: AllowedVersions {developer: true, pro: true, web: true, sase: true, runtime: true},
             function_ptr: Some(MyFunction::extern_func),
             }
         ]
