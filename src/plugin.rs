@@ -584,8 +584,8 @@ impl Registration {
     /// Returns minimum allowed FileMaker version for a function/script step.
     pub fn min_fm_version(&self) -> &str {
         match self {
-            Registration::Function { min_fm_version, .. } => *min_fm_version,
-            Registration::ScriptStep { min_fm_version, .. } => *min_fm_version,
+            Registration::Function { min_fm_version, .. }
+            | Registration::ScriptStep { min_fm_version, .. } => *min_fm_version,
         }
     }
 
@@ -593,8 +593,8 @@ impl Registration {
         let allowed_versions = match self {
             Registration::Function {
                 allowed_versions, ..
-            } => allowed_versions,
-            Registration::ScriptStep {
+            }
+            | Registration::ScriptStep {
                 allowed_versions, ..
             } => allowed_versions,
         };
