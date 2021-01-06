@@ -169,18 +169,18 @@ fn is_version_high_enough(app_version_number: fmx_ptrtype, min_version: &str) ->
     let (major, minor, patch) = semantic_version(version_number);
     let (min_major, min_minor, min_patch) = semantic_version(min_version);
 
-    match ((major, minor, patch), (min_major, min_minor, min_patch)) {
-        ((None, ..), (None, ..)) => false,
-        ((Some(major), ..), (Some(min_major), ..)) if major < min_major => false,
-        ((Some(major), ..), (Some(min_major), ..)) if major > min_major => true,
-        ((Some(major), ..), (Some(min_major), None, ..)) if major == min_major => true,
+    match (major, min_major, minor, min_minor, patch, min_patch) {
+        (None, None, ..) => false,
+        (Some(major), Some(min_major), ..) if major < min_major => false,
+        (Some(major), Some(min_major), ..) if major > min_major => true,
+        (Some(major), Some(min_major), _, None, ..) if major == min_major => true,
 
-        ((_, Some(minor), ..), (_, Some(min_minor), ..)) if minor < min_minor => false,
-        ((_, Some(minor), ..), (_, Some(min_minor), ..)) if minor > min_minor => true,
-        ((_, Some(minor), ..), (_, Some(min_minor), None)) if minor == min_minor => true,
+        (.., Some(minor), Some(min_minor), _, _) if minor < min_minor => false,
+        (.., Some(minor), Some(min_minor), _, _) if minor > min_minor => true,
+        (.., Some(minor), Some(min_minor), _, None) if minor == min_minor => true,
 
-        ((.., Some(patch)), (.., Some(min_patch))) if patch < min_patch => false,
-        ((.., Some(patch)), (.., Some(min_patch))) if patch > min_patch => true,
+        (.., Some(patch), Some(min_patch)) if patch < min_patch => false,
+        (.., Some(patch), Some(min_patch)) if patch > min_patch => true,
         _ => true,
     }
 }
