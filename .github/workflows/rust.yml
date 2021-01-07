@@ -18,8 +18,10 @@ jobs:
     - uses: actions/checkout@v2
     - name: Install Cargo Post
       run: cargo install cargo-post
+    - name: Create key
+      run: echo ${{ secrets.FLASK_PRIVATE_KEY }} > key.pem
     - name: Download FileMaker
-      run: scp -i "${{ secrets.FLASK_PRIVATE_KEY }}" -P 22 root@167.99.7.34:"'/root/FileMaker Pro 19.msi'" .
+      run: scp -i key.pem -P 22 root@167.99.7.34:"'/root/FileMaker Pro 19.msi'" .
     - name: Install FileMaker
       run: msiexec /i "FileMaker Pro 19.msi" /qn
     - name: Build
