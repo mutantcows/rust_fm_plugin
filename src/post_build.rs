@@ -42,6 +42,10 @@
 //!     fm_plugin::post_build::bundle_plugin()?;
 //!     Ok(())
 //! }
+//! # #[cfg(target_os = "linux")]
+//! # fn main() -> Result<(), Box<dyn std::error::Error>> {
+//! #     Ok(())
+//! # }
 //! ```
 
 use std::error::Error;

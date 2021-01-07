@@ -40,6 +40,10 @@
 //!    fm_plugin::kill_filemaker()?;
 //!    Ok(())
 //!}
+//!#  #[cfg(target_os = "linux")]
+//!# fn main() -> Result<(), Box<dyn std::error::Error>> {
+//!#     Ok(())
+//!# }
 //! ```
 
 use serde::Deserialize;
