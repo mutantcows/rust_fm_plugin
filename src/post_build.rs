@@ -45,14 +45,12 @@
 //! ```
 
 use std::error::Error;
-#[cfg(any(target_os = "macos", target_os = "windows"))]
-use std::fs::rename;
 use std::fs::File;
 #[cfg(target_os = "macos")]
 use std::fs::{create_dir_all, remove_dir_all};
+use std::path::Path;
 #[cfg(any(target_os = "macos", target_os = "windows"))]
-use std::path::{Path, PathBuf};
-use std::process;
+use std::{fs::rename, path::PathBuf, process};
 
 use crate::config::{read_config, BuildError, Config};
 
