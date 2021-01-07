@@ -45,9 +45,12 @@
 //! ```
 
 use std::error::Error;
+#[cfg(any(target_os = "macos", target_os = "windows"))]
+use std::fs::rename;
+use std::fs::File;
 #[cfg(target_os = "macos")]
 use std::fs::{create_dir_all, remove_dir_all};
-use std::fs::{rename, File};
+#[cfg(any(target_os = "macos", target_os = "windows"))]
 use std::path::{Path, PathBuf};
 use std::process;
 
@@ -194,5 +197,15 @@ fn sign_code_command(plugin_path: &Path, config: &Config) -> Result<(), Box<dyn 
 
 #[cfg(target_family = "unix")]
 fn sign_code_command(plugin_path: &Path, config: &Config) -> Result<(), Box<dyn Error>> {
+    Ok(())
+}
+
+#[cfg(target_os = "linux")]
+fn bundle_plugin_command(_config: &Config) -> Result<(), Box<dyn Error>> {
+    Ok(())
+}
+
+#[cfg(target_os = "linux")]
+fn launch_filemaker(_config: &Config) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
