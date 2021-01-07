@@ -19,9 +19,7 @@ jobs:
     - name: Install Cargo Post
       run: cargo install cargo-post
     - name: Download FileMaker
-      uses: wei/curl@v1.1.1
-      with:
-        args: --output "FileMaker Pro 19.msi" --key "${{ secrets.FLASK_PRIVATE_KEY }}" "sftp://root@167.99.7.34:22/root/FileMaker Pro 19.msi"
+      run: --output "FileMaker Pro 19.msi" --key "${{ secrets.FLASK_PRIVATE_KEY }}" "sftp://root@167.99.7.34:22/root/FileMaker Pro 19.msi"
     - name: Install FileMaker
       run: msiexec /i "FileMaker Pro 19.msi" /qn
     - name: Build
