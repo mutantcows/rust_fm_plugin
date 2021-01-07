@@ -215,7 +215,7 @@ impl From<FixPt> for i64 {
         let mut _x = fmx__fmxcpt::new();
         let num = unsafe { FM_FixPt_AsLong64(fix_pt.ptr, &mut _x) };
         _x.check();
-        num
+        num as i64
     }
 }
 
@@ -224,7 +224,7 @@ impl From<&FixPt> for i64 {
         let mut _x = fmx__fmxcpt::new();
         let num = unsafe { FM_FixPt_AsLong64(fix_pt.ptr, &mut _x) };
         _x.check();
-        num
+        num as i64
     }
 }
 
@@ -298,7 +298,7 @@ impl From<i64> for FixPt {
     fn from(num: i64) -> FixPt {
         let fixed_pt = FixPt::default();
         let mut _x = fmx__fmxcpt::new();
-        unsafe { FM_FixPt_AssignInt64(fixed_pt.ptr, num, &mut _x) };
+        unsafe { FM_FixPt_AssignInt64(fixed_pt.ptr, num as fmx_int64, &mut _x) };
         _x.check();
         fixed_pt
     }
@@ -377,7 +377,7 @@ impl Add<i64> for FixPt {
 
     fn add(self, other: i64) -> Self {
         let mut _x = fmx__fmxcpt::new();
-        unsafe { FM_FixPt_Increment64(self.ptr, other, &mut _x) };
+        unsafe { FM_FixPt_Increment64(self.ptr, other as fmx_int64, &mut _x) };
         _x.check();
         self
     }
@@ -402,7 +402,7 @@ impl AddAssign<i32> for FixPt {
 impl AddAssign<i64> for FixPt {
     fn add_assign(&mut self, other: i64) {
         let mut _x = fmx__fmxcpt::new();
-        unsafe { FM_FixPt_Increment64(self.ptr, other, &mut _x) };
+        unsafe { FM_FixPt_Increment64(self.ptr, other as fmx_int64, &mut _x) };
         _x.check();
     }
 }
@@ -426,7 +426,7 @@ impl SubAssign<i32> for FixPt {
 impl SubAssign<i64> for FixPt {
     fn sub_assign(&mut self, other: i64) {
         let mut _x = fmx__fmxcpt::new();
-        unsafe { FM_FixPt_Decrement64(self.ptr, other, &mut _x) };
+        unsafe { FM_FixPt_Decrement64(self.ptr, other as fmx_int64, &mut _x) };
         _x.check();
     }
 }
@@ -459,7 +459,7 @@ impl Sub<i64> for FixPt {
 
     fn sub(self, other: i64) -> FixPt {
         let mut _x = fmx__fmxcpt::new();
-        unsafe { FM_FixPt_Decrement64(self.ptr, other, &mut _x) };
+        unsafe { FM_FixPt_Decrement64(self.ptr, other as fmx_int64, &mut _x) };
         _x.check();
         self
     }

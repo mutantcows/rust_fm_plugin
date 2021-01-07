@@ -222,14 +222,21 @@ impl DateTime {
 
     pub fn normalize_time_i64(
         &mut self,
-        hours: i64,
+        hours: i32,
         minutes: i16,
         seconds: i16,
         milliseconds: i32,
     ) {
         let mut _x = fmx__fmxcpt::new();
         let error = unsafe {
-            FM_DateTime_SetNormalizedTime1(self.ptr, hours, minutes, seconds, milliseconds, &mut _x)
+            FM_DateTime_SetNormalizedTime1(
+                self.ptr,
+                hours as fmx_int64,
+                minutes,
+                seconds,
+                milliseconds,
+                &mut _x,
+            )
         };
         _x.check();
         if error != FMError::NoError {
@@ -252,9 +259,9 @@ impl DateTime {
         results
     }
 
-    pub fn set_days_since_epoch(&mut self, days: i64) {
+    pub fn set_days_since_epoch(&mut self, days: i32) {
         let mut _x = fmx__fmxcpt::new();
-        unsafe { FM_DateTime_SetDaysSinceEpoch(self.ptr, days, &mut _x) };
+        unsafe { FM_DateTime_SetDaysSinceEpoch(self.ptr, days as fmx_int64, &mut _x) };
         _x.check();
     }
 
