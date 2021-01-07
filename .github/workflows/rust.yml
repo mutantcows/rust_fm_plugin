@@ -10,10 +10,31 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build:
+  windows:
 
     runs-on: windows-latest
 
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install Cargo Post
+      run: cargo install cargo-post
+    - name: Build
+      run: cargo build --release --verbose
+  linux:
+    
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install Cargo Post
+      run: cargo install cargo-post
+    - name: Build
+      run: cargo build --release --verbose
+      
+  macos:
+    
+    runs-on: macos-latest
+    
     steps:
     - uses: actions/checkout@v2
     - name: Install Cargo Post
