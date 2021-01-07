@@ -52,7 +52,9 @@ use std::path::Path;
 #[cfg(any(target_os = "macos", target_os = "windows"))]
 use std::{fs::rename, path::PathBuf, process};
 
-use crate::config::{read_config, BuildError, Config};
+#[cfg(any(target_os = "macos", target_os = "windows"))]
+use crate::config::BuildError;
+use crate::config::{read_config, Config};
 
 /// Handles bundling, renaming, and moving of the lib after build.
 /// 1. Loads prefs from `config.toml`

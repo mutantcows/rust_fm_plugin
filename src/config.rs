@@ -45,11 +45,14 @@
 use serde::Deserialize;
 use std::env;
 use std::error::Error;
-use std::fmt::{Display, Formatter};
 use std::fs::read_to_string;
 
 #[cfg(any(target_os = "windows", target_os = "macos"))]
-use std::{path::Path, process};
+use std::{
+    fmt::{Display, Formatter},
+    path::Path,
+    process,
+};
 
 #[derive(Debug)]
 #[cfg(any(target_os = "windows", target_os = "macos"))]
