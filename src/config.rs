@@ -47,10 +47,9 @@ use std::env;
 use std::error::Error;
 use std::fmt::{Display, Formatter};
 use std::fs::read_to_string;
-use std::path::Path;
 
 #[cfg(any(target_os = "windows", target_os = "macos"))]
-use std::process;
+use std::{path::Path, process};
 
 #[derive(Debug)]
 pub(crate) enum BuildError {
