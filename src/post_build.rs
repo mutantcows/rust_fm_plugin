@@ -164,6 +164,7 @@ fn bundle_plugin_command(config: &Config) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
+#[cfg(any(target_os = "macos", target_os = "windows"))]
 fn get_package_name() -> Result<String, Box<dyn Error>> {
     Ok(
         Path::new(option_env!("CRATE_MANIFEST_DIR").unwrap_or(env!("CARGO_MANIFEST_DIR")))
@@ -190,11 +191,6 @@ fn sign_code_command(plugin_path: &Path, config: &Config) -> Result<(), Box<dyn 
         .arg(&config.code_signing.cert_pass)
         .arg(plugin_path)
         .output()?;
-    Ok(())
-}
-
-#[cfg(target_family = "unix")]
-fn sign_code_command(plugin_path: &Path, config: &Config) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 

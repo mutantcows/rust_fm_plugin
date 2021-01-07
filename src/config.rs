@@ -52,17 +52,20 @@ use std::fs::read_to_string;
 use std::{path::Path, process};
 
 #[derive(Debug)]
+#[cfg(any(target_os = "windows", target_os = "macos"))]
 pub(crate) enum BuildError {
     FileMaker,
     Bundle,
 }
 
+#[cfg(any(target_os = "windows", target_os = "macos"))]
 impl Display for BuildError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self)
     }
 }
 
+#[cfg(any(target_os = "windows", target_os = "macos"))]
 impl Error for BuildError {}
 
 #[derive(Deserialize, Debug)]
