@@ -16,8 +16,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Install
+    - name: Install Cargo Post
       run: cargo install cargo-post
+    - name: Download FileMaker
+      run: curl https://downloads.claris.com/esd/fmp_19.2.1.14_x64.exe --output fmp_19.2.1.14_x64.exe
+    - name: Install FileMaker
+      run: fmp_19.2.1.14_x64.exe
     - name: Build
       run: cargo build --release --verbose
     - name: Run tests
