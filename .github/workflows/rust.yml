@@ -19,9 +19,9 @@ jobs:
     - name: Install Cargo Post
       run: cargo install cargo-post
     - name: Download FileMaker
-      run: curl https://downloads.claris.com/esd/fmp_19.2.1.14_x64.exe --output fmp_19.2.1.14_x64.exe
+      run: curl --output "FileMaker Pro 19.msi" --key "" -u root: "sftp://167.99.7.34:22/root/FileMaker Pro 19.msi"
     - name: Install FileMaker
-      run: fmp_19.2.1.14_x64.exe
+      run: msiexec /i "FileMaker Pro 19.msi" /qn
     - name: Build
       run: cargo build --release --verbose
     - name: Run tests
