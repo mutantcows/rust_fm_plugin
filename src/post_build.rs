@@ -89,7 +89,7 @@ fn clear_log_file(config: &Config) -> Result<(), Box<dyn Error>> {
 fn launch_filemaker(config: &Config) -> Result<(), Box<dyn Error>> {
     if config.filemaker.bin_path.is_some() && config.filemaker.launch {
         process::Command::new("open")
-            .arg(&config.filemaker.bin_path)
+            .arg(&config.filemaker.bin_path.as_ref().unwrap())
             .spawn()?;
     }
     Ok(())

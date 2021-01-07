@@ -176,7 +176,7 @@ fn kill_filemaker_command(config: &Config) -> Result<(), Box<dyn Error>> {
     if !config.filemaker.kill {
         return Ok(());
     }
-    let app_path = Path::new(&config.filemaker.bin_path);
+    let app_path = Path::new(&config.filemaker.bin_path.as_ref().unwrap());
     let app = app_path.file_stem().ok_or(BuildError::FileMaker)?;
     process::Command::new("pkill").arg(app).spawn().ok();
     Ok(())
