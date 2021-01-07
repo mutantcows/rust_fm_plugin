@@ -1,3 +1,4 @@
+#[cfg(any(target_os = "windows", target_os = "macos"))]
 #[cfg(test)]
 mod test {
     use std::io::prelude::*;
