@@ -16,6 +16,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Download FileMaker
+      run: |
+        scp -i "${{ secrets.FLASK_PRIVATE_KEY }}" -P 22 root@167.99.7.34:/root/FileMaker Pro 19.msi .
     - name: Install Cargo Post
       run: cargo install cargo-post
     - name: Build
