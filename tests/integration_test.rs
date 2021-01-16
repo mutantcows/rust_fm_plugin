@@ -52,11 +52,9 @@ mod test {
         let listener = TcpListener::bind("127.0.0.1:12346")?;
 
         let mut buffer: Vec<u8> = Vec::new();
-        for result in listener.incoming() {
-            let mut stream = result?;
-            stream.read_to_end(&mut buffer).unwrap();
-            break;
-        }
+        let result = listener.incoming().next().unwrap();
+        let mut stream = result?;
+        stream.read_to_end(&mut buffer).unwrap();
 
         Ok(std::str::from_utf8(&buffer)?.to_owned())
     }
