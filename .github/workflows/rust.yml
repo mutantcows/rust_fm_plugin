@@ -21,23 +21,23 @@ jobs:
     - name: Build
       run: cargo post build --release --verbose
   linux:
-    
+
     runs-on: ubuntu-latest
-    
+
     steps:
     - uses: actions/checkout@v2
     - name: Install Cargo Post
       run: cargo install cargo-post
     - name: Build
       run: cargo post build --release --verbose
-      
+
   macos:
-    
+
     runs-on: macos-latest
-    
+
     steps:
     - uses: actions/checkout@v2
     - name: Install Cargo Post
-      run: cargo post install cargo-post
+      run: cargo install cargo-post
     - name: Build
-      run: cargo build --release --verbose
+      run: cargo post build --release --verbose
