@@ -1,4 +1,4 @@
-//! A wrapper around the FileMaker plug-in SDK.
+//! A port of the FileMaker plug-in SDK.
 //!
 //! Replicates much of the functionality found in the C++ library provided by FileMaker, which is mostly wrapping the C ffi, as well as some convenience functions.
 //!
@@ -6,9 +6,12 @@
 //!
 //! # Quick Start
 //!
-//! You'll want to make your project a library with a crate-type of `cdylib`.
+//! You'll want to make your project a library with a crate-type of `cdylib` and set the `resolver` option to `2`.
 //!
 //! ```toml
+//! [package]
+//! resolver = "2"
+//!
 //! [lib]
 //! path = "src/lib.rs"
 //! crate-type = ["cdylib"]
@@ -89,19 +92,24 @@
 #![allow(non_snake_case)]
 
 pub mod config;
+#[cfg(feature = "ffi")]
 pub mod ffi;
 pub mod helpers;
+#[cfg(feature = "ffi")]
 pub mod plugin;
 pub mod post_build;
 #[doc(inline)]
 pub use config::kill_filemaker;
+#[cfg(feature = "ffi")]
 #[doc(inline)]
 pub use ffi::*;
 #[doc(inline)]
 pub use helpers::{log, write_to_u16_buff};
+#[cfg(feature = "ffi")]
 #[doc(inline)]
 pub use plugin::*;
 
+#[cfg(feature = "ffi")]
 pub mod prelude {
     //! Re-exports everything necessary for the register_plugin macro.
     pub use crate::{

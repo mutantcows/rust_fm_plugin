@@ -1,6 +1,13 @@
+#[cfg(feature = "ffi")]
 use std::env;
 
 fn main() {
+#[cfg(feature = "ffi")]
+    link_search();
+}
+
+#[cfg(feature = "ffi")]
+fn link_search() {
     let manifest = env!("CARGO_MANIFEST_DIR");
 
     if cfg!(target_os = "windows") {

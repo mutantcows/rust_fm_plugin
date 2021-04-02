@@ -1,6 +1,6 @@
 [package]
 name = "fm_plugin"
-version = "0.1.15"
+version = "0.1.16"
 authors = ["mutantcows <mutantcows@gmail.com>"]
 edition = "2018"
 license = "MIT"
@@ -12,6 +12,10 @@ exclude = ["tests/"]
 
 [lib]
 path = "src/lib.rs"
+
+[features]
+default = ["ffi"]
+ffi = []
 
 [dependencies]
 widestring = "^0.4"

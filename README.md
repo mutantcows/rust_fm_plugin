@@ -7,15 +7,18 @@
 `Cargo.toml:`
 
 ```toml
+[package]
+resolver = "2"
+
 [lib]
 path = "src/lib.rs"
 crate-type = ["cdylib"]
 
 [dependencies]
-fm_plugin = "0.1.13"
+fm_plugin = "0.1.16"
 
 [build-dependencies]
-fm_plugin = "0.1.13"
+fm_plugin = { version = "0.1.16", default-features = false }
 
 [package.metadata.cargo-post.dependencies]
 fm_plugin = "0.1.13"
