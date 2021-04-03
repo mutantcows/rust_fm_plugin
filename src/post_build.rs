@@ -121,12 +121,11 @@ fn bundle_plugin_command(config: &Config) -> Result<(), Box<dyn Error>> {
     let mut plugin_name = config.plugin.name.to_owned();
     plugin_name.push_str(".fmx64");
 
-    let to: PathBuf;
-    if config.filemaker.ext_path.is_some() && config.plugin.move_to_ext {
-        to = Path::new(config.filemaker.ext_path.as_ref().unwrap()).join(plugin_name);
+    let to = if config.filemaker.ext_path.is_some() && config.plugin.move_to_ext {
+        Path::new(config.filemaker.ext_path.as_ref().unwrap()).join(plugin_name);
     } else {
-        to = Path::new(&out_dir).join(plugin_name);
-    }
+        Path::new(&out_dir).join(plugin_name);
+    };
     rename(from, &to)?;
 
     if config.code_signing.sign {
