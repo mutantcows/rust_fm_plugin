@@ -127,9 +127,9 @@ fn bundle_plugin_command(config: &Config) -> Result<(), Box<dyn Error>> {
     plugin_name.push_str(".fmx64");
 
     let to = if config.filemaker.ext_path.is_some() && config.plugin.move_to_ext {
-        Path::new(config.filemaker.ext_path.as_ref().unwrap()).join(plugin_name);
+        Path::new(config.filemaker.ext_path.as_ref().unwrap()).join(plugin_name)
     } else {
-        Path::new(&out_dir).join(plugin_name);
+        Path::new(&out_dir).join(plugin_name)
     };
     rename(from, &to)?;
 
