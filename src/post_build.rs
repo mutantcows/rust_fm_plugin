@@ -24,7 +24,12 @@
 //! move_to_ext = true
 //!
 //! [code_signing]
-//! sign = false
+//! sign = true
+//!
+//! [code_signing.macos]
+//! identity = "common name"
+//!
+//! [code_signing.windows]
 //! signtool_path = "/path/to/signtool.exe"
 //! cert_path = "/path/to/cert.p12"
 //! cert_pass = "password"
@@ -163,7 +168,11 @@ fn bundle_plugin_command(config: &Config) -> Result<(), Box<dyn Error>> {
     let from = Path::new(out_dir).join(lib_name);
 
     let to = Path::new(&bin_path).join(&config.plugin.name);
-    rename(from, to)?;
+    rename(from, &to)?;
+
+    if config.code_signing.sign {
+        sign_code_command(&to, &config)?;
+    }
 
     Ok(())
 }
@@ -184,15 +193,30 @@ fn sign_code_command(plugin_path: &Path, config: &Config) -> Result<(), Box<dyn 
     if !config.code_signing.sign {
         return Ok(());
     }
-    let signtool_path = Path::new(&config.code_signing.signtool_path);
+    let signing_config = &config.code_signing.windows;
+    let signtool_path = Path::new(&signing_config.signtool_path);
     process::Command::new(signtool_path)
         .arg("sign")
         .arg("/tr")
-        .arg(&config.code_signing.timestamp_url)
+        .arg(&signing_config.timestamp_url)
         .arg("/f")
-        .arg(&config.code_signing.cert_path)
+        .arg(&signing_config.cert_path)
         .arg("/p")
-        .arg(&config.code_signing.cert_pass)
+        .arg(&signing_config.cert_pass)
+        .arg(plugin_path)
+        .output()?;
+    Ok(())
+}
+
+#[cfg(target_os = "macos")]
+fn sign_code_command(plugin_path: &Path, config: &Config) -> Result<(), Box<dyn Error>> {
+    if !config.code_signing.sign {
+        return Ok(());
+    }
+
+    process::Command::new("codesign")
+        .arg("-s")
+        .arg(&config.code_signing.macos.identity)
         .arg(plugin_path)
         .output()?;
     Ok(())

@@ -24,6 +24,11 @@
 //!
 //![code_signing]
 //!sign = true
+//!
+//![code_signing.macos]
+//!identity = ""
+//!
+//![code_signing.windows]
 //!signtool_path = "/path/to/signtool.exe"
 //!cert_path = "/path/to/cert.p12"
 //!cert_pass = "password"
@@ -101,10 +106,21 @@ pub(crate) struct Plugin {
 #[derive(Deserialize, Debug)]
 pub(crate) struct CodeSigning {
     pub(crate) sign: bool,
+    pub(crate) windows: SignWindows,
+    pub(crate) macos: SignMacOs,
+}
+
+#[derive(Deserialize, Debug)]
+pub(crate) struct SignWindows {
     pub(crate) signtool_path: String,
     pub(crate) cert_path: String,
     pub(crate) cert_pass: String,
     pub(crate) timestamp_url: String,
+}
+
+#[derive(Deserialize, Debug)]
+pub(crate) struct SignMacOs {
+    pub(crate) identity: String,
 }
 
 #[derive(Deserialize, Debug)]

@@ -10,7 +10,12 @@ bundle = true
 move_to_ext = true
 
 [code_signing]
-sign = false
+sign = true
+
+[code_signing.macos]
+identity = "common name"
+
+[code_signing.windows]
 signtool_path = "/path/to/signtool.exe"
 cert_path = "/path/to/cert.p12"
 cert_pass = "password"

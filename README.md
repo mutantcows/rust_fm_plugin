@@ -2,7 +2,7 @@
  [![Actions Status](https://github.com/mutantcows/rust_fm_plugin/workflows/Rust/badge.svg)](https://github.com/mutantcows/fm_plugin/actions)
  [![Crates.io](https://img.shields.io/crates/v/fm_plugin.svg)](https://crates.io/crates/fm_plugin)
  [![Docs.rs](https://docs.rs/fm_plugin/badge.svg)](https://docs.rs/fm_plugin)
-### A Rust wrapper for the FileMaker plug-in SDK
+### A Rust port of the FileMaker plug-in SDK
 
 `Cargo.toml:`
 
@@ -42,6 +42,11 @@ move_to_ext = true
 
 [code_signing]
 sign = true
+
+[code_signing.macos]
+identity = "common name"
+
+[code_signing.windows]
 signtool_path = "/path/to/signtool.exe"
 cert_path = "/path/to/cert.p12"
 cert_pass = "password"
