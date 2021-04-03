@@ -15,13 +15,13 @@ path = "src/lib.rs"
 crate-type = ["cdylib"]
 
 [dependencies]
-fm_plugin = "0.1.16"
+fm_plugin = "0.1.17"
 
 [build-dependencies]
-fm_plugin = { version = "0.1.16", default-features = false }
+fm_plugin = { version = "0.1.17", default-features = false }
 
 [package.metadata.cargo-post.dependencies]
-fm_plugin = "0.1.13"
+fm_plugin = { version = "0.1.17", default-features = false }
 toml = "0.5"
 serde = { version = "1.0", features = ["derive"] }
 ```

@@ -54,7 +54,7 @@ use std::fs::File;
 use std::fs::{create_dir_all, remove_dir_all};
 use std::path::Path;
 #[cfg(any(target_os = "macos", target_os = "windows"))]
-use std::{fs::rename, path::PathBuf, process};
+use std::{fs::rename, process};
 
 #[cfg(any(target_os = "macos", target_os = "windows"))]
 use crate::config::BuildError;
@@ -145,23 +145,22 @@ fn bundle_plugin_command(config: &Config) -> Result<(), Box<dyn Error>> {
     let package_name = get_package_name()?;
     let mut plugin_name = config.plugin.name.to_owned();
     plugin_name.push_str(".fmplugin");
-    let plugin_path: PathBuf;
 
-    if config.plugin.move_to_ext && config.filemaker.ext_path.is_some() {
-        plugin_path = Path::new(config.filemaker.ext_path.as_ref().unwrap()).join(plugin_name);
-        remove_dir_all(&plugin_path).ok();
-        create_dir_all(&plugin_path)?;
+    let plugin_path = if config.plugin.move_to_ext && config.filemaker.ext_path.is_some() {
+        Path::new(config.filemaker.ext_path.as_ref().unwrap()).join(plugin_name)
     } else {
-        plugin_path = Path::new(out_dir).join(plugin_name);
-        remove_dir_all(&plugin_path).ok();
-        create_dir_all(&plugin_path)?;
-    }
+        Path::new(out_dir).join(plugin_name)
+    };
 
-    let bin_path = Path::new(&plugin_path).join("/Contents/MacOS");
+    remove_dir_all(&plugin_path).ok();
+    create_dir_all(&plugin_path)?;
+
+    let bin_path = Path::new(&plugin_path).join("Contents/MacOS");
     create_dir_all(&bin_path)?;
 
     let mut lib_name = String::from("lib");
     lib_name.push_str(&package_name);
+    lib_name.push_str(".dylib");
     let from = Path::new(out_dir).join(lib_name);
 
     let to = Path::new(&bin_path).join(&config.plugin.name);
